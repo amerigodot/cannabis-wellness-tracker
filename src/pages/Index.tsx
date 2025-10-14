@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { InsightsChart } from "@/components/InsightsChart";
 import { Leaf, Calendar, Clock, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -265,6 +266,13 @@ const Index = () => {
             </Button>
           </div>
         </Card>
+
+        {/* Insights Chart */}
+        {entries.length > 0 && (
+          <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <InsightsChart entries={entries} />
+          </div>
+        )}
 
         {/* Entries List */}
         {entries.length > 0 && (
