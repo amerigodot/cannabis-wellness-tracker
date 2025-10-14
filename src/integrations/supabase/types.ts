@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           dosage: string
           id: string
+          is_deleted: boolean
           method: string
           notes: string | null
           observations: string[]
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           dosage: string
           id?: string
+          is_deleted?: boolean
           method: string
           notes?: string | null
           observations?: string[]
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           dosage?: string
           id?: string
+          is_deleted?: boolean
           method?: string
           notes?: string | null
           observations?: string[]

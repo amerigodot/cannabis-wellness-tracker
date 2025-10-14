@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Leaf, Calendar, Clock, LogOut } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -128,6 +128,20 @@ const Index = () => {
       setNotes("");
       
       // Refresh entries
+      fetchEntries();
+    }
+  };
+
+  const handleDelete = async (entryId: string) => {
+    const { error } = await supabase
+      .from("journal_entries")
+      .update({ is_deleted: true })
+      .eq("id", entryId);
+
+    if (error) {
+      toast.error("Error deleting entry: " + error.message);
+    } else {
+      toast.success("Entry deleted");
       fetchEntries();
     }
   };
@@ -263,7 +277,7 @@ const Index = () => {
                   className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-all duration-300 hover:scale-[1.01]"
                 >
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-xl font-semibold text-primary mb-1">{entry.strain}</h3>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -276,9 +290,18 @@ const Index = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex gap-2 text-sm">
+                    <div className="flex gap-2 text-sm items-start">
                       <Badge variant="secondary">{entry.dosage}</Badge>
                       <Badge variant="secondary">{entry.method}</Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(entry.id)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete entry</span>
+                      </Button>
                     </div>
                   </div>
 
