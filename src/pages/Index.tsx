@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Leaf, Calendar, Clock, LogOut, Trash2 } from "lucide-react";
@@ -45,7 +46,8 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [strain, setStrain] = useState("");
-  const [dosage, setDosage] = useState("");
+  const [dosageAmount, setDosageAmount] = useState("");
+  const [dosageUnit, setDosageUnit] = useState("g");
   const [method, setMethod] = useState("");
   const [selectedObservations, setSelectedObservations] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
@@ -100,12 +102,14 @@ const Index = () => {
   };
 
   const handleSubmit = async () => {
-    if (!strain || !dosage || !method) {
+    if (!strain || !dosageAmount || !method) {
       toast.error("Please fill in strain, dosage, and method");
       return;
     }
 
     if (!user) return;
+
+    const dosage = `${dosageAmount}${dosageUnit}`;
 
     const { error } = await supabase.from("journal_entries").insert({
       user_id: user.id,
@@ -123,7 +127,8 @@ const Index = () => {
       
       // Reset form
       setStrain("");
-      setDosage("");
+      setDosageAmount("");
+      setDosageUnit("g");
       setMethod("");
       setSelectedObservations([]);
       setNotes("");
@@ -208,13 +213,27 @@ const Index = () => {
               </div>
               <div>
                 <Label htmlFor="dosage">Dosage</Label>
-                <Input
-                  id="dosage"
-                  value={dosage}
-                  onChange={(e) => setDosage(e.target.value)}
-                  placeholder="e.g., 10mg, 0.5g"
-                  className="mt-1.5"
-                />
+                <div className="flex gap-2 mt-1.5">
+                  <Input
+                    id="dosage"
+                    type="number"
+                    step="0.1"
+                    value={dosageAmount}
+                    onChange={(e) => setDosageAmount(e.target.value)}
+                    placeholder="e.g., 0.5"
+                    className="flex-1"
+                  />
+                  <Select value={dosageUnit} onValueChange={setDosageUnit}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="g">g</SelectItem>
+                      <SelectItem value="ml">ml</SelectItem>
+                      <SelectItem value="mg">mg</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <Label htmlFor="method">Method</Label>

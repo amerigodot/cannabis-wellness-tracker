@@ -5,6 +5,7 @@ import { BarChart3 } from "lucide-react";
 interface JournalEntry {
   id: string;
   created_at: string;
+  dosage: string;
 }
 
 interface InsightsChartProps {
@@ -21,6 +22,34 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     acc[date] = (acc[date] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  // Calculate average consumption
+  const calculateAverageConsumption = () => {
+    let totalGrams = 0;
+    let count = 0;
+
+    entries.forEach(entry => {
+      const match = entry.dosage.match(/^([\d.]+)(g|ml|mg)$/);
+      if (match) {
+        const amount = parseFloat(match[1]);
+        const unit = match[2];
+        
+        // Convert to grams
+        if (unit === 'g') {
+          totalGrams += amount;
+        } else if (unit === 'mg') {
+          totalGrams += amount / 1000;
+        } else if (unit === 'ml') {
+          totalGrams += amount; // Assuming 1ml ≈ 1g for simplicity
+        }
+        count++;
+      }
+    });
+
+    return count > 0 ? (totalGrams / count).toFixed(2) : '0';
+  };
+
+  const avgConsumption = calculateAverageConsumption();
 
   // Convert to array and sort by date
   const chartData = Object.entries(entriesByDate)
@@ -71,7 +100,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+      <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         <div className="p-3 rounded-lg bg-muted/30">
           <p className="text-2xl font-bold text-primary">{entries.length}</p>
           <p className="text-sm text-muted-foreground">Total Entries</p>
@@ -85,6 +114,10 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             {entries.length > 0 ? (entries.length / Object.keys(entriesByDate).length).toFixed(1) : 0}
           </p>
           <p className="text-sm text-muted-foreground">Avg per Day</p>
+        </div>
+        <div className="p-3 rounded-lg bg-muted/30">
+          <p className="text-2xl font-bold text-primary">{avgConsumption}g</p>
+          <p className="text-sm text-muted-foreground">Avg Consumption</p>
         </div>
       </div>
     </Card>
