@@ -92,6 +92,21 @@ const Index = () => {
       toast.error("Error loading entries: " + error.message);
     } else {
       setEntries(data || []);
+      
+      // Set form defaults from last entry
+      if (data && data.length > 0) {
+        const lastEntry = data[0];
+        setStrain(lastEntry.strain);
+        setMethod(lastEntry.method);
+        setSelectedObservations(lastEntry.observations);
+        
+        // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
+        const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
+        if (dosageMatch) {
+          setDosageAmount(dosageMatch[1]);
+          setDosageUnit(dosageMatch[2]);
+        }
+      }
     }
   };
 
@@ -125,12 +140,7 @@ const Index = () => {
     } else {
       toast.success("Entry saved successfully");
       
-      // Reset form
-      setStrain("");
-      setDosageAmount("");
-      setDosageUnit("g");
-      setMethod("");
-      setSelectedObservations([]);
+      // Clear only notes, keep other fields as defaults
       setNotes("");
       
       // Refresh entries
