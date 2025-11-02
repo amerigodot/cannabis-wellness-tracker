@@ -22,6 +22,7 @@ interface JournalEntry {
   dosage: string;
   method: string;
   observations: string[];
+  activities: string[];
   notes: string | null;
 }
 
@@ -40,6 +41,21 @@ const COMMON_OBSERVATIONS = [
   "Energy Increase",
 ];
 
+const COMMON_ACTIVITIES = [
+  "Social",
+  "Music",
+  "Painting",
+  "Gaming",
+  "Exercise",
+  "Cooking",
+  "Reading",
+  "Writing",
+  "Meditation",
+  "Movies",
+  "Work",
+  "Relaxing",
+];
+
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -50,6 +66,7 @@ const Index = () => {
   const [dosageUnit, setDosageUnit] = useState("g");
   const [method, setMethod] = useState("");
   const [selectedObservations, setSelectedObservations] = useState<string[]>([]);
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -99,6 +116,7 @@ const Index = () => {
         setStrain(lastEntry.strain);
         setMethod(lastEntry.method);
         setSelectedObservations(lastEntry.observations);
+        setSelectedActivities(lastEntry.activities || []);
         
         // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
         const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
@@ -113,6 +131,12 @@ const Index = () => {
   const toggleObservation = (obs: string) => {
     setSelectedObservations((prev) =>
       prev.includes(obs) ? prev.filter((o) => o !== obs) : [...prev, obs]
+    );
+  };
+
+  const toggleActivity = (activity: string) => {
+    setSelectedActivities((prev) =>
+      prev.includes(activity) ? prev.filter((a) => a !== activity) : [...prev, activity]
     );
   };
 
@@ -132,6 +156,7 @@ const Index = () => {
       dosage,
       method,
       observations: selectedObservations,
+      activities: selectedActivities,
       notes: notes || null,
     });
 
@@ -257,6 +282,23 @@ const Index = () => {
               </div>
             </div>
 
+            {/* Activities */}
+            <div>
+              <Label className="mb-3 block">Activities</Label>
+              <div className="flex flex-wrap gap-2">
+                {COMMON_ACTIVITIES.map((activity) => (
+                  <Badge
+                    key={activity}
+                    variant={selectedActivities.includes(activity) ? "default" : "outline"}
+                    className="cursor-pointer transition-all duration-200 hover:scale-105"
+                    onClick={() => toggleActivity(activity)}
+                  >
+                    {activity}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
             {/* Observations */}
             <div>
               <Label className="mb-3 block">Observations</Label>
@@ -342,8 +384,22 @@ const Index = () => {
                     </div>
                   </div>
 
+                  {entry.activities && entry.activities.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-muted-foreground mb-2">Activities</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.activities.map((activity) => (
+                          <Badge key={activity} variant="secondary" className="bg-secondary/50">
+                            {activity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {entry.observations.length > 0 && (
                     <div className="mb-3">
+                      <p className="text-xs text-muted-foreground mb-2">Observations</p>
                       <div className="flex flex-wrap gap-2">
                         {entry.observations.map((obs) => (
                           <Badge key={obs} variant="outline" className="bg-primary/5">

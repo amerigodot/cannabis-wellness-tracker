@@ -6,6 +6,7 @@ interface JournalEntry {
   id: string;
   created_at: string;
   dosage: string;
+  activities?: string[];
 }
 
 interface InsightsChartProps {
