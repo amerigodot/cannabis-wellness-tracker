@@ -69,6 +69,7 @@ const Index = () => {
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<string>("date-desc");
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -355,9 +356,44 @@ const Index = () => {
         {/* Entries List */}
         {entries.length > 0 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            <h2 className="text-2xl font-semibold mb-6">Recent Entries</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold">Recent Entries</h2>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="sort" className="text-sm text-muted-foreground">Sort by:</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger id="sort" className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-desc">Newest First</SelectItem>
+                    <SelectItem value="date-asc">Oldest First</SelectItem>
+                    <SelectItem value="strain-asc">Strain (A-Z)</SelectItem>
+                    <SelectItem value="strain-desc">Strain (Z-A)</SelectItem>
+                    <SelectItem value="dosage-asc">Dosage (Low-High)</SelectItem>
+                    <SelectItem value="dosage-desc">Dosage (High-Low)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="space-y-4">
-              {entries.map((entry) => (
+              {[...entries].sort((a, b) => {
+                switch (sortBy) {
+                  case "date-asc":
+                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                  case "date-desc":
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                  case "strain-asc":
+                    return a.strain.localeCompare(b.strain);
+                  case "strain-desc":
+                    return b.strain.localeCompare(a.strain);
+                  case "dosage-asc":
+                    return parseFloat(a.dosage) - parseFloat(b.dosage);
+                  case "dosage-desc":
+                    return parseFloat(b.dosage) - parseFloat(a.dosage);
+                  default:
+                    return 0;
+                }
+              }).map((entry) => (
                 <Card
                   key={entry.id}
                   className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-all duration-300 hover:scale-[1.01]"
