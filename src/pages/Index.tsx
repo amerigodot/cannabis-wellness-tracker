@@ -174,14 +174,21 @@ const Index = () => {
   };
 
   const handleDelete = async (entryId: string) => {
-    const { error } = await supabase
+    console.log("Delete button clicked, entryId:", entryId);
+    
+    const { data, error } = await supabase
       .from("journal_entries")
       .update({ is_deleted: true })
-      .eq("id", entryId);
+      .eq("id", entryId)
+      .select();
+
+    console.log("Delete response:", { data, error });
 
     if (error) {
+      console.error("Delete error:", error);
       toast.error("Error deleting entry: " + error.message);
     } else {
+      console.log("Delete successful");
       toast.success("Entry deleted");
       fetchEntries();
     }
