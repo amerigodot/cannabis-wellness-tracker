@@ -23,6 +23,7 @@ interface JournalEntry {
   method: string;
   observations: string[];
   activities: string[];
+  negative_side_effects: string[];
   notes: string | null;
 }
 
@@ -56,6 +57,21 @@ const COMMON_ACTIVITIES = [
   "Relaxing",
 ];
 
+const NEGATIVE_SIDE_EFFECTS = [
+  "Dry Mouth",
+  "Dry Eyes",
+  "Dizziness",
+  "Paranoia",
+  "Anxiety",
+  "Headache",
+  "Fatigue",
+  "Increased Heart Rate",
+  "Coughing",
+  "Nausea",
+  "Memory Issues",
+  "Confusion",
+];
+
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -67,6 +83,7 @@ const Index = () => {
   const [method, setMethod] = useState("");
   const [selectedObservations, setSelectedObservations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [selectedNegativeSideEffects, setSelectedNegativeSideEffects] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>("date-desc");
@@ -111,13 +128,11 @@ const Index = () => {
     } else {
       setEntries(data || []);
       
-      // Set form defaults from last entry
+      // Set form defaults from last entry (strain, dosage, method only)
       if (data && data.length > 0) {
         const lastEntry = data[0];
         setStrain(lastEntry.strain);
         setMethod(lastEntry.method);
-        setSelectedObservations(lastEntry.observations);
-        setSelectedActivities(lastEntry.activities || []);
         
         // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
         const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
@@ -141,6 +156,12 @@ const Index = () => {
     );
   };
 
+  const toggleNegativeSideEffect = (effect: string) => {
+    setSelectedNegativeSideEffects((prev) =>
+      prev.includes(effect) ? prev.filter((e) => e !== effect) : [...prev, effect]
+    );
+  };
+
   const handleSubmit = async () => {
     if (!strain || !dosageAmount || !method) {
       toast.error("Please fill in strain, dosage, and method");
@@ -158,6 +179,7 @@ const Index = () => {
       method,
       observations: selectedObservations,
       activities: selectedActivities,
+      negative_side_effects: selectedNegativeSideEffects,
       notes: notes || null,
     });
 
@@ -166,8 +188,11 @@ const Index = () => {
     } else {
       toast.success("Entry saved successfully");
       
-      // Clear only notes, keep other fields as defaults
+      // Clear notes, activities, observations, and negative side effects
       setNotes("");
+      setSelectedActivities([]);
+      setSelectedObservations([]);
+      setSelectedNegativeSideEffects([]);
       
       // Refresh entries
       fetchEntries();
@@ -324,6 +349,23 @@ const Index = () => {
               </div>
             </div>
 
+            {/* Negative Side Effects */}
+            <div>
+              <Label className="mb-3 block">Negative Side Effects</Label>
+              <div className="flex flex-wrap gap-2">
+                {NEGATIVE_SIDE_EFFECTS.map((effect) => (
+                  <Badge
+                    key={effect}
+                    variant={selectedNegativeSideEffects.includes(effect) ? "destructive" : "outline"}
+                    className="cursor-pointer transition-all duration-200 hover:scale-105"
+                    onClick={() => toggleNegativeSideEffect(effect)}
+                  >
+                    {effect}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
             {/* Personal Notes */}
             <div>
               <Label htmlFor="notes">Personal Notes</Label>
@@ -447,6 +489,19 @@ const Index = () => {
                         {entry.observations.map((obs) => (
                           <Badge key={obs} variant="outline" className="bg-primary/5">
                             {obs}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {entry.negative_side_effects && entry.negative_side_effects.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-muted-foreground mb-2">Negative Side Effects</p>
+                      <div className="flex flex-wrap gap-2">
+                        {entry.negative_side_effects.map((effect) => (
+                          <Badge key={effect} variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20">
+                            {effect}
                           </Badge>
                         ))}
                       </div>

@@ -22,6 +22,7 @@ export type Database = {
           id: string
           is_deleted: boolean
           method: string
+          negative_side_effects: string[]
           notes: string | null
           observations: string[]
           strain: string
@@ -34,6 +35,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           method: string
+          negative_side_effects?: string[]
           notes?: string | null
           observations?: string[]
           strain: string
@@ -46,6 +48,7 @@ export type Database = {
           id?: string
           is_deleted?: boolean
           method?: string
+          negative_side_effects?: string[]
           notes?: string | null
           observations?: string[]
           strain?: string

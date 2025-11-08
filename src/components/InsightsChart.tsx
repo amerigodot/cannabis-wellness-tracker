@@ -7,6 +7,7 @@ interface JournalEntry {
   created_at: string;
   dosage: string;
   activities?: string[];
+  negative_side_effects?: string[];
 }
 
 interface InsightsChartProps {
