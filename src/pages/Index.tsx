@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
+import { Reminders } from "@/components/Reminders";
 import { Leaf, Calendar, Clock, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -387,6 +388,11 @@ const Index = () => {
             </Button>
           </div>
         </Card>
+
+        {/* Reminders */}
+        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Reminders />
+        </div>
 
         {/* Insights Chart */}
         {entries.length > 0 && (
