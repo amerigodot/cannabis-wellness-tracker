@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Trash2, Plus, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Bell, Trash2, Plus, X, Repeat } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -15,6 +16,7 @@ interface Reminder {
   title: string;
   reminder_time: string;
   is_active: boolean;
+  recurrence: string;
   created_at: string;
 }
 
@@ -24,6 +26,7 @@ export const Reminders = () => {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [recurrence, setRecurrence] = useState("none");
 
   useEffect(() => {
     fetchReminders();
@@ -71,6 +74,11 @@ export const Reminders = () => {
             onClick: () => dismissReminder(reminder.id),
           },
         });
+        
+        // Handle recurring reminders
+        if (reminder.recurrence !== "none") {
+          createNextRecurrence(reminder);
+        }
       });
       
       // Mark reminders as inactive
@@ -82,6 +90,30 @@ export const Reminders = () => {
       
       fetchReminders();
     }
+  };
+
+  const createNextRecurrence = async (reminder: Reminder) => {
+    const currentTime = new Date(reminder.reminder_time);
+    let nextTime = new Date(currentTime);
+
+    switch (reminder.recurrence) {
+      case "daily":
+        nextTime.setDate(nextTime.getDate() + 1);
+        break;
+      case "weekly":
+        nextTime.setDate(nextTime.getDate() + 7);
+        break;
+      case "monthly":
+        nextTime.setMonth(nextTime.getMonth() + 1);
+        break;
+    }
+
+    await supabase.from("reminders").insert({
+      user_id: reminder.user_id,
+      title: reminder.title,
+      reminder_time: nextTime.toISOString(),
+      recurrence: reminder.recurrence,
+    });
   };
 
   const dismissReminder = async (id: string) => {
@@ -115,6 +147,7 @@ export const Reminders = () => {
       user_id: user.user.id,
       title,
       reminder_time: reminderDateTime.toISOString(),
+      recurrence,
     });
 
     if (error) {
@@ -124,6 +157,7 @@ export const Reminders = () => {
       setTitle("");
       setDate("");
       setTime("");
+      setRecurrence("none");
       setShowForm(false);
       fetchReminders();
     }
@@ -195,6 +229,20 @@ export const Reminders = () => {
                 />
               </div>
             </div>
+            <div>
+              <Label htmlFor="recurrence">Repeat</Label>
+              <Select value={recurrence} onValueChange={setRecurrence}>
+                <SelectTrigger id="recurrence" className="mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Repeat</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button type="submit" className="w-full">
               Create Reminder
             </Button>
@@ -218,7 +266,12 @@ export const Reminders = () => {
                 className="flex items-center justify-between p-4 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors"
               >
                 <div className="flex-1">
-                  <p className="font-medium">{reminder.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{reminder.title}</p>
+                    {reminder.recurrence !== "none" && (
+                      <Repeat className="w-4 h-4 text-primary" />
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
                     <Badge variant={isToday ? "default" : "secondary"} className="text-xs">
                       {format(reminderDate, "MMM d, yyyy")}
@@ -226,6 +279,11 @@ export const Reminders = () => {
                     <Badge variant="outline" className="text-xs">
                       {format(reminderDate, "h:mm a")}
                     </Badge>
+                    {reminder.recurrence !== "none" && (
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {reminder.recurrence}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <Button

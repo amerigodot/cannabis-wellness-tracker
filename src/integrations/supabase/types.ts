@@ -61,6 +61,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          recurrence: string
           reminder_time: string
           title: string
           user_id: string
@@ -69,6 +70,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          recurrence?: string
           reminder_time: string
           title: string
           user_id: string
@@ -77,6 +79,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          recurrence?: string
           reminder_time?: string
           title?: string
           user_id?: string
