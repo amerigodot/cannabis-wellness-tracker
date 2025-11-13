@@ -107,11 +107,8 @@ export const CalendarView = () => {
             modifiers={{
               hasData: (date) => datesWithData.has(format(date, "yyyy-MM-dd")),
             }}
-            modifiersStyles={{
-              hasData: {
-                fontWeight: "bold",
-                backgroundColor: "hsl(var(--primary) / 0.1)",
-              },
+            modifiersClassNames={{
+              hasData: "font-bold relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-primary",
             }}
           />
         </CardContent>
