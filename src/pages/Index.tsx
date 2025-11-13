@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
-import { Leaf, Calendar, Clock, LogOut, Trash2 } from "lucide-react";
+import { CalendarView } from "@/components/CalendarView";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -401,127 +403,152 @@ const Index = () => {
           </div>
         )}
 
-        {/* Entries List */}
+        {/* Entries List and Calendar View */}
         {entries.length > 0 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">Recent Entries</h2>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="sort" className="text-sm text-muted-foreground">Sort by:</Label>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger id="sort" className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date-desc">Newest First</SelectItem>
-                    <SelectItem value="date-asc">Oldest First</SelectItem>
-                    <SelectItem value="strain-asc">Strain (A-Z)</SelectItem>
-                    <SelectItem value="strain-desc">Strain (Z-A)</SelectItem>
-                    <SelectItem value="dosage-asc">Dosage (Low-High)</SelectItem>
-                    <SelectItem value="dosage-desc">Dosage (High-Low)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {[...entries].sort((a, b) => {
-                switch (sortBy) {
-                  case "date-asc":
-                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                  case "date-desc":
-                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                  case "strain-asc":
-                    return a.strain.localeCompare(b.strain);
-                  case "strain-desc":
-                    return b.strain.localeCompare(a.strain);
-                  case "dosage-asc":
-                    return parseFloat(a.dosage) - parseFloat(b.dosage);
-                  case "dosage-desc":
-                    return parseFloat(b.dosage) - parseFloat(a.dosage);
-                  default:
-                    return 0;
-                }
-              }).map((entry) => (
-                <Card
-                  key={entry.id}
-                  className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-all duration-300 hover:scale-[1.01]"
-                >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-primary mb-1">{entry.strain}</h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {new Date(entry.created_at).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {new Date(entry.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 text-sm items-start">
-                      <Badge variant="secondary">{entry.dosage}</Badge>
-                      <Badge variant="secondary">{entry.method}</Badge>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(entry.id)}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete entry</span>
-                      </Button>
-                    </div>
+            <Tabs defaultValue="list" className="w-full">
+              <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
+                <TabsTrigger value="list" className="flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  List View
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Calendar View
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="list" className="space-y-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-semibold">Recent Entries</h2>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="sort" className="text-sm text-muted-foreground">Sort by:</Label>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger id="sort" className="w-[180px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date-desc">Newest First</SelectItem>
+                        <SelectItem value="date-asc">Oldest First</SelectItem>
+                        <SelectItem value="strain-asc">Strain (A-Z)</SelectItem>
+                        <SelectItem value="strain-desc">Strain (Z-A)</SelectItem>
+                        <SelectItem value="dosage-asc">Dosage (Low-High)</SelectItem>
+                        <SelectItem value="dosage-desc">Dosage (High-Low)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
+                </div>
+                <div className="space-y-4">
+                  {[...entries].sort((a, b) => {
+                    switch (sortBy) {
+                      case "date-asc":
+                        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                      case "date-desc":
+                        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                      case "strain-asc":
+                        return a.strain.localeCompare(b.strain);
+                      case "strain-desc":
+                        return b.strain.localeCompare(a.strain);
+                      case "dosage-asc":
+                        return parseFloat(a.dosage) - parseFloat(b.dosage);
+                      case "dosage-desc":
+                        return parseFloat(b.dosage) - parseFloat(a.dosage);
+                      default:
+                        return 0;
+                    }
+                  }).map((entry) => (
+                    <Card key={entry.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200 animate-in fade-in slide-in-from-bottom-2">
+                      <div className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-primary/10">
+                              <Leaf className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{entry.strain}</h3>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                <Clock className="h-3 w-3" />
+                                <span>{new Date(entry.created_at).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(entry.id)}
+                            className="text-muted-foreground hover:text-destructive rounded-full"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete entry</span>
+                          </Button>
+                        </div>
 
-                  {entry.activities && entry.activities.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs text-muted-foreground mb-2">Activities</p>
-                      <div className="flex flex-wrap gap-2">
-                        {entry.activities.map((activity) => (
-                          <Badge key={activity} variant="secondary" className="bg-secondary/50">
-                            {activity}
-                          </Badge>
-                        ))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Dosage</Label>
+                            <p className="font-medium">{entry.dosage}</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Method</Label>
+                            <p className="font-medium">{entry.method}</p>
+                          </div>
+                        </div>
+
+                        {entry.observations.length > 0 && (
+                          <div className="mb-4">
+                            <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {entry.observations.map((obs) => (
+                                <Badge key={obs} variant="secondary" className="px-2 py-1">
+                                  {obs}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {entry.activities.length > 0 && (
+                          <div className="mb-4">
+                            <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {entry.activities.map((activity) => (
+                                <Badge key={activity} variant="outline" className="px-2 py-1">
+                                  {activity}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {entry.negative_side_effects.length > 0 && (
+                          <div className="mb-4">
+                            <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
+                            <div className="flex flex-wrap gap-2">
+                              {entry.negative_side_effects.map((effect) => (
+                                <Badge key={effect} variant="destructive" className="px-2 py-1">
+                                  {effect}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {entry.notes && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground mb-2 block">Notes</Label>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{entry.notes}</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
 
-                  {entry.observations.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs text-muted-foreground mb-2">Observations</p>
-                      <div className="flex flex-wrap gap-2">
-                        {entry.observations.map((obs) => (
-                          <Badge key={obs} variant="outline" className="bg-primary/5">
-                            {obs}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.negative_side_effects && entry.negative_side_effects.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs text-muted-foreground mb-2">Negative Side Effects</p>
-                      <div className="flex flex-wrap gap-2">
-                        {entry.negative_side_effects.map((effect) => (
-                          <Badge key={effect} variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20">
-                            {effect}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {entry.notes && (
-                    <p className="text-sm text-foreground/80 leading-relaxed bg-muted/30 p-3 rounded-md">
-                      {entry.notes}
-                    </p>
-                  )}
-                </Card>
-              ))}
-            </div>
+              <TabsContent value="calendar">
+                <CalendarView />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
 
