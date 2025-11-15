@@ -14,7 +14,8 @@ import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -90,6 +91,9 @@ const Index = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>("date-desc");
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [tempNotes, setTempNotes] = useState("");
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -226,6 +230,40 @@ const Index = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth");
+  };
+
+  const openNotesDialog = (entryId?: string, existingNotes?: string) => {
+    if (entryId) {
+      setEditingEntryId(entryId);
+      setTempNotes(existingNotes || "");
+    } else {
+      setEditingEntryId(null);
+      setTempNotes(notes);
+    }
+    setNotesDialogOpen(true);
+  };
+
+  const saveNotes = async () => {
+    if (editingEntryId) {
+      // Update existing entry
+      const { error } = await supabase
+        .from("journal_entries")
+        .update({ notes: tempNotes })
+        .eq("id", editingEntryId);
+
+      if (error) {
+        toast.error("Error updating notes: " + error.message);
+      } else {
+        toast.success("Notes updated successfully!");
+        fetchEntries();
+      }
+    } else {
+      // Update new entry notes
+      setNotes(tempNotes);
+    }
+    setNotesDialogOpen(false);
+    setEditingEntryId(null);
+    setTempNotes("");
   };
 
   if (loading) {
@@ -371,14 +409,41 @@ const Index = () => {
 
             {/* Personal Notes */}
             <div>
-              <Label htmlFor="notes">Personal Notes</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="How are you feeling? Any additional observations or context..."
-                className="mt-1.5 min-h-[120px] resize-none"
-              />
+              <Sheet open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-2"
+                    onClick={() => openNotesDialog()}
+                  >
+                    <FileText className="h-4 w-4" />
+                    {notes ? "Edit Notes" : "Add Notes"}
+                    {notes && <Badge variant="secondary" className="ml-auto">{notes.length} chars</Badge>}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Personal Notes</SheetTitle>
+                    <SheetDescription>
+                      Add any additional observations, feelings, or context about this entry.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <Textarea
+                      value={tempNotes}
+                      onChange={(e) => setTempNotes(e.target.value)}
+                      placeholder="How are you feeling? Any additional observations or context..."
+                      className="min-h-[300px] resize-none"
+                    />
+                    <Button
+                      onClick={saveNotes}
+                      className="w-full mt-4"
+                    >
+                      Save Notes
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
 
             <Button
@@ -472,15 +537,30 @@ const Index = () => {
                               </div>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(entry.id)}
-                            className="text-muted-foreground hover:text-destructive rounded-full"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete entry</span>
-                          </Button>
+                          <div className="flex gap-2">
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openNotesDialog(entry.id, entry.notes || "")}
+                                  className="text-muted-foreground hover:text-primary rounded-full"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  <span className="sr-only">Add/Edit notes</span>
+                                </Button>
+                              </SheetTrigger>
+                            </Sheet>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(entry.id)}
+                              className="text-muted-foreground hover:text-destructive rounded-full"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete entry</span>
+                            </Button>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
