@@ -38,6 +38,21 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
     
+    /* Vibrant strain colors */
+    --strain-sativa: 140 70% 55%;
+    --strain-indica: 268 65% 60%;
+    --strain-hybrid: 40 95% 62%;
+    --strain-cbd: 200 75% 58%;
+    --strain-thc: 340 75% 60%;
+    --strain-balanced: 175 60% 55%;
+    
+    --strain-sativa-light: 140 70% 95%;
+    --strain-indica-light: 268 65% 95%;
+    --strain-hybrid-light: 40 95% 95%;
+    --strain-cbd-light: 200 75% 95%;
+    --strain-thc-light: 340 75% 95%;
+    --strain-balanced-light: 175 60% 95%;
+    
     --gradient-wellness: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(175 55% 50%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(150 30% 99%) 100%);
     --shadow-soft: 0 4px 20px -2px hsl(158 64% 42% / 0.08);
@@ -88,6 +103,21 @@ All colors MUST be HSL.
     --border: 160 10% 25%;
     --input: 160 10% 25%;
     --ring: 158 64% 52%;
+    
+    /* Vibrant strain colors - dark mode */
+    --strain-sativa: 140 65% 50%;
+    --strain-indica: 268 60% 58%;
+    --strain-hybrid: 40 90% 58%;
+    --strain-cbd: 200 70% 55%;
+    --strain-thc: 340 70% 58%;
+    --strain-balanced: 175 55% 50%;
+    
+    --strain-sativa-light: 140 65% 20%;
+    --strain-indica-light: 268 60% 20%;
+    --strain-hybrid-light: 40 90% 22%;
+    --strain-cbd-light: 200 70% 20%;
+    --strain-thc-light: 340 70% 20%;
+    --strain-balanced-light: 175 55% 20%;
     
     --gradient-wellness: linear-gradient(135deg, hsl(158 64% 35%) 0%, hsl(175 55% 40%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(160 15% 15%) 0%, hsl(160 15% 17%) 100%);
