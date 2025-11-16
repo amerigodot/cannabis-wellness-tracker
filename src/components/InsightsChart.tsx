@@ -6,6 +6,7 @@ interface JournalEntry {
   id: string;
   created_at: string;
   dosage: string;
+  strain: string;
   activities?: string[];
   negative_side_effects?: string[];
 }
@@ -15,6 +16,24 @@ interface InsightsChartProps {
 }
 
 export const InsightsChart = ({ entries }: InsightsChartProps) => {
+  // Categorize strain type
+  const getStrainType = (strain: string): string => {
+    const lowerStrain = strain.toLowerCase();
+    
+    if (lowerStrain.includes('sativa') || lowerStrain.includes('energizing') || lowerStrain.includes('uplifting')) {
+      return 'Sativa';
+    } else if (lowerStrain.includes('indica') || lowerStrain.includes('relax') || lowerStrain.includes('sleep')) {
+      return 'Indica';
+    } else if (lowerStrain.includes('hybrid')) {
+      return 'Hybrid';
+    } else if (lowerStrain.includes('cbd')) {
+      return 'CBD';
+    } else if (lowerStrain.includes('thc')) {
+      return 'THC';
+    }
+    return 'Balanced';
+  };
+
   // Convert entries to scatter plot data
   const scatterData = entries.map(entry => {
     const date = new Date(entry.created_at);
@@ -42,9 +61,28 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
       dosage: dosageInGrams,
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      strain: entry.dosage
+      strain: entry.strain,
+      strainType: getStrainType(entry.strain)
     };
   }).sort((a, b) => a.timestamp - b.timestamp);
+
+  // Group data by strain type
+  const strainTypeColors = {
+    'Sativa': 'hsl(var(--strain-sativa))',
+    'Indica': 'hsl(var(--strain-indica))',
+    'Hybrid': 'hsl(var(--strain-hybrid))',
+    'CBD': 'hsl(var(--strain-cbd))',
+    'THC': 'hsl(var(--strain-thc))',
+    'Balanced': 'hsl(var(--strain-balanced))'
+  };
+
+  const groupedData = scatterData.reduce((acc, point) => {
+    if (!acc[point.strainType]) {
+      acc[point.strainType] = [];
+    }
+    acc[point.strainType].push(point);
+    return acc;
+  }, {} as Record<string, typeof scatterData>);
 
   // Group entries by date for stats
   const entriesByDate = entries.reduce((acc, entry) => {
@@ -125,7 +163,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
               className="text-xs text-muted-foreground"
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
             />
-            <ZAxis range={[60, 60]} />
+            <ZAxis range={[80, 80]} />
             <Tooltip 
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
@@ -134,19 +172,39 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
                 color: 'hsl(var(--card-foreground))'
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number, name: string) => {
+              formatter={(value: number, name: string, props: any) => {
                 if (name === 'dosage') return [`${value.toFixed(2)}g`, 'Dosage'];
+                if (name === 'strain') return [value, 'Strain'];
                 return [value, name];
               }}
               labelFormatter={formatTimestamp}
             />
-            <Scatter 
-              data={scatterData} 
-              fill="hsl(var(--primary))"
-              opacity={0.7}
-            />
+            {Object.entries(groupedData).map(([strainType, data]) => (
+              <Scatter 
+                key={strainType}
+                name={strainType}
+                data={data} 
+                fill={strainTypeColors[strainType as keyof typeof strainTypeColors]}
+                opacity={0.8}
+              />
+            ))}
           </ScatterChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-6 flex flex-wrap gap-3 justify-center">
+        {Object.entries(groupedData).map(([strainType, data]) => (
+          <div key={strainType} className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: strainTypeColors[strainType as keyof typeof strainTypeColors] }}
+            />
+            <span className="text-sm text-muted-foreground">
+              {strainType} ({data.length})
+            </span>
+          </div>
+        ))}
       </div>
 
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
