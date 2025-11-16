@@ -486,7 +486,7 @@ const Index = () => {
                     {notes && <Badge variant="secondary" className="ml-auto">{notes.length} chars</Badge>}
                   </Button>
                 </SheetTrigger>
-                <SheetContent>
+                <SheetContent onCloseAutoFocus={(e) => e.preventDefault()}>
                   <SheetHeader>
                     <SheetTitle>Personal Notes</SheetTitle>
                     <SheetDescription>
@@ -614,19 +614,15 @@ const Index = () => {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Sheet>
-                              <SheetTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => openNotesDialog(entry.id, entry.notes || "")}
-                                  className="text-muted-foreground hover:text-primary rounded-full"
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  <span className="sr-only">Add/Edit notes</span>
-                                </Button>
-                              </SheetTrigger>
-                            </Sheet>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openNotesDialog(entry.id, entry.notes || "")}
+                              className="text-muted-foreground hover:text-primary rounded-full"
+                            >
+                              <FileText className="h-4 w-4" />
+                              <span className="sr-only">Add/Edit notes</span>
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { BarChart3 } from "lucide-react";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from "recharts";
+import { ScatterChart as ScatterChartIcon } from "lucide-react";
 
 interface JournalEntry {
   id: string;
@@ -15,7 +15,38 @@ interface InsightsChartProps {
 }
 
 export const InsightsChart = ({ entries }: InsightsChartProps) => {
-  // Group entries by date
+  // Convert entries to scatter plot data
+  const scatterData = entries.map(entry => {
+    const date = new Date(entry.created_at);
+    const timestamp = date.getTime();
+    
+    // Parse dosage to grams
+    const match = entry.dosage.match(/^([\d.]+)(g|ml|mg)$/);
+    let dosageInGrams = 0;
+    
+    if (match) {
+      const amount = parseFloat(match[1]);
+      const unit = match[2];
+      
+      if (unit === 'g') {
+        dosageInGrams = amount;
+      } else if (unit === 'mg') {
+        dosageInGrams = amount / 1000;
+      } else if (unit === 'ml') {
+        dosageInGrams = amount; // Assuming 1ml ≈ 1g
+      }
+    }
+    
+    return {
+      timestamp,
+      dosage: dosageInGrams,
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      strain: entry.dosage
+    };
+  }).sort((a, b) => a.timestamp - b.timestamp);
+
+  // Group entries by date for stats
   const entriesByDate = entries.reduce((acc, entry) => {
     const date = new Date(entry.created_at).toLocaleDateString('en-US', { 
       month: 'short', 
@@ -53,36 +84,48 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
 
   const avgConsumption = calculateAverageConsumption();
 
-  // Convert to array and sort by date
-  const chartData = Object.entries(entriesByDate)
-    .map(([date, count]) => ({ date, count }))
-    .slice(-14); // Show last 14 days
-
-  if (chartData.length === 0) {
+  if (scatterData.length === 0) {
     return null;
   }
+
+  // Format timestamp for display
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+  };
 
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <BarChart3 className="w-6 h-6 text-primary" />
+        <ScatterChartIcon className="w-6 h-6 text-primary" />
         Insights
       </h2>
       
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
+          <ScatterChart>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 
-              dataKey="date" 
+              type="number"
+              dataKey="timestamp" 
+              name="Time"
+              domain={['dataMin', 'dataMax']}
+              tickFormatter={formatTimestamp}
               className="text-xs text-muted-foreground"
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
             />
             <YAxis 
+              type="number"
+              dataKey="dosage" 
+              name="Dosage"
+              unit="g"
               className="text-xs text-muted-foreground"
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              allowDecimals={false}
             />
+            <ZAxis range={[60, 60]} />
             <Tooltip 
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
@@ -91,14 +134,18 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
                 color: 'hsl(var(--card-foreground))'
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
+              formatter={(value: number, name: string) => {
+                if (name === 'dosage') return [`${value.toFixed(2)}g`, 'Dosage'];
+                return [value, name];
+              }}
+              labelFormatter={formatTimestamp}
             />
-            <Bar 
-              dataKey="count" 
-              fill="hsl(var(--primary))" 
-              radius={[8, 8, 0, 0]}
-              name="Entries"
+            <Scatter 
+              data={scatterData} 
+              fill="hsl(var(--primary))"
+              opacity={0.7}
             />
-          </BarChart>
+          </ScatterChart>
         </ResponsiveContainer>
       </div>
 
