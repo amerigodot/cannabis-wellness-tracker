@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from "recharts";
 import { ScatterChart as ScatterChartIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface JournalEntry {
   id: string;
@@ -16,6 +18,8 @@ interface InsightsChartProps {
 }
 
 export const InsightsChart = ({ entries }: InsightsChartProps) => {
+  const [selectedStrains, setSelectedStrains] = useState<Set<string>>(new Set());
+
   // Categorize strain type
   const getStrainType = (strain: string): string => {
     const lowerStrain = strain.toLowerCase();
@@ -129,7 +133,30 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
   // Format timestamp for display
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const formatTooltipTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
     return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  // Toggle strain filter
+  const toggleStrain = (strainType: string) => {
+    setSelectedStrains(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(strainType)) {
+        newSet.delete(strainType);
+      } else {
+        newSet.add(strainType);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if a strain is filtered
+  const isStrainVisible = (strainType: string) => {
+    return selectedStrains.size === 0 || selectedStrains.has(strainType);
   };
 
   return (
@@ -146,14 +173,12 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             <XAxis 
               type="number"
               dataKey="timestamp" 
-              name="Time"
+              name="Date"
               domain={['dataMin', 'dataMax']}
               tickFormatter={formatTimestamp}
               className="text-xs text-muted-foreground"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              angle={-45}
-              textAnchor="end"
-              height={80}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+              height={60}
             />
             <YAxis 
               type="number"
@@ -177,7 +202,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
                 if (name === 'strain') return [value, 'Strain'];
                 return [value, name];
               }}
-              labelFormatter={formatTimestamp}
+              labelFormatter={formatTooltipTimestamp}
             />
             {Object.entries(groupedData).map(([strainType, data]) => (
               <Scatter 
@@ -185,7 +210,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
                 name={strainType}
                 data={data} 
                 fill={strainTypeColors[strainType as keyof typeof strainTypeColors]}
-                opacity={0.8}
+                opacity={isStrainVisible(strainType) ? 0.8 : 0.15}
               />
             ))}
           </ScatterChart>
@@ -195,15 +220,28 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
       {/* Legend */}
       <div className="mt-6 flex flex-wrap gap-3 justify-center">
         {Object.entries(groupedData).map(([strainType, data]) => (
-          <div key={strainType} className="flex items-center gap-2">
+          <Badge
+            key={strainType}
+            variant={isStrainVisible(strainType) ? "default" : "outline"}
+            className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform px-3 py-1.5"
+            style={{
+              backgroundColor: isStrainVisible(strainType) 
+                ? strainTypeColors[strainType as keyof typeof strainTypeColors]
+                : 'transparent',
+              borderColor: strainTypeColors[strainType as keyof typeof strainTypeColors],
+              color: isStrainVisible(strainType) ? 'white' : 'hsl(var(--foreground))',
+              opacity: isStrainVisible(strainType) ? 1 : 0.5
+            }}
+            onClick={() => toggleStrain(strainType)}
+          >
             <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: strainTypeColors[strainType as keyof typeof strainTypeColors] }}
+              className="w-2 h-2 rounded-full" 
+              style={{ backgroundColor: isStrainVisible(strainType) ? 'white' : strainTypeColors[strainType as keyof typeof strainTypeColors] }}
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs font-medium">
               {strainType} ({data.length})
             </span>
-          </div>
+          </Badge>
         ))}
       </div>
 
