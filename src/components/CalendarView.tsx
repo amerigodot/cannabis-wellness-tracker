@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Leaf, Bell, FileText } from "lucide-react";
+import { Leaf, Bell, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -118,6 +118,20 @@ export const CalendarView = () => {
     }
   };
 
+  const deleteEntry = async (entryId: string) => {
+    const { error } = await supabase
+      .from("journal_entries")
+      .update({ is_deleted: true })
+      .eq("id", entryId);
+
+    if (error) {
+      toast.error("Error deleting entry: " + error.message);
+    } else {
+      toast.success("Entry deleted");
+      fetchData();
+    }
+  };
+
   const datesWithData = getDatesWithData();
   const selectedDateEntries = selectedDate ? getEntriesForDate(selectedDate) : [];
   const selectedDateReminders = selectedDate ? getRemindersForDate(selectedDate) : [];
@@ -192,34 +206,44 @@ export const CalendarView = () => {
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
                           <p className="font-medium">{entry.strain}</p>
-                          <Sheet>
-                            <SheetTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openNotesDialog(entry)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <FileText className="h-4 w-4" />
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent>
-                              <SheetHeader>
-                                <SheetTitle>Notes for {entry.strain}</SheetTitle>
-                              </SheetHeader>
-                              <div className="mt-4 space-y-4">
-                                <Textarea
-                                  placeholder="Add your personal notes here..."
-                                  value={editingNotes}
-                                  onChange={(e) => setEditingNotes(e.target.value)}
-                                  className="min-h-[200px]"
-                                />
-                                <Button onClick={saveNotes} className="w-full">
-                                  Save Notes
+                          <div className="flex gap-1">
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => openNotesDialog(entry)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <FileText className="h-4 w-4" />
                                 </Button>
-                              </div>
-                            </SheetContent>
-                          </Sheet>
+                              </SheetTrigger>
+                              <SheetContent>
+                                <SheetHeader>
+                                  <SheetTitle>Notes for {entry.strain}</SheetTitle>
+                                </SheetHeader>
+                                <div className="mt-4 space-y-4">
+                                  <Textarea
+                                    placeholder="Add your personal notes here..."
+                                    value={editingNotes}
+                                    onChange={(e) => setEditingNotes(e.target.value)}
+                                    className="min-h-[200px]"
+                                  />
+                                  <Button onClick={saveNotes} className="w-full">
+                                    Save Notes
+                                  </Button>
+                                </div>
+                              </SheetContent>
+                            </Sheet>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteEntry(entry.id)}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <Badge variant="outline">{entry.dosage}</Badge>
