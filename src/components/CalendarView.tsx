@@ -13,6 +13,8 @@ interface JournalEntry {
   strain: string;
   dosage: string;
   method: string;
+  observations: string[];
+  negative_side_effects: string[];
 }
 
 interface Reminder {
@@ -38,7 +40,7 @@ export const CalendarView = () => {
     
     const { data: entriesData, error: entriesError } = await supabase
       .from("journal_entries")
-      .select("id, created_at, strain, dosage, method")
+      .select("id, created_at, strain, dosage, method, observations, negative_side_effects")
       .order("created_at", { ascending: false });
 
     const { data: remindersData, error: remindersError } = await supabase
@@ -159,12 +161,30 @@ export const CalendarView = () => {
                   </h3>
                   {selectedDateEntries.map((entry) => (
                     <Card key={entry.id} className="p-3">
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <p className="font-medium">{entry.strain}</p>
-                        <div className="flex gap-2 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap gap-2 text-sm">
                           <Badge variant="outline">{entry.dosage}</Badge>
                           <Badge variant="outline">{entry.method}</Badge>
                         </div>
+                        {entry.observations.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {entry.observations.map((obs, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {obs}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {entry.negative_side_effects.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {entry.negative_side_effects.map((effect, idx) => (
+                              <Badge key={idx} variant="destructive" className="text-xs">
+                                {effect}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                         <p className="text-xs text-muted-foreground">
                           {format(parseISO(entry.created_at), "h:mm a")}
                         </p>
