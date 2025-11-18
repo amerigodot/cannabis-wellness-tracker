@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Leaf, Bell } from "lucide-react";
+import { Leaf, Bell, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -15,6 +18,7 @@ interface JournalEntry {
   method: string;
   observations: string[];
   negative_side_effects: string[];
+  notes: string | null;
 }
 
 interface Reminder {
@@ -30,6 +34,8 @@ export const CalendarView = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingNotes, setEditingNotes] = useState<string>("");
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -40,7 +46,7 @@ export const CalendarView = () => {
     
     const { data: entriesData, error: entriesError } = await supabase
       .from("journal_entries")
-      .select("id, created_at, strain, dosage, method, observations, negative_side_effects")
+      .select("id, created_at, strain, dosage, method, observations, negative_side_effects, notes")
       .order("created_at", { ascending: false });
 
     const { data: remindersData, error: remindersError } = await supabase
@@ -88,6 +94,28 @@ export const CalendarView = () => {
     });
     
     return dates;
+  };
+
+  const openNotesDialog = (entry: JournalEntry) => {
+    setEditingEntryId(entry.id);
+    setEditingNotes(entry.notes || "");
+  };
+
+  const saveNotes = async () => {
+    if (!editingEntryId) return;
+
+    const { error } = await supabase
+      .from("journal_entries")
+      .update({ notes: editingNotes })
+      .eq("id", editingEntryId);
+
+    if (error) {
+      toast.error("Error saving notes: " + error.message);
+    } else {
+      toast.success("Notes saved!");
+      fetchData();
+      setEditingEntryId(null);
+    }
   };
 
   const datesWithData = getDatesWithData();
@@ -162,7 +190,37 @@ export const CalendarView = () => {
                   {selectedDateEntries.map((entry) => (
                     <Card key={entry.id} className="p-3">
                       <div className="space-y-2">
-                        <p className="font-medium">{entry.strain}</p>
+                        <div className="flex items-start justify-between">
+                          <p className="font-medium">{entry.strain}</p>
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openNotesDialog(entry)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent>
+                              <SheetHeader>
+                                <SheetTitle>Notes for {entry.strain}</SheetTitle>
+                              </SheetHeader>
+                              <div className="mt-4 space-y-4">
+                                <Textarea
+                                  placeholder="Add your personal notes here..."
+                                  value={editingNotes}
+                                  onChange={(e) => setEditingNotes(e.target.value)}
+                                  className="min-h-[200px]"
+                                />
+                                <Button onClick={saveNotes} className="w-full">
+                                  Save Notes
+                                </Button>
+                              </div>
+                            </SheetContent>
+                          </Sheet>
+                        </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <Badge variant="outline">{entry.dosage}</Badge>
                           <Badge variant="outline">{entry.method}</Badge>
@@ -184,6 +242,11 @@ export const CalendarView = () => {
                               </Badge>
                             ))}
                           </div>
+                        )}
+                        {entry.notes && (
+                          <p className="text-sm text-muted-foreground italic">
+                            {entry.notes}
+                          </p>
                         )}
                         <p className="text-xs text-muted-foreground">
                           {format(parseISO(entry.created_at), "h:mm a")}
