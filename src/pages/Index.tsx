@@ -98,6 +98,18 @@ const AVAILABLE_ICONS = [
   { name: "Fire", value: "flame" },
 ];
 
+const getMethodIcon = (method: string) => {
+  const methodIconMap: Record<string, any> = {
+    "Vape": Wind,
+    "Smoke": Cigarette,
+    "Oil": Droplet,
+    "Tincture": Beaker,
+    "Topical": Pipette,
+    "Edible": Cookie,
+  };
+  return methodIconMap[method] || Leaf;
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -994,7 +1006,13 @@ const Index = () => {
                           </div>
                           <div>
                             <Label className="text-xs text-muted-foreground">Method</Label>
-                            <p className="font-medium">{entry.method}</p>
+                            <p className="font-medium flex items-center gap-2">
+                              {(() => {
+                                const MethodIcon = getMethodIcon(entry.method);
+                                return <MethodIcon className="h-4 w-4" />;
+                              })()}
+                              {entry.method}
+                            </p>
                           </div>
                         </div>
 
