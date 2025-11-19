@@ -226,10 +226,20 @@ const Index = () => {
   const handleDelete = async (entryId: string) => {
     console.log("Delete button clicked, entryId:", entryId);
     
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("You must be logged in to delete entries");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("journal_entries")
-      .update({ is_deleted: true })
+      .update({ 
+        is_deleted: true,
+        user_id: user.id
+      })
       .eq("id", entryId)
+      .eq("user_id", user.id)
       .select();
 
     console.log("Delete response:", { data, error });
