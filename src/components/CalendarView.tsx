@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap } from "lucide-react";
+import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -69,6 +69,8 @@ export const CalendarView = ({
       heart: Heart,
       brain: Brain,
       zap: Zap,
+      rocket: Rocket,
+      flame: Flame,
     };
     return iconMap[iconName] || Leaf;
   };
