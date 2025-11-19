@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO, startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from "date-fns";
-import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Clock } from "lucide-react";
+import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Clock, Wind, Beaker, Pipette } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -79,6 +79,18 @@ export const CalendarView = ({
       flame: Flame,
     };
     return iconMap[iconName] || Leaf;
+  };
+
+  const getMethodIcon = (method: string) => {
+    const methodIconMap: Record<string, typeof Wind> = {
+      "Vape": Wind,
+      "Smoke": Cigarette,
+      "Oil": Droplet,
+      "Tincture": Beaker,
+      "Topical": Pipette,
+      "Edible": Cookie,
+    };
+    return methodIconMap[method] || Leaf;
   };
 
   const isEntryInTimeRange = (entry: JournalEntry) => {
@@ -532,7 +544,13 @@ export const CalendarView = ({
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <Badge variant="outline">{entry.dosage}</Badge>
-                          <Badge variant="outline">{entry.method}</Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            {(() => {
+                              const MethodIcon = getMethodIcon(entry.method);
+                              return <MethodIcon className="h-3 w-3" />;
+                            })()}
+                            {entry.method}
+                          </Badge>
                         </div>
                         {entry.observations.length > 0 && (
                           <div className="flex flex-wrap gap-1">
