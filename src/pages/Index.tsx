@@ -19,7 +19,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2 } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
@@ -539,10 +539,30 @@ const Index = () => {
                     <SelectValue placeholder="Select method" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Vape">Vape</SelectItem>
-                    <SelectItem value="Smoke">Smoke</SelectItem>
-                    <SelectItem value="Oil">Oil</SelectItem>
-                    <SelectItem value="Edible">Edible</SelectItem>
+                    <SelectItem value="Vape">
+                      <div className="flex items-center gap-2">
+                        <Wind className="h-4 w-4" />
+                        <span>Vape</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Smoke">
+                      <div className="flex items-center gap-2">
+                        <Cigarette className="h-4 w-4" />
+                        <span>Smoke</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Oil">
+                      <div className="flex items-center gap-2">
+                        <Droplet className="h-4 w-4" />
+                        <span>Oil</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Edible">
+                      <div className="flex items-center gap-2">
+                        <Cookie className="h-4 w-4" />
+                        <span>Edible</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
