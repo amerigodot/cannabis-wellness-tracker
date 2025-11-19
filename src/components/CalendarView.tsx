@@ -15,6 +15,7 @@ import { toast } from "sonner";
 interface JournalEntry {
   id: string;
   created_at: string;
+  consumption_time: string;
   strain: string;
   dosage: string;
   method: string;
@@ -124,9 +125,9 @@ export const CalendarView = ({
     
     const { data: entriesData, error: entriesError } = await supabase
       .from("journal_entries")
-      .select("id, created_at, strain, dosage, method, observations, activities, negative_side_effects, notes, icon")
+      .select("id, created_at, consumption_time, strain, dosage, method, observations, activities, negative_side_effects, notes, icon")
       .eq("is_deleted", false)
-      .order("created_at", { ascending: false });
+      .order("consumption_time", { ascending: false });
 
     const { data: remindersData, error: remindersError } = await supabase
       .from("reminders")
@@ -151,7 +152,7 @@ export const CalendarView = ({
 
   const getEntriesForDate = (date: Date) => {
     return entries.filter((entry) =>
-      isSameDay(parseISO(entry.created_at), date)
+      isSameDay(parseISO(entry.consumption_time || entry.created_at), date)
     );
   };
 
@@ -165,7 +166,7 @@ export const CalendarView = ({
     const dates = new Set<string>();
     
     entries.forEach((entry) => {
-      dates.add(format(parseISO(entry.created_at), "yyyy-MM-dd"));
+      dates.add(format(parseISO(entry.consumption_time || entry.created_at), "yyyy-MM-dd"));
     });
     
     reminders.forEach((reminder) => {
@@ -202,7 +203,7 @@ export const CalendarView = ({
     });
     
     filteredEntries.forEach((entry) => {
-      dates.add(format(parseISO(entry.created_at), "yyyy-MM-dd"));
+      dates.add(format(parseISO(entry.consumption_time || entry.created_at), "yyyy-MM-dd"));
     });
     
     // Always include reminders
