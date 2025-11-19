@@ -547,11 +547,11 @@ const Index = () => {
                 step={5}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Now</span>
-                <span>1 hour</span>
-                <span>12 hours</span>
-                <span>24 hours</span>
+              <div className="relative text-xs text-muted-foreground h-4">
+                <span className="absolute left-0">Now</span>
+                <span className="absolute left-[4.2%] -translate-x-1/2">1h</span>
+                <span className="absolute left-1/2 -translate-x-1/2">12h</span>
+                <span className="absolute right-0">24h</span>
               </div>
             </div>
 
