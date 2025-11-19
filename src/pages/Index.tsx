@@ -19,7 +19,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
@@ -555,6 +555,12 @@ const Index = () => {
                       <div className="flex items-center gap-2">
                         <Droplet className="h-4 w-4" />
                         <span>Oil</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Tincture">
+                      <div className="flex items-center gap-2">
+                        <Beaker className="h-4 w-4" />
+                        <span>Tincture</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="Edible">
