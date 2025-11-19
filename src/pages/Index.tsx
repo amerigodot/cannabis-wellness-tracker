@@ -534,13 +534,17 @@ const Index = () => {
               </div>
               <div>
                 <Label htmlFor="method">Method</Label>
-                <Input
-                  id="method"
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value)}
-                  placeholder="e.g., Vape, Edible"
-                  className="mt-1.5"
-                />
+                <Select value={method} onValueChange={setMethod}>
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder="Select method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Vape">Vape</SelectItem>
+                    <SelectItem value="Smoke">Smoke</SelectItem>
+                    <SelectItem value="Oil">Oil</SelectItem>
+                    <SelectItem value="Edible">Edible</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
