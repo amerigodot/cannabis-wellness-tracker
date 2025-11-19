@@ -458,9 +458,11 @@ const Index = () => {
                 {COMMON_ACTIVITIES.map((activity) => (
                   <Badge
                     key={activity}
-                    variant={selectedActivities.includes(activity) ? "default" : "outline"}
+                    variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-                      !selectedActivities.includes(activity) ? "bg-gray-100 dark:bg-gray-800" : ""
+                      selectedActivities.includes(activity) 
+                        ? "bg-primary/10 dark:bg-primary/20 border-primary/30" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleActivity(activity)}
                   >
@@ -477,9 +479,11 @@ const Index = () => {
                 {COMMON_OBSERVATIONS.map((obs) => (
                   <Badge
                     key={obs}
-                    variant={selectedObservations.includes(obs) ? "default" : "outline"}
+                    variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-                      !selectedObservations.includes(obs) ? "bg-gray-100 dark:bg-gray-800" : ""
+                      selectedObservations.includes(obs) 
+                        ? "bg-primary/10 dark:bg-primary/20 border-primary/30" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleObservation(obs)}
                   >
@@ -496,9 +500,11 @@ const Index = () => {
                 {NEGATIVE_SIDE_EFFECTS.map((effect) => (
                   <Badge
                     key={effect}
-                    variant={selectedNegativeSideEffects.includes(effect) ? "destructive" : "outline"}
+                    variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-                      !selectedNegativeSideEffects.includes(effect) ? "bg-gray-100 dark:bg-gray-800" : ""
+                      selectedNegativeSideEffects.includes(effect) 
+                        ? "bg-destructive/10 dark:bg-destructive/20 border-destructive/30" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleNegativeSideEffect(effect)}
                   >
