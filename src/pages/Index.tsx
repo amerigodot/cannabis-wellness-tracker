@@ -144,17 +144,6 @@ const Index = () => {
     return 720 + (minutes - 120) / 1.8333; // 2-24 hours
   };
 
-  // Tick mark intervals in actual minutes
-  const tickMarks = [0, 15, 30, 60, 120, 360, 720, 1080, 1440];
-
-  const snapToNearestTick = (sliderValue: number) => {
-    const actualMinutes = sliderValueToMinutes(sliderValue);
-    const nearestTick = tickMarks.reduce((prev, curr) => 
-      Math.abs(curr - actualMinutes) < Math.abs(prev - actualMinutes) ? curr : prev
-    );
-    return minutesToSliderValue(nearestTick);
-  };
-
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -570,7 +559,6 @@ const Index = () => {
                 <Slider
                   value={[minutesAgo]}
                   onValueChange={(value) => setMinutesAgo(value[0])}
-                  onValueCommit={(value) => setMinutesAgo(snapToNearestTick(value[0]))}
                   max={1440}
                   step={1}
                   className="w-full"
