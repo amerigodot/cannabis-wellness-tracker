@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
@@ -123,6 +124,8 @@ const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [minutesAgo, setMinutesAgo] = useState<number>(0);
+  const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
+  const [editingTime, setEditingTime] = useState<Date>(new Date());
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -334,6 +337,28 @@ const Index = () => {
     setNotesDialogOpen(false);
     setEditingEntryId(null);
     setTempNotes("");
+  };
+
+  const openTimeEditDialog = (entryId: string, currentTime: string) => {
+    setEditingTimeEntryId(entryId);
+    setEditingTime(new Date(currentTime));
+  };
+
+  const saveTimeEdit = async () => {
+    if (!editingTimeEntryId) return;
+
+    const { error } = await supabase
+      .from("journal_entries")
+      .update({ consumption_time: editingTime.toISOString() })
+      .eq("id", editingTimeEntryId);
+
+    if (error) {
+      toast.error("Error updating time: " + error.message);
+    } else {
+      toast.success("Consumption time updated!");
+      fetchEntries();
+      setEditingTimeEntryId(null);
+    }
   };
 
   const getIconComponent = (iconName: string) => {
@@ -774,10 +799,13 @@ const Index = () => {
                             </div>
                             <div>
                               <h3 className="font-semibold text-lg">{entry.strain}</h3>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                              <button
+                                onClick={() => openTimeEditDialog(entry.id, entry.consumption_time || entry.created_at)}
+                                className="flex items-center gap-2 text-sm text-muted-foreground mt-1 hover:text-primary transition-colors cursor-pointer"
+                              >
                                 <Clock className="h-3 w-3" />
-                                <span>{new Date(entry.consumption_time || entry.created_at).toLocaleString()}</span>
-                              </div>
+                                <span className="hover:underline">{new Date(entry.consumption_time || entry.created_at).toLocaleString()}</span>
+                              </button>
                             </div>
                           </div>
                           <div className="flex gap-2">
@@ -950,6 +978,56 @@ const Index = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Edit Consumption Time Dialog */}
+        <Dialog open={!!editingTimeEntryId} onOpenChange={(open) => !open && setEditingTimeEntryId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Consumption Time</DialogTitle>
+              <DialogDescription>
+                Adjust when this entry was consumed
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-date">Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={editingTime.toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newDate = new Date(editingTime);
+                    const [year, month, day] = e.target.value.split('-').map(Number);
+                    newDate.setFullYear(year, month - 1, day);
+                    setEditingTime(newDate);
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-time">Time</Label>
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={editingTime.toTimeString().slice(0, 5)}
+                  onChange={(e) => {
+                    const newDate = new Date(editingTime);
+                    const [hours, minutes] = e.target.value.split(':').map(Number);
+                    newDate.setHours(hours, minutes);
+                    setEditingTime(newDate);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingTimeEntryId(null)}>
+                Cancel
+              </Button>
+              <Button onClick={saveTimeEdit}>
+                Save Time
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
