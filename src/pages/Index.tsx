@@ -574,7 +574,15 @@ const Index = () => {
         {/* Insights Chart */}
         {entries.length > 0 && (
           <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <InsightsChart entries={entries} />
+            <InsightsChart 
+              entries={entries}
+              filterObservations={filterObservations}
+              setFilterObservations={setFilterObservations}
+              filterActivities={filterActivities}
+              setFilterActivities={setFilterActivities}
+              filterSideEffects={filterSideEffects}
+              setFilterSideEffects={setFilterSideEffects}
+            />
           </div>
         )}
 

@@ -18,11 +18,27 @@ interface JournalEntry {
 
 interface InsightsChartProps {
   entries: JournalEntry[];
+  filterObservations: string[];
+  setFilterObservations: (filters: string[]) => void;
+  filterActivities: string[];
+  setFilterActivities: (filters: string[]) => void;
+  filterSideEffects: string[];
+  setFilterSideEffects: (filters: string[]) => void;
 }
 
-export const InsightsChart = ({ entries }: InsightsChartProps) => {
-  const [selectedBadges, setSelectedBadges] = useState<Set<string>>(new Set());
+export const InsightsChart = ({ 
+  entries, 
+  filterObservations,
+  setFilterObservations,
+  filterActivities,
+  setFilterActivities,
+  filterSideEffects,
+  setFilterSideEffects
+}: InsightsChartProps) => {
   const [topCount, setTopCount] = useState<3 | 5 | 10>(5);
+  
+  // Combine all filters into a single set for backward compatibility
+  const selectedBadges = new Set([...filterObservations, ...filterActivities, ...filterSideEffects]);
 
   // Calculate top N most used badges by type
   const getTopBadgesByType = () => {
@@ -174,15 +190,26 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
 
   // Toggle badge filter
   const toggleBadge = (badge: string) => {
-    setSelectedBadges(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(badge)) {
-        newSet.delete(badge);
-      } else {
-        newSet.add(badge);
-      }
-      return newSet;
-    });
+    // Determine which category the badge belongs to and update accordingly
+    if (topBadges.observations.some(([b]) => b === badge)) {
+      setFilterObservations(
+        filterObservations.includes(badge)
+          ? filterObservations.filter(b => b !== badge)
+          : [...filterObservations, badge]
+      );
+    } else if (topBadges.activities.some(([b]) => b === badge)) {
+      setFilterActivities(
+        filterActivities.includes(badge)
+          ? filterActivities.filter(b => b !== badge)
+          : [...filterActivities, badge]
+      );
+    } else {
+      setFilterSideEffects(
+        filterSideEffects.includes(badge)
+          ? filterSideEffects.filter(b => b !== badge)
+          : [...filterSideEffects, badge]
+      );
+    }
   };
 
   // Check if a badge is selected
@@ -201,17 +228,17 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     const categoryBadges = badges.map(([badge]) => badge);
     const allSelected = categoryBadges.every(badge => selectedBadges.has(badge));
     
-    setSelectedBadges(prev => {
-      const newSet = new Set(prev);
-      if (allSelected) {
-        // Remove all if all are selected
-        categoryBadges.forEach(badge => newSet.delete(badge));
-      } else {
-        // Add all if not all are selected
-        categoryBadges.forEach(badge => newSet.add(badge));
-      }
-      return newSet;
-    });
+    // Determine category type from first badge
+    const firstBadge = categoryBadges[0];
+    if (!firstBadge) return;
+    
+    if (topBadges.observations.some(([b]) => b === firstBadge)) {
+      setFilterObservations(allSelected ? [] : categoryBadges);
+    } else if (topBadges.activities.some(([b]) => b === firstBadge)) {
+      setFilterActivities(allSelected ? [] : categoryBadges);
+    } else {
+      setFilterSideEffects(allSelected ? [] : categoryBadges);
+    }
   };
 
   return (
@@ -450,7 +477,11 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSelectedBadges(new Set())}
+              onClick={() => {
+                setFilterObservations([]);
+                setFilterActivities([]);
+                setFilterSideEffects([]);
+              }}
               className="text-xs h-7"
             >
               Clear filters
