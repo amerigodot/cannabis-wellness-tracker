@@ -19,9 +19,44 @@ interface InsightsChartProps {
 }
 
 export const InsightsChart = ({ entries }: InsightsChartProps) => {
-  const [selectedStrains, setSelectedStrains] = useState<Set<string>>(new Set());
+  const [selectedBadges, setSelectedBadges] = useState<Set<string>>(new Set());
 
-  // Categorize strain type
+  // Calculate top 5 most used badges
+  const getTopBadges = () => {
+    const badgeCounts: Record<string, { count: number; type: 'observation' | 'activity' | 'side-effect' }> = {};
+    
+    entries.forEach(entry => {
+      (entry.observations || []).forEach(obs => {
+        if (!badgeCounts[obs]) {
+          badgeCounts[obs] = { count: 0, type: 'observation' };
+        }
+        badgeCounts[obs].count++;
+      });
+      
+      (entry.activities || []).forEach(act => {
+        if (!badgeCounts[act]) {
+          badgeCounts[act] = { count: 0, type: 'activity' };
+        }
+        badgeCounts[act].count++;
+      });
+      
+      (entry.negative_side_effects || []).forEach(eff => {
+        if (!badgeCounts[eff]) {
+          badgeCounts[eff] = { count: 0, type: 'side-effect' };
+        }
+        badgeCounts[eff].count++;
+      });
+    });
+    
+    return Object.entries(badgeCounts)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5)
+      .map(([badge, data]) => ({ badge, ...data }));
+  };
+
+  const topBadges = getTopBadges();
+
+  // Categorize strain type (for coloring only)
   const getStrainType = (strain: string): string => {
     const lowerStrain = strain.toLowerCase();
     
@@ -36,7 +71,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     } else if (lowerStrain.includes('thc')) {
       return 'THC';
     }
-    return 'Balanced';
+    return 'Sativa'; // Default to Sativa instead of Balanced
   };
 
   // Convert entries to scatter plot data
@@ -74,17 +109,34 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     };
   }).sort((a, b) => a.timestamp - b.timestamp);
 
-  // Group data by strain type
+  // Group data by strain type (for coloring)
   const strainTypeColors = {
     'Sativa': 'hsl(var(--strain-sativa))',
     'Indica': 'hsl(var(--strain-indica))',
     'Hybrid': 'hsl(var(--strain-hybrid))',
     'CBD': 'hsl(var(--strain-cbd))',
-    'THC': 'hsl(var(--strain-thc))',
-    'Balanced': 'hsl(var(--strain-balanced))'
+    'THC': 'hsl(var(--strain-thc))'
   };
 
-  const groupedData = scatterData.reduce((acc, point) => {
+  // Filter data based on selected badges
+  const getFilteredData = () => {
+    if (selectedBadges.size === 0) {
+      return scatterData;
+    }
+    
+    return scatterData.filter(point => {
+      const allBadges = [
+        ...point.observations,
+        ...point.activities,
+        ...point.negative_side_effects
+      ];
+      return Array.from(selectedBadges).some(badge => allBadges.includes(badge));
+    });
+  };
+
+  const filteredData = getFilteredData();
+
+  const groupedData = filteredData.reduce((acc, point) => {
     if (!acc[point.strainType]) {
       acc[point.strainType] = [];
     }
@@ -145,22 +197,34 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
   };
 
-  // Toggle strain filter
-  const toggleStrain = (strainType: string) => {
-    setSelectedStrains(prev => {
+  // Toggle badge filter
+  const toggleBadge = (badge: string) => {
+    setSelectedBadges(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(strainType)) {
-        newSet.delete(strainType);
+      if (newSet.has(badge)) {
+        newSet.delete(badge);
       } else {
-        newSet.add(strainType);
+        newSet.add(badge);
       }
       return newSet;
     });
   };
 
-  // Check if a strain is filtered
-  const isStrainVisible = (strainType: string) => {
-    return selectedStrains.size === 0 || selectedStrains.has(strainType);
+  // Check if a badge is selected
+  const isBadgeSelected = (badge: string) => {
+    return selectedBadges.has(badge);
+  };
+
+  // Get badge color based on type
+  const getBadgeColor = (type: 'observation' | 'activity' | 'side-effect') => {
+    switch (type) {
+      case 'observation':
+        return { bg: 'hsl(var(--observation))', fg: 'hsl(var(--observation-foreground))' };
+      case 'activity':
+        return { bg: 'hsl(var(--activity))', fg: 'hsl(var(--activity-foreground))' };
+      case 'side-effect':
+        return { bg: 'hsl(var(--side-effect))', fg: 'hsl(var(--side-effect-foreground))' };
+    }
   };
 
   // Custom Tooltip Component
@@ -262,40 +326,47 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
                 name={strainType}
                 data={data} 
                 fill={strainTypeColors[strainType as keyof typeof strainTypeColors]}
-                opacity={isStrainVisible(strainType) ? 0.8 : 0.15}
+                opacity={0.8}
               />
             ))}
           </ScatterChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Legend */}
-      <div className="mt-6 flex flex-wrap gap-3 justify-center">
-        {Object.entries(groupedData).map(([strainType, data]) => (
-          <Badge
-            key={strainType}
-            variant={isStrainVisible(strainType) ? "default" : "outline"}
-            className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform px-3 py-1.5"
-            style={{
-              backgroundColor: isStrainVisible(strainType) 
-                ? strainTypeColors[strainType as keyof typeof strainTypeColors]
-                : 'transparent',
-              borderColor: strainTypeColors[strainType as keyof typeof strainTypeColors],
-              color: isStrainVisible(strainType) ? 'white' : 'hsl(var(--foreground))',
-              opacity: isStrainVisible(strainType) ? 1 : 0.5
-            }}
-            onClick={() => toggleStrain(strainType)}
-          >
-            <div 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: isStrainVisible(strainType) ? 'white' : strainTypeColors[strainType as keyof typeof strainTypeColors] }}
-            />
-            <span className="text-xs font-medium">
-              {strainType} ({data.length})
-            </span>
-          </Badge>
-        ))}
-      </div>
+      {/* Badge Filters */}
+      {topBadges.length > 0 && (
+        <div className="mt-6">
+          <p className="text-sm text-muted-foreground mb-3 text-center">Filter by most common:</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {topBadges.map(({ badge, count, type }) => {
+              const colors = getBadgeColor(type);
+              const isSelected = isBadgeSelected(badge);
+              
+              return (
+                <Badge
+                  key={badge}
+                  className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                  style={{
+                    backgroundColor: isSelected ? colors.bg : 'transparent',
+                    borderColor: colors.bg,
+                    color: isSelected ? colors.fg : 'hsl(var(--foreground))',
+                    border: `1px solid ${colors.bg}`,
+                    opacity: isSelected ? 1 : 0.6
+                  }}
+                  onClick={() => toggleBadge(badge)}
+                >
+                  {badge} ({count})
+                </Badge>
+              );
+            })}
+          </div>
+          {selectedBadges.size > 0 && (
+            <p className="text-xs text-center mt-2 text-muted-foreground">
+              Showing {filteredData.length} of {scatterData.length} entries
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         <div className="p-3 rounded-lg bg-muted/30">
