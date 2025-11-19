@@ -129,13 +129,30 @@ const Index = () => {
   const [editingTime, setEditingTime] = useState<Date>(new Date());
   const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
-  // Tick mark intervals in minutes
+  // Non-linear slider: first half (0-720) = 0-6h, second half (720-1440) = 6-24h
+  const sliderValueToMinutes = (sliderValue: number) => {
+    if (sliderValue <= 720) {
+      return sliderValue * 0.5; // 0-6 hours (0-360 minutes)
+    }
+    return 360 + (sliderValue - 720) * 1.5; // 6-24 hours (360-1440 minutes)
+  };
+
+  const minutesToSliderValue = (minutes: number) => {
+    if (minutes <= 360) {
+      return minutes * 2; // 0-6 hours
+    }
+    return 720 + (minutes - 360) / 1.5; // 6-24 hours
+  };
+
+  // Tick mark intervals in actual minutes
   const tickMarks = [0, 15, 30, 60, 120, 360, 720, 1080, 1440];
 
-  const snapToNearestTick = (value: number) => {
-    return tickMarks.reduce((prev, curr) => 
-      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+  const snapToNearestTick = (sliderValue: number) => {
+    const actualMinutes = sliderValueToMinutes(sliderValue);
+    const nearestTick = tickMarks.reduce((prev, curr) => 
+      Math.abs(curr - actualMinutes) < Math.abs(prev - actualMinutes) ? curr : prev
     );
+    return minutesToSliderValue(nearestTick);
   };
 
   useEffect(() => {
@@ -273,9 +290,9 @@ const Index = () => {
     setIsSubmitting(true);
     const dosage = `${dosageAmount}${dosageUnit}`;
     
-    // Calculate consumption time based on minutes ago
+    // Calculate consumption time based on minutes ago (convert slider value to actual minutes)
     const consumptionTime = new Date();
-    consumptionTime.setMinutes(consumptionTime.getMinutes() - minutesAgo);
+    consumptionTime.setMinutes(consumptionTime.getMinutes() - sliderValueToMinutes(minutesAgo));
 
     const { error } = await supabase.from("journal_entries").insert({
       user_id: user.id,
@@ -543,10 +560,10 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Time Since Consumption</Label>
                 <span className="text-sm text-muted-foreground">
-                  {minutesAgo === 0 ? 'Now' : 
-                   minutesAgo < 60 ? `${minutesAgo} min ago` :
-                   minutesAgo < 1440 ? `${Math.floor(minutesAgo / 60)}h ${minutesAgo % 60}m ago` :
-                   `${Math.floor(minutesAgo / 1440)} days ago`}
+                  {sliderValueToMinutes(minutesAgo) === 0 ? 'Now' : 
+                   sliderValueToMinutes(minutesAgo) < 60 ? `${Math.round(sliderValueToMinutes(minutesAgo))} min ago` :
+                   sliderValueToMinutes(minutesAgo) < 1440 ? `${Math.floor(sliderValueToMinutes(minutesAgo) / 60)}h ${Math.round(sliderValueToMinutes(minutesAgo) % 60)}m ago` :
+                   `${Math.floor(sliderValueToMinutes(minutesAgo) / 1440)} days ago`}
                 </span>
               </div>
               <div className="relative">
@@ -558,29 +575,29 @@ const Index = () => {
                   step={1}
                   className="w-full"
                 />
-                {/* Tick marks */}
+                {/* Tick marks - positions match non-linear distribution */}
                 <div className="absolute top-[9px] left-0 right-0 pointer-events-none">
-                  {/* 15min */}
-                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '1.04%' }} />
-                  {/* 30min */}
+                  {/* 15min at 2.08% */}
                   <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '2.08%' }} />
-                  {/* 1h */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '4.17%' }} />
-                  {/* 2h */}
+                  {/* 30min at 4.17% */}
+                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '4.17%' }} />
+                  {/* 1h at 8.33% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '8.33%' }} />
-                  {/* 6h */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '25%' }} />
-                  {/* 12h */}
+                  {/* 2h at 16.67% */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '16.67%' }} />
+                  {/* 6h at 50% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '50%' }} />
-                  {/* 18h */}
-                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '75%' }} />
+                  {/* 12h at 66.67% */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '66.67%' }} />
+                  {/* 18h at 83.33% */}
+                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '83.33%' }} />
                 </div>
               </div>
               <div className="relative text-xs text-muted-foreground h-4 mt-1">
                 <span className="absolute left-0">Now</span>
-                <span className="absolute left-[4.17%] -translate-x-1/2">1h</span>
-                <span className="absolute left-[25%] -translate-x-1/2">6h</span>
-                <span className="absolute left-1/2 -translate-x-1/2">12h</span>
+                <span className="absolute left-[8.33%] -translate-x-1/2">1h</span>
+                <span className="absolute left-[50%] -translate-x-1/2">6h</span>
+                <span className="absolute left-[66.67%] -translate-x-1/2">12h</span>
                 <span className="absolute right-0">24h</span>
               </div>
             </div>
