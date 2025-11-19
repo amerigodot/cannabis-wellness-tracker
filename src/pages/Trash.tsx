@@ -11,6 +11,7 @@ import { format } from "date-fns";
 interface DeletedEntry {
   id: string;
   created_at: string;
+  consumption_time: string;
   strain: string;
   dosage: string;
   method: string;
@@ -35,7 +36,7 @@ export default function Trash() {
       .from("journal_entries")
       .select("*")
       .eq("is_deleted", true)
-      .order("created_at", { ascending: false });
+      .order("consumption_time", { ascending: false });
 
     if (error) {
       toast.error("Error loading deleted entries: " + error.message);
@@ -125,7 +126,7 @@ export default function Trash() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-sm text-muted-foreground">
-                        {format(new Date(entry.created_at), "PPP 'at' p")}
+                        {format(new Date(entry.consumption_time || entry.created_at), "PPP 'at' p")}
                       </span>
                     </div>
 

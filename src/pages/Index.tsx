@@ -25,6 +25,7 @@ interface JournalEntry {
   id: string;
   user_id: string;
   created_at: string;
+  consumption_time: string;
   strain: string;
   dosage: string;
   method: string;
@@ -180,7 +181,7 @@ const Index = () => {
       .from("journal_entries")
       .select("*")
       .eq("is_deleted", false)
-      .order("created_at", { ascending: false });
+      .order("consumption_time", { ascending: false });
 
     if (error) {
       toast.error("Error loading entries: " + error.message);
@@ -775,7 +776,7 @@ const Index = () => {
                               <h3 className="font-semibold text-lg">{entry.strain}</h3>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                                 <Clock className="h-3 w-3" />
-                                <span>{new Date(entry.created_at).toLocaleString()}</span>
+                                <span>{new Date(entry.consumption_time || entry.created_at).toLocaleString()}</span>
                               </div>
                             </div>
                           </div>
