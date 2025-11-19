@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from "recharts";
-import { ScatterChart as ScatterChartIcon } from "lucide-react";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis, LineChart, Line, Legend } from "recharts";
+import { ScatterChart as ScatterChartIcon, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface JournalEntry {
@@ -56,6 +56,82 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
   };
 
   const topBadges = getTopBadgesByType();
+
+  // Calculate badge trends over time
+  const getBadgeTrends = () => {
+    if (entries.length === 0) return [];
+    
+    // Group entries by week
+    const weeklyData: Record<string, Record<string, number>> = {};
+    
+    entries.forEach(entry => {
+      const date = new Date(entry.created_at);
+      // Get the start of the week
+      const weekStart = new Date(date);
+      weekStart.setDate(date.getDate() - date.getDay());
+      const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      if (!weeklyData[weekKey]) {
+        weeklyData[weekKey] = {};
+      }
+      
+      // Count all badges for this week
+      [...(entry.observations || []), ...(entry.activities || []), ...(entry.negative_side_effects || [])].forEach(badge => {
+        weeklyData[weekKey][badge] = (weeklyData[weekKey][badge] || 0) + 1;
+      });
+    });
+    
+    // Convert to array format for recharts
+    return Object.entries(weeklyData)
+      .map(([week, badges]) => ({
+        week,
+        ...badges
+      }))
+      .sort((a, b) => {
+        const dateA = new Date(a.week);
+        const dateB = new Date(b.week);
+        return dateA.getTime() - dateB.getTime();
+      });
+  };
+
+  const trendData = getBadgeTrends();
+  
+  // Get all unique badges that appear in trends
+  const allTrendBadges = new Set<string>();
+  trendData.forEach(week => {
+    Object.keys(week).forEach(key => {
+      if (key !== 'week') allTrendBadges.add(key);
+    });
+  });
+  
+  // Filter to show only selected badges or top badges if none selected
+  const badgesToShow = selectedBadges.size > 0 
+    ? Array.from(selectedBadges)
+    : [
+        ...topBadges.observations.slice(0, 2).map(([badge]) => badge),
+        ...topBadges.activities.slice(0, 2).map(([badge]) => badge),
+        ...topBadges.sideEffects.slice(0, 1).map(([badge]) => badge)
+      ];
+  
+  // Get badge type for coloring
+  const getBadgeType = (badge: string): 'observation' | 'activity' | 'side-effect' => {
+    if (topBadges.observations.some(([b]) => b === badge)) return 'observation';
+    if (topBadges.activities.some(([b]) => b === badge)) return 'activity';
+    return 'side-effect';
+  };
+  
+  // Generate colors for trend lines
+  const getTrendColor = (badge: string): string => {
+    const type = getBadgeType(badge);
+    const colors = {
+      'observation': ['hsl(268, 50%, 65%)', 'hsl(268, 50%, 75%)', 'hsl(268, 50%, 55%)'],
+      'activity': ['hsl(220, 70%, 55%)', 'hsl(220, 70%, 65%)', 'hsl(220, 70%, 45%)'],
+      'side-effect': ['hsl(0, 72%, 51%)', 'hsl(0, 72%, 61%)', 'hsl(0, 72%, 41%)']
+    };
+    const colorArray = colors[type];
+    const index = badgesToShow.indexOf(badge) % colorArray.length;
+    return colorArray[index];
+  };
 
   // Categorize strain type (for coloring only)
   const getStrainType = (strain: string): string => {
@@ -446,6 +522,63 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
           </div>
         )}
       </div>
+
+      {/* Trends Chart */}
+      {trendData.length > 1 && badgesToShow.length > 0 && (
+        <div className="mt-6 border-t border-border pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">Badge Trends Over Time</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            {selectedBadges.size > 0 
+              ? "Showing trends for selected badges" 
+              : "Showing trends for top 5 most common badges"}
+          </p>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="week" 
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  height={60}
+                  angle={-45}
+                  textAnchor="end"
+                />
+                <YAxis 
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    color: 'hsl(var(--card-foreground))'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ fontSize: '12px' }}
+                  iconType="line"
+                />
+                {badgesToShow.map(badge => (
+                  <Line
+                    key={badge}
+                    type="monotone"
+                    dataKey={badge}
+                    stroke={getTrendColor(badge)}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name={badge}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         <div className="p-3 rounded-lg bg-muted/30">
