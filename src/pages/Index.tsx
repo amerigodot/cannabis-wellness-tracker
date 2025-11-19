@@ -383,20 +383,20 @@ const Index = () => {
                   Select Icon
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="grid grid-cols-5 gap-1 p-2">
+              <DropdownMenuContent align="end" className="w-64">
+                <div className="grid grid-cols-4 gap-2 p-3">
                   {AVAILABLE_ICONS.map((icon) => {
                     const IconComponent = getIconComponent(icon.value);
                     return (
                       <DropdownMenuItem
                         key={icon.value}
                         onClick={() => setSelectedIcon(icon.value)}
-                        className={`p-4 justify-center cursor-pointer ${
+                        className={`p-5 justify-center cursor-pointer ${
                           selectedIcon === icon.value ? 'bg-primary/10' : ''
                         }`}
                         title={icon.name}
                       >
-                        <IconComponent className="h-8 w-8" />
+                        <IconComponent className="h-10 w-10" />
                       </DropdownMenuItem>
                     );
                   })}
