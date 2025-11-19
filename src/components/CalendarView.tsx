@@ -241,7 +241,25 @@ export const CalendarView = ({
   };
 
   const datesWithData = getDatesWithFilteredData();
-  const selectedDateEntries = selectedDate ? getEntriesForDate(selectedDate) : [];
+  const selectedDateEntries = selectedDate ? getEntriesForDate(selectedDate).filter(entry => {
+    // Apply the same filters as getDatesWithFilteredData
+    if (filterObservations.length > 0) {
+      if (!filterObservations.some(obs => entry.observations.includes(obs))) {
+        return false;
+      }
+    }
+    if (filterActivities.length > 0) {
+      if (!filterActivities.some(act => entry.activities.includes(act))) {
+        return false;
+      }
+    }
+    if (filterSideEffects.length > 0) {
+      if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
+        return false;
+      }
+    }
+    return true;
+  }) : [];
   const selectedDateReminders = selectedDate ? getRemindersForDate(selectedDate) : [];
 
   return (
