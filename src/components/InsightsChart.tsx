@@ -159,6 +159,27 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return selectedStrains.size === 0 || selectedStrains.has(strainType);
   };
 
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
+          <p className="text-foreground font-semibold mb-1">
+            {data.date} {data.time}
+          </p>
+          <p className="text-foreground">
+            <span className="font-medium">Dosage:</span> {data.dosage.toFixed(2)}g
+          </p>
+          <p className="text-foreground">
+            <span className="font-medium">Strain:</span> {data.strain}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
@@ -189,21 +210,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
               tick={{ fill: 'hsl(var(--muted-foreground))' }}
             />
             <ZAxis range={[80, 80]} />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '6px',
-                color: 'hsl(var(--card-foreground))'
-              }}
-              labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number, name: string, props: any) => {
-                if (name === 'dosage') return [`${value.toFixed(2)}g`, 'Dosage'];
-                if (name === 'strain') return [value, 'Strain'];
-                return [value, name];
-              }}
-              labelFormatter={formatTooltipTimestamp}
-            />
+            <Tooltip content={<CustomTooltip />} />
             {Object.entries(groupedData).map(([strainType, data]) => (
               <Scatter 
                 key={strainType}
