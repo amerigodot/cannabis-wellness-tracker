@@ -44,26 +44,43 @@ export const CalendarView = () => {
     fetchData();
   }, []);
 
-  // Real-time subscription for entry deletions
+  // Real-time subscription for all entry changes
   useEffect(() => {
-    const channel = supabase
+    const entriesChannel = supabase
       .channel('calendar-entries-changes')
       .on(
         'postgres_changes',
         {
-          event: 'DELETE',
+          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
           schema: 'public',
           table: 'journal_entries'
         },
-        () => {
-          console.log('Entry deleted - refreshing calendar');
+        (payload) => {
+          console.log('Entry changed in calendar:', payload.eventType);
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    const remindersChannel = supabase
+      .channel('calendar-reminders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'reminders'
+        },
+        (payload) => {
+          console.log('Reminder changed in calendar:', payload.eventType);
           fetchData();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(entriesChannel);
+      supabase.removeChannel(remindersChannel);
     };
   }, []);
 
