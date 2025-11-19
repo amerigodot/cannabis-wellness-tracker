@@ -104,14 +104,14 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     });
   });
   
-  // Filter to show only selected badges or top badges if none selected
+  // Filter to show only selected badges or top badges based on topCount if none selected
   const badgesToShow = selectedBadges.size > 0 
     ? Array.from(selectedBadges)
     : [
-        ...topBadges.observations.slice(0, 2).map(([badge]) => badge),
-        ...topBadges.activities.slice(0, 2).map(([badge]) => badge),
-        ...topBadges.sideEffects.slice(0, 1).map(([badge]) => badge)
-      ];
+        ...topBadges.observations.map(([badge]) => badge),
+        ...topBadges.activities.map(([badge]) => badge),
+        ...topBadges.sideEffects.map(([badge]) => badge)
+      ].slice(0, topCount);
   
   // Get badge type for coloring
   const getBadgeType = (badge: string): 'observation' | 'activity' | 'side-effect' => {
@@ -202,7 +202,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
           <p className="text-xs text-muted-foreground mb-4">
             {selectedBadges.size > 0 
               ? "Showing trends for selected badges" 
-              : "Showing trends for top 5 most common badges"}
+              : `Showing trends for top ${topCount} most common badges`}
           </p>
           <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -392,7 +392,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
           <p className="text-xs text-muted-foreground mb-4">
             {selectedBadges.size > 0 
               ? "Showing trends for selected badges" 
-              : "Showing trends for top 5 most common badges"}
+              : `Showing trends for top ${topCount} most common badges`}
           </p>
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
