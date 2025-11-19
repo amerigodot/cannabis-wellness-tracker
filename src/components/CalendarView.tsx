@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
@@ -36,6 +37,8 @@ export const CalendarView = () => {
   const [loading, setLoading] = useState(true);
   const [editingNotes, setEditingNotes] = useState<string>("");
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -118,18 +121,47 @@ export const CalendarView = () => {
     }
   };
 
-  const deleteEntry = async (entryId: string) => {
+  const deleteEntry = (entryId: string) => {
+    setDeleteEntryId(entryId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleMoveToTrash = async () => {
+    if (!deleteEntryId) return;
+    
     const { error } = await supabase
       .from("journal_entries")
       .update({ is_deleted: true })
-      .eq("id", entryId);
+      .eq("id", deleteEntryId);
 
     if (error) {
-      toast.error("Error deleting entry: " + error.message);
+      toast.error("Error moving entry to trash: " + error.message);
     } else {
-      toast.success("Entry deleted");
+      toast.success("Entry moved to trash");
       fetchData();
     }
+    
+    setShowDeleteDialog(false);
+    setDeleteEntryId(null);
+  };
+
+  const handlePermanentDelete = async () => {
+    if (!deleteEntryId) return;
+    
+    const { error } = await supabase
+      .from("journal_entries")
+      .delete()
+      .eq("id", deleteEntryId);
+
+    if (error) {
+      toast.error("Error deleting entry permanently: " + error.message);
+    } else {
+      toast.success("Entry permanently deleted");
+      fetchData();
+    }
+    
+    setShowDeleteDialog(false);
+    setDeleteEntryId(null);
   };
 
   const datesWithData = getDatesWithData();
@@ -284,6 +316,37 @@ export const CalendarView = () => {
           </Card>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Entry</AlertDialogTitle>
+            <AlertDialogDescription>
+              How would you like to delete this entry?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={handleMoveToTrash}
+              className="w-full sm:w-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Move to Trash
+            </Button>
+            <AlertDialogAction
+              onClick={handlePermanentDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

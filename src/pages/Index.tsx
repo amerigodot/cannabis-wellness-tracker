@@ -16,6 +16,7 @@ import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -110,6 +111,8 @@ const Index = () => {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("leaf");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -224,27 +227,47 @@ const Index = () => {
     }
   };
 
-  const handleDelete = async (entryId: string) => {
-    console.log("Attempting to delete entry:", entryId);
+  const handleDelete = (entryId: string) => {
+    setDeleteEntryId(entryId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleMoveToTrash = async () => {
+    if (!deleteEntryId) return;
     
-    const { data: session } = await supabase.auth.getSession();
-    console.log("Current user:", session?.session?.user?.id);
-    
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("journal_entries")
       .update({ is_deleted: true })
-      .eq("id", entryId)
-      .select();
-
-    console.log("Delete result:", { data, error });
+      .eq("id", deleteEntryId);
 
     if (error) {
-      console.error("Delete error details:", error);
-      toast.error("Error deleting entry: " + error.message);
+      toast.error("Error moving entry to trash: " + error.message);
     } else {
-      toast.success("Entry deleted");
+      toast.success("Entry moved to trash");
       fetchEntries();
     }
+    
+    setShowDeleteDialog(false);
+    setDeleteEntryId(null);
+  };
+
+  const handlePermanentDelete = async () => {
+    if (!deleteEntryId) return;
+    
+    const { error } = await supabase
+      .from("journal_entries")
+      .delete()
+      .eq("id", deleteEntryId);
+
+    if (error) {
+      toast.error("Error deleting entry permanently: " + error.message);
+    } else {
+      toast.success("Entry permanently deleted");
+      fetchEntries();
+    }
+    
+    setShowDeleteDialog(false);
+    setDeleteEntryId(null);
   };
 
   const handleSignOut = async () => {
@@ -719,6 +742,37 @@ const Index = () => {
             <p className="text-lg">No entries yet. Start your wellness journey above!</p>
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Entry</AlertDialogTitle>
+              <AlertDialogDescription>
+                How would you like to delete this entry?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <Button
+                variant="outline"
+                onClick={handleMoveToTrash}
+                className="w-full sm:w-auto"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Move to Trash
+              </Button>
+              <AlertDialogAction
+                onClick={handlePermanentDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
+              >
+                Delete Permanently
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );
