@@ -19,6 +19,7 @@ export type Database = {
           activities: string[]
           created_at: string
           dosage: string
+          icon: string | null
           id: string
           is_deleted: boolean
           method: string
@@ -32,6 +33,7 @@ export type Database = {
           activities?: string[]
           created_at?: string
           dosage: string
+          icon?: string | null
           id?: string
           is_deleted?: boolean
           method: string
@@ -45,6 +47,7 @@ export type Database = {
           activities?: string[]
           created_at?: string
           dosage?: string
+          icon?: string | null
           id?: string
           is_deleted?: boolean
           method?: string

@@ -15,7 +15,7 @@ import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -29,6 +29,7 @@ interface JournalEntry {
   activities: string[];
   negative_side_effects: string[];
   notes: string | null;
+  icon: string;
 }
 
 const COMMON_OBSERVATIONS = [
@@ -76,6 +77,19 @@ const NEGATIVE_SIDE_EFFECTS = [
   "Confusion",
 ];
 
+const AVAILABLE_ICONS = [
+  { name: "Leaf", value: "leaf" },
+  { name: "Pill", value: "pill" },
+  { name: "Droplet", value: "droplet" },
+  { name: "Cigarette", value: "cigarette" },
+  { name: "Cookie", value: "cookie" },
+  { name: "Coffee", value: "coffee" },
+  { name: "Sparkles", value: "sparkles" },
+  { name: "Heart", value: "heart" },
+  { name: "Brain", value: "brain" },
+  { name: "Zap", value: "zap" },
+];
+
 const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -94,6 +108,7 @@ const Index = () => {
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
+  const [selectedIcon, setSelectedIcon] = useState("leaf");
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -188,6 +203,7 @@ const Index = () => {
       activities: selectedActivities,
       negative_side_effects: selectedNegativeSideEffects,
       notes: notes || null,
+      icon: selectedIcon,
     });
 
     if (error) {
@@ -264,6 +280,22 @@ const Index = () => {
     setNotesDialogOpen(false);
     setEditingEntryId(null);
     setTempNotes("");
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, typeof Leaf> = {
+      leaf: Leaf,
+      pill: Pill,
+      droplet: Droplet,
+      cigarette: Cigarette,
+      cookie: Cookie,
+      coffee: Coffee,
+      sparkles: Sparkles,
+      heart: Heart,
+      brain: Brain,
+      zap: Zap,
+    };
+    return iconMap[iconName] || Leaf;
   };
 
   if (loading) {
@@ -353,6 +385,23 @@ const Index = () => {
                   placeholder="e.g., Vape, Edible"
                   className="mt-1.5"
                 />
+              </div>
+            </div>
+
+            {/* Icon Selection */}
+            <div>
+              <Label className="mb-3 block">Entry Icon</Label>
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_ICONS.map((icon) => (
+                  <Badge
+                    key={icon.value}
+                    variant={selectedIcon === icon.value ? "default" : "outline"}
+                    className="cursor-pointer transition-all duration-200 hover:scale-105 gap-1.5"
+                    onClick={() => setSelectedIcon(icon.value)}
+                  >
+                    {icon.name}
+                  </Badge>
+                ))}
               </div>
             </div>
 
@@ -522,6 +571,8 @@ const Index = () => {
                         return 0;
                     }
                   }).map((entry, index) => {
+                    const IconComponent = getIconComponent(entry.icon || 'leaf');
+                    
                     return (
                     <Card 
                       key={entry.id} 
@@ -531,7 +582,7 @@ const Index = () => {
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-primary/10">
-                              <Leaf className="h-5 w-5 text-primary" />
+                              <IconComponent className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                               <h3 className="font-semibold text-lg">{entry.strain}</h3>
