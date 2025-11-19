@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface JournalEntry {
   id: string;
@@ -208,7 +209,8 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
   };
 
   return (
-    <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
+    <TooltipProvider>
+      <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp className="w-6 h-6 text-primary" />
         <h2 className="text-2xl font-semibold">Badge Trends</h2>
@@ -302,12 +304,19 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Observations Section */}
         {topBadges.observations.length > 0 && (
           <div className="mb-4">
-            <p 
-              className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => toggleCategory(topBadges.observations)}
-            >
-              Observations
-            </p>
+            <UITooltip>
+              <TooltipTrigger asChild>
+                <p 
+                  className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  onClick={() => toggleCategory(topBadges.observations)}
+                >
+                  Observations
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to select/deselect all observations</p>
+              </TooltipContent>
+            </UITooltip>
             <div className="flex flex-wrap gap-2">
               {topBadges.observations.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
@@ -335,12 +344,19 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Activities Section */}
         {topBadges.activities.length > 0 && (
           <div className="mb-4">
-            <p 
-              className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => toggleCategory(topBadges.activities)}
-            >
-              Activities
-            </p>
+            <UITooltip>
+              <TooltipTrigger asChild>
+                <p 
+                  className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  onClick={() => toggleCategory(topBadges.activities)}
+                >
+                  Activities
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to select/deselect all activities</p>
+              </TooltipContent>
+            </UITooltip>
             <div className="flex flex-wrap gap-2">
               {topBadges.activities.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
@@ -368,12 +384,19 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Side Effects Section */}
         {topBadges.sideEffects.length > 0 && (
           <div className="mb-4">
-            <p 
-              className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => toggleCategory(topBadges.sideEffects)}
-            >
-              Side Effects
-            </p>
+            <UITooltip>
+              <TooltipTrigger asChild>
+                <p 
+                  className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  onClick={() => toggleCategory(topBadges.sideEffects)}
+                >
+                  Side Effects
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to select/deselect all side effects</p>
+              </TooltipContent>
+            </UITooltip>
             <div className="flex flex-wrap gap-2">
               {topBadges.sideEffects.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
@@ -436,5 +459,6 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         </div>
       </div>
     </Card>
+    </TooltipProvider>
   );
 };
