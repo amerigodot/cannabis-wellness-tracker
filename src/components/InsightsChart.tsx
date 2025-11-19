@@ -9,6 +9,7 @@ interface JournalEntry {
   created_at: string;
   dosage: string;
   strain: string;
+  observations?: string[];
   activities?: string[];
   negative_side_effects?: string[];
 }
@@ -66,7 +67,10 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       strain: entry.strain,
-      strainType: getStrainType(entry.strain)
+      strainType: getStrainType(entry.strain),
+      observations: (entry as any).observations || [],
+      activities: entry.activities || [],
+      negative_side_effects: entry.negative_side_effects || []
     };
   }).sort((a, b) => a.timestamp - b.timestamp);
 
@@ -164,16 +168,57 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-card border border-border rounded-lg p-3 shadow-lg z-50">
-          <p className="text-foreground font-semibold mb-1">
+        <div className="bg-card border border-border rounded-lg p-4 shadow-lg z-50 max-w-xs">
+          <p className="text-foreground font-semibold mb-2">
             {data.date} {data.time}
           </p>
-          <p className="text-foreground">
-            <span className="font-medium">Dosage:</span> {data.dosage.toFixed(2)}g
-          </p>
-          <p className="text-foreground">
-            <span className="font-medium">Strain:</span> {data.strain}
-          </p>
+          <div className="space-y-1 mb-2">
+            <p className="text-foreground">
+              <span className="font-medium">Dosage:</span> {data.dosage.toFixed(2)}g
+            </p>
+            <p className="text-foreground">
+              <span className="font-medium">Strain:</span> {data.strain}
+            </p>
+          </div>
+          
+          {data.observations && data.observations.length > 0 && (
+            <div className="mt-3 pt-2 border-t border-border">
+              <p className="text-foreground font-medium text-xs mb-1">Observations:</p>
+              <div className="flex flex-wrap gap-1">
+                {data.observations.map((obs: string, idx: number) => (
+                  <Badge key={idx} className="text-xs bg-observation text-observation-foreground">
+                    {obs}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {data.activities && data.activities.length > 0 && (
+            <div className="mt-2">
+              <p className="text-foreground font-medium text-xs mb-1">Activities:</p>
+              <div className="flex flex-wrap gap-1">
+                {data.activities.map((activity: string, idx: number) => (
+                  <Badge key={idx} className="text-xs bg-activity text-activity-foreground">
+                    {activity}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {data.negative_side_effects && data.negative_side_effects.length > 0 && (
+            <div className="mt-2">
+              <p className="text-foreground font-medium text-xs mb-1">Side Effects:</p>
+              <div className="flex flex-wrap gap-1">
+                {data.negative_side_effects.map((effect: string, idx: number) => (
+                  <Badge key={idx} className="text-xs bg-side-effect text-side-effect-foreground">
+                    {effect}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       );
     }
