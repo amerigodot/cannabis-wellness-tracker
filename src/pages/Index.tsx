@@ -143,19 +143,19 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Real-time subscription for entry deletions
+  // Real-time subscription for all entry changes
   useEffect(() => {
     const channel = supabase
       .channel('journal-entries-changes')
       .on(
         'postgres_changes',
         {
-          event: 'DELETE',
+          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
           schema: 'public',
           table: 'journal_entries'
         },
-        () => {
-          console.log('Entry deleted - refreshing list');
+        (payload) => {
+          console.log('Entry changed:', payload.eventType);
           fetchEntries();
         }
       )
