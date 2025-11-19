@@ -134,6 +134,7 @@ const Index = () => {
   const [filterObservations, setFilterObservations] = useState<string[]>([]);
   const [filterActivities, setFilterActivities] = useState<string[]>([]);
   const [filterSideEffects, setFilterSideEffects] = useState<string[]>([]);
+  const [filterMethods, setFilterMethods] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [minutesAgo, setMinutesAgo] = useState<number>(0);
@@ -933,6 +934,12 @@ const Index = () => {
                           return false;
                         }
                       }
+                      // Filter by method
+                      if (filterMethods.length > 0) {
+                        if (!filterMethods.includes(entry.method)) {
+                          return false;
+                        }
+                      }
                       return true;
                     })
                     .sort((a, b) => {
@@ -1006,7 +1013,16 @@ const Index = () => {
                           </div>
                           <div>
                             <Label className="text-xs text-muted-foreground">Method</Label>
-                            <p className="font-medium flex items-center gap-2">
+                            <p 
+                              className="font-medium flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                              onClick={() => {
+                                setFilterMethods(prev => 
+                                  prev.includes(entry.method) 
+                                    ? prev.filter(m => m !== entry.method)
+                                    : [...prev, entry.method]
+                                );
+                              }}
+                            >
                               {(() => {
                                 const MethodIcon = getMethodIcon(entry.method);
                                 return <MethodIcon className="h-4 w-4" />;
@@ -1118,6 +1134,8 @@ const Index = () => {
                   setFilterActivities={setFilterActivities}
                   filterSideEffects={filterSideEffects}
                   setFilterSideEffects={setFilterSideEffects}
+                  filterMethods={filterMethods}
+                  setFilterMethods={setFilterMethods}
                 />
               </TabsContent>
             </Tabs>

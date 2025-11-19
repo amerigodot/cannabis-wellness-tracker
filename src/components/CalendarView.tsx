@@ -42,7 +42,9 @@ export const CalendarView = ({
   filterActivities, 
   setFilterActivities, 
   filterSideEffects, 
-  setFilterSideEffects 
+  setFilterSideEffects,
+  filterMethods,
+  setFilterMethods
 }: {
   filterObservations: string[];
   setFilterObservations: React.Dispatch<React.SetStateAction<string[]>>;
@@ -50,6 +52,8 @@ export const CalendarView = ({
   setFilterActivities: React.Dispatch<React.SetStateAction<string[]>>;
   filterSideEffects: string[];
   setFilterSideEffects: React.Dispatch<React.SetStateAction<string[]>>;
+  filterMethods: string[];
+  setFilterMethods: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -246,6 +250,12 @@ export const CalendarView = ({
           return false;
         }
       }
+      // Filter by method
+      if (filterMethods.length > 0) {
+        if (!filterMethods.includes(entry.method)) {
+          return false;
+        }
+      }
       return true;
     });
     
@@ -347,6 +357,11 @@ export const CalendarView = ({
         return false;
       }
     }
+    if (filterMethods.length > 0) {
+      if (!filterMethods.includes(entry.method)) {
+        return false;
+      }
+    }
     return true;
   }) : [];
   const selectedDateReminders = selectedDate ? getRemindersForDate(selectedDate) : [];
@@ -357,9 +372,9 @@ export const CalendarView = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Calendar</CardTitle>
-            {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+            {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0 || filterMethods.length > 0) && (
               <Badge variant="secondary" className="text-xs">
-                {filterObservations.length + filterActivities.length + filterSideEffects.length} filter(s) active
+                {filterObservations.length + filterActivities.length + filterSideEffects.length + filterMethods.length} filter(s) active
               </Badge>
             )}
           </div>
@@ -399,7 +414,7 @@ export const CalendarView = ({
           </div>
         </CardHeader>
         <CardContent>
-          {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+          {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0 || filterMethods.length > 0) && (
             <div className="mb-4 p-3 rounded-lg bg-muted/50">
               <Label className="text-xs font-semibold mb-2 block">Showing dates with:</Label>
               <div className="flex flex-wrap gap-1">
@@ -416,6 +431,15 @@ export const CalendarView = ({
                 {filterSideEffects.map(eff => (
                   <Badge key={eff} className="text-xs bg-side-effect text-side-effect-foreground">
                     {eff}
+                  </Badge>
+                ))}
+                {filterMethods.map(method => (
+                  <Badge key={method} variant="outline" className="text-xs flex items-center gap-1">
+                    {(() => {
+                      const MethodIcon = getMethodIcon(method);
+                      return <MethodIcon className="h-3 w-3" />;
+                    })()}
+                    {method}
                   </Badge>
                 ))}
               </div>
@@ -544,7 +568,19 @@ export const CalendarView = ({
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <Badge variant="outline">{entry.dosage}</Badge>
-                          <Badge variant="outline" className="flex items-center gap-1">
+                          <Badge 
+                            variant="outline" 
+                            className={`flex items-center gap-1 cursor-pointer transition-all hover:scale-105 ${
+                              filterMethods.includes(entry.method) ? "ring-2 ring-primary" : ""
+                            }`}
+                            onClick={() => {
+                              setFilterMethods(prev => 
+                                prev.includes(entry.method) 
+                                  ? prev.filter(m => m !== entry.method)
+                                  : [...prev, entry.method]
+                              );
+                            }}
+                          >
                             {(() => {
                               const MethodIcon = getMethodIcon(entry.method);
                               return <MethodIcon className="h-3 w-3" />;
