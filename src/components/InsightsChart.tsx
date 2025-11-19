@@ -303,11 +303,10 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {topBadges.observations.length > 0 && (
           <div className="mb-4">
             <p 
-              className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => toggleCategory(topBadges.observations)}
             >
               Observations
-              <span className="text-[10px] opacity-60">(click to select all)</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.observations.map(([badge, count]) => {
@@ -337,11 +336,10 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {topBadges.activities.length > 0 && (
           <div className="mb-4">
             <p 
-              className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => toggleCategory(topBadges.activities)}
             >
               Activities
-              <span className="text-[10px] opacity-60">(click to select all)</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.activities.map(([badge, count]) => {
@@ -371,11 +369,10 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {topBadges.sideEffects.length > 0 && (
           <div className="mb-4">
             <p 
-              className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => toggleCategory(topBadges.sideEffects)}
             >
               Side Effects
-              <span className="text-[10px] opacity-60">(click to select all)</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.sideEffects.map(([badge, count]) => {
