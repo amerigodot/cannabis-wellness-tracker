@@ -232,25 +232,6 @@ const Index = () => {
     setShowDeleteDialog(true);
   };
 
-  const handleMoveToTrash = async () => {
-    if (!deleteEntryId) return;
-    
-    const { error } = await supabase
-      .from("journal_entries")
-      .update({ is_deleted: true })
-      .eq("id", deleteEntryId);
-
-    if (error) {
-      toast.error("Error moving entry to trash: " + error.message);
-    } else {
-      toast.success("Entry moved to trash");
-      fetchEntries();
-    }
-    
-    setShowDeleteDialog(false);
-    setDeleteEntryId(null);
-  };
-
   const handlePermanentDelete = async () => {
     if (!deleteEntryId) return;
     
@@ -260,7 +241,7 @@ const Index = () => {
       .eq("id", deleteEntryId);
 
     if (error) {
-      toast.error("Error deleting entry permanently: " + error.message);
+      toast.error("Error deleting entry: " + error.message);
     } else {
       toast.success("Entry permanently deleted");
       fetchEntries();
@@ -739,24 +720,16 @@ const Index = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Entry</AlertDialogTitle>
               <AlertDialogDescription>
-                How would you like to delete this entry?
+                Are you sure you want to permanently delete this entry? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
                 Cancel
               </AlertDialogCancel>
-              <Button
-                variant="outline"
-                onClick={handleMoveToTrash}
-                className="w-full sm:w-auto"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Move to Trash
-              </Button>
               <AlertDialogAction
                 onClick={handlePermanentDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete Permanently
               </AlertDialogAction>
