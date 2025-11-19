@@ -15,7 +15,7 @@ import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Palette } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -94,14 +94,6 @@ const Index = () => {
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
-  const [vividMode, setVividMode] = useState(() => {
-    const saved = localStorage.getItem("vividMode");
-    return saved === "true";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("vividMode", vividMode.toString());
-  }, [vividMode]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -274,54 +266,6 @@ const Index = () => {
     setTempNotes("");
   };
 
-  const getStrainColor = (strain: string): { bg: string; border: string } => {
-    const lowerStrain = strain.toLowerCase();
-    
-    // Categorize strain types and return HSL colors
-    if (lowerStrain.includes('sativa') || lowerStrain.includes('energizing') || lowerStrain.includes('uplifting')) {
-      return { bg: 'hsl(var(--strain-sativa-light))', border: 'hsl(var(--strain-sativa))' };
-    } else if (lowerStrain.includes('indica') || lowerStrain.includes('relax') || lowerStrain.includes('sleep')) {
-      return { bg: 'hsl(var(--strain-indica-light))', border: 'hsl(var(--strain-indica))' };
-    } else if (lowerStrain.includes('hybrid')) {
-      return { bg: 'hsl(var(--strain-hybrid-light))', border: 'hsl(var(--strain-hybrid))' };
-    } else if (lowerStrain.includes('cbd')) {
-      return { bg: 'hsl(var(--strain-cbd-light))', border: 'hsl(var(--strain-cbd))' };
-    } else if (lowerStrain.includes('thc')) {
-      return { bg: 'hsl(var(--strain-thc-light))', border: 'hsl(var(--strain-thc))' };
-    }
-    
-    // Hash strain name to consistently pick a color
-    const hash = strain.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const colors = [
-      { bg: 'hsl(var(--strain-sativa-light))', border: 'hsl(var(--strain-sativa))' },
-      { bg: 'hsl(var(--strain-indica-light))', border: 'hsl(var(--strain-indica))' },
-      { bg: 'hsl(var(--strain-hybrid-light))', border: 'hsl(var(--strain-hybrid))' },
-      { bg: 'hsl(var(--strain-cbd-light))', border: 'hsl(var(--strain-cbd))' },
-      { bg: 'hsl(var(--strain-thc-light))', border: 'hsl(var(--strain-thc))' },
-      { bg: 'hsl(var(--strain-balanced-light))', border: 'hsl(var(--strain-balanced))' },
-    ];
-    return colors[hash % colors.length];
-  };
-
-  const getPatternStyle = (index: number): React.CSSProperties => {
-    const patterns = [
-      { backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)' },
-      { 
-        backgroundImage: 'linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.1) 49%, rgba(255,255,255,0.1) 51%, transparent 52%)',
-        backgroundSize: '20px 20px'
-      },
-      { 
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-        backgroundSize: '24px 24px'
-      },
-      { 
-        backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent)',
-        backgroundSize: '30px 30px'
-      },
-    ];
-    return patterns[index % patterns.length];
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -338,15 +282,6 @@ const Index = () => {
           <div className="flex justify-between items-start mb-6">
             <div className="flex-1"></div>
             <div className="flex gap-2">
-              <Button 
-                variant={vividMode ? "default" : "ghost"} 
-                size="icon" 
-                onClick={() => setVividMode(!vividMode)} 
-                className="rounded-full"
-              >
-                <Palette className="h-5 w-5" />
-                <span className="sr-only">Toggle vivid mode</span>
-              </Button>
               <ThemeToggle />
               <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">
                 <LogOut className="h-5 w-5" />
@@ -587,19 +522,12 @@ const Index = () => {
                         return 0;
                     }
                   }).map((entry, index) => {
-                    const strainColor = getStrainColor(entry.strain);
-                    const patternStyle = getPatternStyle(index);
-                    
                     return (
                     <Card 
                       key={entry.id} 
-                      className={`overflow-hidden hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 ${vividMode ? 'border-2' : ''}`}
-                      style={vividMode ? { borderColor: strainColor.border } : undefined}
+                      className="overflow-hidden hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
                     >
-                      {vividMode && (
-                        <div className="h-2" style={{ backgroundColor: strainColor.border }} />
-                      )}
-                      <div className="p-6" style={vividMode ? { backgroundColor: strainColor.bg, ...patternStyle } : undefined}>
+                      <div className="p-6">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-primary/10">
