@@ -422,7 +422,7 @@ export const CalendarView = ({
                             >
                               <Clock className="h-3 w-3" />
                               <span className="hover:underline">
-                                {format(parseISO(entry.consumption_time || entry.created_at), "p")}
+                                {format(parseISO(entry.consumption_time || entry.created_at), "MMM d, yyyy 'at' p")}
                               </span>
                             </button>
                           </div>
