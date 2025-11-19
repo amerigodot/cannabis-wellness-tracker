@@ -392,16 +392,24 @@ const Index = () => {
             <div>
               <Label className="mb-3 block">Entry Icon</Label>
               <div className="flex flex-wrap gap-2">
-                {AVAILABLE_ICONS.map((icon) => (
-                  <Badge
-                    key={icon.value}
-                    variant={selectedIcon === icon.value ? "default" : "outline"}
-                    className="cursor-pointer transition-all duration-200 hover:scale-105 gap-1.5"
-                    onClick={() => setSelectedIcon(icon.value)}
-                  >
-                    {icon.name}
-                  </Badge>
-                ))}
+                {AVAILABLE_ICONS.map((icon) => {
+                  const IconComponent = getIconComponent(icon.value);
+                  return (
+                    <button
+                      key={icon.value}
+                      type="button"
+                      onClick={() => setSelectedIcon(icon.value)}
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
+                        selectedIcon === icon.value
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-background hover:border-primary/50'
+                      }`}
+                      title={icon.name}
+                    >
+                      <IconComponent className="h-5 w-5" />
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
