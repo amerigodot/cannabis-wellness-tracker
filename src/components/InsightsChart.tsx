@@ -382,63 +382,6 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         )}
       </div>
 
-      {/* Trends Chart */}
-      {trendData.length > 1 && badgesToShow.length > 0 && (
-        <div className="mt-6 border-t border-border pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Badge Trends Over Time</h3>
-          </div>
-          <p className="text-xs text-muted-foreground mb-4">
-            {selectedBadges.size > 0 
-              ? "Showing trends for selected badges" 
-              : `Showing trends for top ${topCount} most common badges`}
-          </p>
-          <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="week" 
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                  height={60}
-                  angle={-45}
-                  textAnchor="end"
-                />
-                <YAxis 
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                    color: 'hsl(var(--card-foreground))'
-                  }}
-                />
-                <Legend 
-                  wrapperStyle={{ fontSize: '12px' }}
-                  iconType="line"
-                />
-                {badgesToShow.map(badge => (
-                  <Line
-                    key={badge}
-                    type="monotone"
-                    dataKey={badge}
-                    stroke={getTrendColor(badge)}
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                    name={badge}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         <div className="p-3 rounded-lg bg-muted/30">
           <p className="text-2xl font-bold text-primary">{entries.length}</p>
