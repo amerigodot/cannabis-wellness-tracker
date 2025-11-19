@@ -17,7 +17,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -118,6 +118,8 @@ const Index = () => {
   const [filterObservations, setFilterObservations] = useState<string[]>([]);
   const [filterActivities, setFilterActivities] = useState<string[]>([]);
   const [filterSideEffects, setFilterSideEffects] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -225,6 +227,7 @@ const Index = () => {
 
     if (!user) return;
 
+    setIsSubmitting(true);
     const dosage = `${dosageAmount}${dosageUnit}`;
 
     const { error } = await supabase.from("journal_entries").insert({
@@ -239,10 +242,13 @@ const Index = () => {
       icon: selectedIcon,
     });
 
+    setIsSubmitting(false);
+
     if (error) {
       toast.error("Error saving entry: " + error.message);
     } else {
-      toast.success("Entry saved successfully");
+      setShowSuccessAnimation(true);
+      toast.success("Entry saved successfully! 🎉");
       
       // Clear notes, activities, observations, and negative side effects
       setNotes("");
@@ -252,6 +258,9 @@ const Index = () => {
       
       // Refresh entries
       fetchEntries();
+
+      // Hide success animation after 500ms
+      setTimeout(() => setShowSuccessAnimation(false), 500);
     }
   };
 
@@ -562,10 +571,20 @@ const Index = () => {
 
             <Button
               onClick={handleSubmit}
-              className="w-full md:w-auto md:ml-auto"
+              className={`w-full md:w-auto md:ml-auto transition-all duration-300 ${
+                showSuccessAnimation ? 'animate-in zoom-in-95 bg-green-500 hover:bg-green-600' : ''
+              }`}
               size="lg"
+              disabled={isSubmitting}
             >
-              Save Entry
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Entry'
+              )}
             </Button>
           </div>
         </Card>
