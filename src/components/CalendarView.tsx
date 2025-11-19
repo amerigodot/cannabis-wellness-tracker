@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, isSameDay, parseISO, startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval } from "date-fns";
 import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Clock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +61,7 @@ export const CalendarView = ({
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
+  const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
   const getIconComponent = (iconName: string) => {
     const iconMap: Record<string, typeof Leaf> = {
@@ -78,6 +79,32 @@ export const CalendarView = ({
       flame: Flame,
     };
     return iconMap[iconName] || Leaf;
+  };
+
+  const isEntryInTimeRange = (entry: JournalEntry) => {
+    const consumptionDate = parseISO(entry.consumption_time || entry.created_at);
+    const now = new Date();
+    
+    switch (timeRangeFilter) {
+      case 'today':
+        return isWithinInterval(consumptionDate, {
+          start: startOfDay(now),
+          end: endOfDay(now)
+        });
+      case 'week':
+        return isWithinInterval(consumptionDate, {
+          start: startOfWeek(now),
+          end: endOfWeek(now)
+        });
+      case 'month':
+        return isWithinInterval(consumptionDate, {
+          start: startOfMonth(now),
+          end: endOfMonth(now)
+        });
+      case 'all':
+      default:
+        return true;
+    }
   };
 
   useEffect(() => {
@@ -156,7 +183,7 @@ export const CalendarView = ({
 
   const getEntriesForDate = (date: Date) => {
     return entries.filter((entry) =>
-      isSameDay(parseISO(entry.consumption_time || entry.created_at), date)
+      isSameDay(parseISO(entry.consumption_time || entry.created_at), date) && isEntryInTimeRange(entry)
     );
   };
 
@@ -185,6 +212,10 @@ export const CalendarView = ({
     
     // Filter entries based on active filters
     const filteredEntries = entries.filter(entry => {
+      // Filter by time range first
+      if (!isEntryInTimeRange(entry)) {
+        return false;
+      }
       // Filter by observations
       if (filterObservations.length > 0) {
         if (!filterObservations.some(obs => entry.observations.includes(obs))) {
@@ -319,6 +350,40 @@ export const CalendarView = ({
                 {filterObservations.length + filterActivities.length + filterSideEffects.length} filter(s) active
               </Badge>
             )}
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant={timeRangeFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeRangeFilter('all')}
+              className="flex-1"
+            >
+              All Time
+            </Button>
+            <Button
+              variant={timeRangeFilter === 'today' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeRangeFilter('today')}
+              className="flex-1"
+            >
+              Today
+            </Button>
+            <Button
+              variant={timeRangeFilter === 'week' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeRangeFilter('week')}
+              className="flex-1"
+            >
+              This Week
+            </Button>
+            <Button
+              variant={timeRangeFilter === 'month' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeRangeFilter('month')}
+              className="flex-1"
+            >
+              This Month
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
