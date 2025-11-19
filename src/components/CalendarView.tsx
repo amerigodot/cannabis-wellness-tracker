@@ -18,6 +18,7 @@ interface JournalEntry {
   dosage: string;
   method: string;
   observations: string[];
+  activities: string[];
   negative_side_effects: string[];
   notes: string | null;
 }
@@ -89,7 +90,7 @@ export const CalendarView = () => {
     
     const { data: entriesData, error: entriesError } = await supabase
       .from("journal_entries")
-      .select("id, created_at, strain, dosage, method, observations, negative_side_effects, notes")
+      .select("id, created_at, strain, dosage, method, observations, activities, negative_side_effects, notes")
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
@@ -308,6 +309,15 @@ export const CalendarView = () => {
                             {entry.observations.map((obs, idx) => (
                               <Badge key={idx} variant="secondary" className="text-xs">
                                 {obs}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {entry.activities.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {entry.activities.map((activity, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs bg-muted">
+                                {activity}
                               </Badge>
                             ))}
                           </div>
