@@ -31,6 +31,13 @@ All colors MUST be HSL.
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    
+    --observation: 268 50% 65%;
+    --observation-light: 268 50% 90%;
+    --activity: 220 70% 55%;
+    --activity-light: 220 70% 90%;
+    --side-effect: 0 72% 51%;
+    --side-effect-light: 0 72% 90%;
 
     --border: 150 20% 88%;
     --input: 150 20% 88%;
@@ -99,6 +106,13 @@ All colors MUST be HSL.
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
+    
+    --observation: 268 45% 55%;
+    --observation-light: 268 45% 25%;
+    --activity: 220 65% 50%;
+    --activity-light: 220 65% 25%;
+    --side-effect: 0 70% 55%;
+    --side-effect-light: 0 70% 25%;
 
     --border: 160 10% 25%;
     --input: 160 10% 25%;

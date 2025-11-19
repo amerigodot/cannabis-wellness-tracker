@@ -31,6 +31,18 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        observation: {
+          DEFAULT: "hsl(var(--observation))",
+          light: "hsl(var(--observation-light))",
+        },
+        activity: {
+          DEFAULT: "hsl(var(--activity))",
+          light: "hsl(var(--activity-light))",
+        },
+        "side-effect": {
+          DEFAULT: "hsl(var(--side-effect))",
+          light: "hsl(var(--side-effect-light))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
