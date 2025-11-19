@@ -189,6 +189,24 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return selectedBadges.has(badge);
   };
 
+  // Toggle all badges in a category
+  const toggleCategory = (badges: [string, number][]) => {
+    const categoryBadges = badges.map(([badge]) => badge);
+    const allSelected = categoryBadges.every(badge => selectedBadges.has(badge));
+    
+    setSelectedBadges(prev => {
+      const newSet = new Set(prev);
+      if (allSelected) {
+        // Remove all if all are selected
+        categoryBadges.forEach(badge => newSet.delete(badge));
+      } else {
+        // Add all if not all are selected
+        categoryBadges.forEach(badge => newSet.add(badge));
+      }
+      return newSet;
+    });
+  };
+
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <div className="flex items-center gap-2 mb-6">
@@ -284,7 +302,13 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Observations Section */}
         {topBadges.observations.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs font-medium text-observation mb-2">Observations</p>
+            <p 
+              className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              onClick={() => toggleCategory(topBadges.observations)}
+            >
+              Observations
+              <span className="text-[10px] opacity-60">(click to select all)</span>
+            </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.observations.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
@@ -312,7 +336,13 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Activities Section */}
         {topBadges.activities.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs font-medium text-activity mb-2">Activities</p>
+            <p 
+              className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              onClick={() => toggleCategory(topBadges.activities)}
+            >
+              Activities
+              <span className="text-[10px] opacity-60">(click to select all)</span>
+            </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.activities.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
@@ -340,7 +370,13 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {/* Side Effects Section */}
         {topBadges.sideEffects.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs font-medium text-side-effect mb-2">Side Effects</p>
+            <p 
+              className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-1"
+              onClick={() => toggleCategory(topBadges.sideEffects)}
+            >
+              Side Effects
+              <span className="text-[10px] opacity-60">(click to select all)</span>
+            </p>
             <div className="flex flex-wrap gap-2">
               {topBadges.sideEffects.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
