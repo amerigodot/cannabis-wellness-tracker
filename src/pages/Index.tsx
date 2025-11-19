@@ -466,10 +466,10 @@ const Index = () => {
                   <Badge
                     key={activity}
                     variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-activity ${
                       selectedActivities.includes(activity) 
-                        ? "bg-activity text-activity-foreground border-activity scale-105" 
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-activity/20 hover:border-activity/50"
+                        ? "bg-activity text-activity-foreground border-activity scale-105 animate-in zoom-in-95 duration-200" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleActivity(activity)}
                   >
@@ -487,10 +487,10 @@ const Index = () => {
                   <Badge
                     key={obs}
                     variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-observation ${
                       selectedObservations.includes(obs) 
-                        ? "bg-observation text-observation-foreground border-observation scale-105" 
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-observation/20 hover:border-observation/50"
+                        ? "bg-observation text-observation-foreground border-observation scale-105 animate-in zoom-in-95 duration-200" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleObservation(obs)}
                   >
@@ -508,10 +508,10 @@ const Index = () => {
                   <Badge
                     key={effect}
                     variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md ${
+                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-side-effect ${
                       selectedNegativeSideEffects.includes(effect) 
-                        ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-side-effect/20 hover:border-side-effect/50"
+                        ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105 animate-in zoom-in-95 duration-200" 
+                        : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleNegativeSideEffect(effect)}
                   >
