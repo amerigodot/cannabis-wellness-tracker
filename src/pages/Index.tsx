@@ -224,13 +224,21 @@ const Index = () => {
   };
 
   const handleDelete = async (entryId: string) => {
+    console.log("Attempting to delete entry:", entryId);
+    
+    const { data: session } = await supabase.auth.getSession();
+    console.log("Current user:", session?.session?.user?.id);
+    
     const { data, error } = await supabase
       .from("journal_entries")
       .update({ is_deleted: true })
       .eq("id", entryId)
       .select();
 
+    console.log("Delete result:", { data, error });
+
     if (error) {
+      console.error("Delete error details:", error);
       toast.error("Error deleting entry: " + error.message);
     } else {
       toast.success("Entry deleted");
