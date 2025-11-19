@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -190,6 +190,12 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return selectedBadges.has(badge);
   };
 
+  // Check if all badges in a category are selected
+  const isAllCategorySelected = (badges: [string, number][]) => {
+    const categoryBadges = badges.map(([badge]) => badge);
+    return categoryBadges.length > 0 && categoryBadges.every(badge => selectedBadges.has(badge));
+  };
+
   // Toggle all badges in a category
   const toggleCategory = (badges: [string, number][]) => {
     const categoryBadges = badges.map(([badge]) => badge);
@@ -307,9 +313,14 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             <UITooltip>
               <TooltipTrigger asChild>
                 <p 
-                  className="text-xs font-medium text-observation mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  className={`text-xs font-medium mb-2 cursor-pointer hover:opacity-80 transition-all w-fit px-2 py-1 rounded inline-flex items-center gap-1.5 ${
+                    isAllCategorySelected(topBadges.observations)
+                      ? 'bg-observation text-observation-foreground'
+                      : 'text-observation'
+                  }`}
                   onClick={() => toggleCategory(topBadges.observations)}
                 >
+                  {isAllCategorySelected(topBadges.observations) && <Check className="w-3 h-3" />}
                   Observations
                 </p>
               </TooltipTrigger>
@@ -347,9 +358,14 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             <UITooltip>
               <TooltipTrigger asChild>
                 <p 
-                  className="text-xs font-medium text-activity mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  className={`text-xs font-medium mb-2 cursor-pointer hover:opacity-80 transition-all w-fit px-2 py-1 rounded inline-flex items-center gap-1.5 ${
+                    isAllCategorySelected(topBadges.activities)
+                      ? 'bg-activity text-activity-foreground'
+                      : 'text-activity'
+                  }`}
                   onClick={() => toggleCategory(topBadges.activities)}
                 >
+                  {isAllCategorySelected(topBadges.activities) && <Check className="w-3 h-3" />}
                   Activities
                 </p>
               </TooltipTrigger>
@@ -387,9 +403,14 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
             <UITooltip>
               <TooltipTrigger asChild>
                 <p 
-                  className="text-xs font-medium text-side-effect mb-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                  className={`text-xs font-medium mb-2 cursor-pointer hover:opacity-80 transition-all w-fit px-2 py-1 rounded inline-flex items-center gap-1.5 ${
+                    isAllCategorySelected(topBadges.sideEffects)
+                      ? 'bg-side-effect text-side-effect-foreground'
+                      : 'text-side-effect'
+                  }`}
                   onClick={() => toggleCategory(topBadges.sideEffects)}
                 >
+                  {isAllCategorySelected(topBadges.sideEffects) && <Check className="w-3 h-3" />}
                   Side Effects
                 </p>
               </TooltipTrigger>
