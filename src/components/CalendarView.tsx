@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Leaf, Bell, FileText, Trash2 } from "lucide-react";
+import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -22,6 +22,7 @@ interface JournalEntry {
   activities: string[];
   negative_side_effects: string[];
   notes: string | null;
+  icon: string;
 }
 
 interface Reminder {
@@ -55,6 +56,22 @@ export const CalendarView = ({
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, typeof Leaf> = {
+      leaf: Leaf,
+      pill: Pill,
+      droplet: Droplet,
+      cigarette: Cigarette,
+      cookie: Cookie,
+      coffee: Coffee,
+      sparkles: Sparkles,
+      heart: Heart,
+      brain: Brain,
+      zap: Zap,
+    };
+    return iconMap[iconName] || Leaf;
+  };
 
   useEffect(() => {
     fetchData();
@@ -105,7 +122,7 @@ export const CalendarView = ({
     
     const { data: entriesData, error: entriesError } = await supabase
       .from("journal_entries")
-      .select("id, created_at, strain, dosage, method, observations, activities, negative_side_effects, notes")
+      .select("id, created_at, strain, dosage, method, observations, activities, negative_side_effects, notes, icon")
       .eq("is_deleted", false)
       .order("created_at", { ascending: false });
 
@@ -356,11 +373,19 @@ export const CalendarView = ({
                     <Leaf className="h-4 w-4" />
                     Journal Entries
                   </h3>
-                  {selectedDateEntries.map((entry) => (
+                  {selectedDateEntries.map((entry) => {
+                    const IconComponent = getIconComponent(entry.icon || 'leaf');
+                    
+                    return (
                     <Card key={entry.id} className="p-3">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
-                          <p className="font-medium">{entry.strain}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-full bg-primary/10 flex-shrink-0">
+                              <IconComponent className="h-4 w-4 text-primary" />
+                            </div>
+                            <p className="font-medium">{entry.strain}</p>
+                          </div>
                           <div className="flex gap-1">
                             <Sheet>
                               <SheetTrigger asChild>
@@ -483,7 +508,8 @@ export const CalendarView = ({
                         </p>
                       </div>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
