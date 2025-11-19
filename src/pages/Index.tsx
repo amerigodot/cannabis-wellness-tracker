@@ -391,12 +391,12 @@ const Index = () => {
                       <DropdownMenuItem
                         key={icon.value}
                         onClick={() => setSelectedIcon(icon.value)}
-                        className={`p-3 justify-center cursor-pointer ${
+                        className={`p-4 justify-center cursor-pointer ${
                           selectedIcon === icon.value ? 'bg-primary/10' : ''
                         }`}
                         title={icon.name}
                       >
-                        <IconComponent className="h-5 w-5" />
+                        <IconComponent className="h-8 w-8" />
                       </DropdownMenuItem>
                     );
                   })}
