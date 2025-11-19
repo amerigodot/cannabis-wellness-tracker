@@ -689,7 +689,7 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.activities.map((activity) => (
-                                <Badge key={activity} variant="outline" className="px-2 py-1">
+                                <Badge key={activity} variant="outline" className="px-2 py-1 bg-gray-100 dark:bg-gray-800">
                                   {activity}
                                 </Badge>
                               ))}

@@ -316,7 +316,7 @@ export const CalendarView = () => {
                         {entry.activities.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {entry.activities.map((activity, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
+                              <Badge key={idx} variant="outline" className="text-xs bg-gray-100 dark:bg-gray-800">
                                 {activity}
                               </Badge>
                             ))}
