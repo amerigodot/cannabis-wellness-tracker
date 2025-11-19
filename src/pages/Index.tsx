@@ -810,25 +810,51 @@ const Index = () => {
 
               <TabsContent value="list" className="space-y-4">
                 {/* Active Filters */}
-                {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+                {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0 || filterMethods.length > 0) && (
                   <Card className="p-4 mb-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <Label className="text-sm font-semibold mb-2 block">Active Filters:</Label>
                         <div className="flex flex-wrap gap-2">
                           {filterObservations.map(obs => (
-                            <Badge key={obs} className="bg-observation text-observation-foreground">
-                              {obs}
+                            <Badge 
+                              key={obs} 
+                              className="bg-observation text-observation-foreground cursor-pointer hover:opacity-80"
+                              onClick={() => setFilterObservations(prev => prev.filter(o => o !== obs))}
+                            >
+                              {obs} ×
                             </Badge>
                           ))}
                           {filterActivities.map(act => (
-                            <Badge key={act} className="bg-activity text-activity-foreground">
-                              {act}
+                            <Badge 
+                              key={act} 
+                              className="bg-activity text-activity-foreground cursor-pointer hover:opacity-80"
+                              onClick={() => setFilterActivities(prev => prev.filter(a => a !== act))}
+                            >
+                              {act} ×
                             </Badge>
                           ))}
                           {filterSideEffects.map(eff => (
-                            <Badge key={eff} className="bg-side-effect text-side-effect-foreground">
-                              {eff}
+                            <Badge 
+                              key={eff} 
+                              className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-80"
+                              onClick={() => setFilterSideEffects(prev => prev.filter(e => e !== eff))}
+                            >
+                              {eff} ×
+                            </Badge>
+                          ))}
+                          {filterMethods.map(method => (
+                            <Badge 
+                              key={method} 
+                              variant="default"
+                              className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                              onClick={() => setFilterMethods(prev => prev.filter(m => m !== method))}
+                            >
+                              {(() => {
+                                const MethodIcon = getMethodIcon(method);
+                                return <MethodIcon className="h-3 w-3" />;
+                              })()}
+                              {method} ×
                             </Badge>
                           ))}
                         </div>
@@ -840,6 +866,7 @@ const Index = () => {
                           setFilterObservations([]);
                           setFilterActivities([]);
                           setFilterSideEffects([]);
+                          setFilterMethods([]);
                         }}
                       >
                         Clear All
