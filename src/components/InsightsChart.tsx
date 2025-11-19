@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis, LineChart, Line, Legend } from "recharts";
-import { ScatterChart as ScatterChartIcon, TrendingUp } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface JournalEntry {
@@ -133,94 +133,6 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return colorArray[index];
   };
 
-  // Categorize strain type (for coloring only)
-  const getStrainType = (strain: string): string => {
-    const lowerStrain = strain.toLowerCase();
-    
-    if (lowerStrain.includes('sativa') || lowerStrain.includes('energizing') || lowerStrain.includes('uplifting')) {
-      return 'Sativa';
-    } else if (lowerStrain.includes('indica') || lowerStrain.includes('relax') || lowerStrain.includes('sleep')) {
-      return 'Indica';
-    } else if (lowerStrain.includes('hybrid')) {
-      return 'Hybrid';
-    } else if (lowerStrain.includes('cbd')) {
-      return 'CBD';
-    } else if (lowerStrain.includes('thc')) {
-      return 'THC';
-    }
-    return 'Sativa'; // Default to Sativa instead of Balanced
-  };
-
-  // Convert entries to scatter plot data
-  const scatterData = entries.map(entry => {
-    const date = new Date(entry.created_at);
-    const timestamp = date.getTime();
-    
-    // Parse dosage to grams
-    const match = entry.dosage.match(/^([\d.]+)(g|ml|mg)$/);
-    let dosageInGrams = 0;
-    
-    if (match) {
-      const amount = parseFloat(match[1]);
-      const unit = match[2];
-      
-      if (unit === 'g') {
-        dosageInGrams = amount;
-      } else if (unit === 'mg') {
-        dosageInGrams = amount / 1000;
-      } else if (unit === 'ml') {
-        dosageInGrams = amount; // Assuming 1ml ≈ 1g
-      }
-    }
-    
-    return {
-      timestamp,
-      dosage: dosageInGrams,
-      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      strain: entry.strain,
-      strainType: getStrainType(entry.strain),
-      observations: (entry as any).observations || [],
-      activities: entry.activities || [],
-      negative_side_effects: entry.negative_side_effects || []
-    };
-  }).sort((a, b) => a.timestamp - b.timestamp);
-
-  // Group data by strain type (for coloring)
-  const strainTypeColors = {
-    'Sativa': 'hsl(var(--strain-sativa))',
-    'Indica': 'hsl(var(--strain-indica))',
-    'Hybrid': 'hsl(var(--strain-hybrid))',
-    'CBD': 'hsl(var(--strain-cbd))',
-    'THC': 'hsl(var(--strain-thc))'
-  };
-
-  // Filter data based on selected badges
-  const getFilteredData = () => {
-    if (selectedBadges.size === 0) {
-      return scatterData;
-    }
-    
-    return scatterData.filter(point => {
-      const allBadges = [
-        ...point.observations,
-        ...point.activities,
-        ...point.negative_side_effects
-      ];
-      return Array.from(selectedBadges).some(badge => allBadges.includes(badge));
-    });
-  };
-
-  const filteredData = getFilteredData();
-
-  const groupedData = filteredData.reduce((acc, point) => {
-    if (!acc[point.strainType]) {
-      acc[point.strainType] = [];
-    }
-    acc[point.strainType].push(point);
-    return acc;
-  }, {} as Record<string, typeof scatterData>);
-
   // Group entries by date for stats
   const entriesByDate = entries.reduce((acc, entry) => {
     const date = new Date(entry.created_at).toLocaleDateString('en-US', { 
@@ -259,21 +171,6 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
 
   const avgConsumption = calculateAverageConsumption();
 
-  if (scatterData.length === 0) {
-    return null;
-  }
-
-  // Format timestamp for display
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const formatTooltipTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
-  };
-
   // Toggle badge filter
   const toggleBadge = (badge: string) => {
     setSelectedBadges(prev => {
@@ -292,111 +189,73 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return selectedBadges.has(badge);
   };
 
-  // Custom Tooltip Component
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-card border border-border rounded-lg p-4 shadow-lg z-50 max-w-xs">
-          <p className="text-foreground font-semibold mb-2">
-            {data.date} {data.time}
-          </p>
-          <div className="space-y-1 mb-2">
-            <p className="text-foreground">
-              <span className="font-medium">Dosage:</span> {data.dosage.toFixed(2)}g
-            </p>
-            <p className="text-foreground">
-              <span className="font-medium">Strain:</span> {data.strain}
-            </p>
-          </div>
-          
-          {data.observations && data.observations.length > 0 && (
-            <div className="mt-3 pt-2 border-t border-border">
-              <p className="text-foreground font-medium text-xs mb-1">Observations:</p>
-              <div className="flex flex-wrap gap-1">
-                {data.observations.map((obs: string, idx: number) => (
-                  <Badge key={idx} className="text-xs bg-observation text-observation-foreground">
-                    {obs}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {data.activities && data.activities.length > 0 && (
-            <div className="mt-2">
-              <p className="text-foreground font-medium text-xs mb-1">Activities:</p>
-              <div className="flex flex-wrap gap-1">
-                {data.activities.map((activity: string, idx: number) => (
-                  <Badge key={idx} className="text-xs bg-activity text-activity-foreground">
-                    {activity}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {data.negative_side_effects && data.negative_side_effects.length > 0 && (
-            <div className="mt-2">
-              <p className="text-foreground font-medium text-xs mb-1">Side Effects:</p>
-              <div className="flex flex-wrap gap-1">
-                {data.negative_side_effects.map((effect: string, idx: number) => (
-                  <Badge key={idx} className="text-xs bg-side-effect text-side-effect-foreground">
-                    {effect}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
-      <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-        <ScatterChartIcon className="w-6 h-6 text-primary" />
-        Insights
-      </h2>
-      
-      <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis 
-              type="number"
-              dataKey="timestamp" 
-              name="Date"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={formatTimestamp}
-              className="text-xs text-muted-foreground"
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-              height={60}
-            />
-            <YAxis 
-              type="number"
-              dataKey="dosage" 
-              name="Dosage"
-              unit="g"
-              className="text-xs text-muted-foreground"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <ZAxis range={[80, 80]} />
-            <Tooltip content={<CustomTooltip />} />
-            {Object.entries(groupedData).map(([strainType, data]) => (
-              <Scatter 
-                key={strainType}
-                name={strainType}
-                data={data} 
-                fill={strainTypeColors[strainType as keyof typeof strainTypeColors]}
-                opacity={0.8}
-              />
-            ))}
-          </ScatterChart>
-        </ResponsiveContainer>
+      <div className="flex items-center gap-2 mb-6">
+        <TrendingUp className="w-6 h-6 text-primary" />
+        <h2 className="text-2xl font-semibold">Badge Trends</h2>
       </div>
+
+      {/* Trends Chart - Main Chart */}
+      {trendData.length > 1 && badgesToShow.length > 0 && (
+        <div className="mb-6">
+          <p className="text-xs text-muted-foreground mb-4">
+            {selectedBadges.size > 0 
+              ? "Showing trends for selected badges" 
+              : "Showing trends for top 5 most common badges"}
+          </p>
+          <div className="h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="week" 
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                  height={60}
+                  angle={-45}
+                  textAnchor="end"
+                />
+                <YAxis 
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    color: 'hsl(var(--card-foreground))'
+                  }}
+                />
+                <Legend 
+                  wrapperStyle={{ fontSize: '12px' }}
+                  iconType="line"
+                />
+                {badgesToShow.map(badge => (
+                  <Line
+                    key={badge}
+                    type="monotone"
+                    dataKey={badge}
+                    stroke={getTrendColor(badge)}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name={badge}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {trendData.length <= 1 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <TrendingUp className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p className="text-lg">Not enough data to show trends yet</p>
+          <p className="text-sm">Add more entries over time to see patterns</p>
+        </div>
+      )}
 
       {/* Badge Filters */}
       <div className="mt-6 border-t border-border pt-6">
@@ -509,7 +368,7 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
         {selectedBadges.size > 0 && (
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              Showing {filteredData.length} of {scatterData.length} entries
+              {selectedBadges.size} filter{selectedBadges.size > 1 ? 's' : ''} active
             </p>
             <Button
               variant="ghost"
