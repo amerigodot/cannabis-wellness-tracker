@@ -342,16 +342,6 @@ const Index = () => {
             <div className="flex-1"></div>
             <div className="flex gap-2">
               <ThemeToggle />
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate("/trash")} 
-                className="rounded-full"
-                title="View Trash"
-              >
-                <Trash2 className="h-5 w-5" />
-                <span className="sr-only">Trash</span>
-              </Button>
               <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">
                 <LogOut className="h-5 w-5" />
                 <span className="sr-only">Sign out</span>
