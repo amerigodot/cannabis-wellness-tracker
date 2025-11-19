@@ -17,6 +17,7 @@ export type Database = {
       journal_entries: {
         Row: {
           activities: string[]
+          consumption_time: string | null
           created_at: string
           dosage: string
           icon: string | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           activities?: string[]
+          consumption_time?: string | null
           created_at?: string
           dosage: string
           icon?: string | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           activities?: string[]
+          consumption_time?: string | null
           created_at?: string
           dosage?: string
           icon?: string | null

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
@@ -120,6 +121,7 @@ const Index = () => {
   const [filterSideEffects, setFilterSideEffects] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [minutesAgo, setMinutesAgo] = useState<number>(0);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -229,6 +231,10 @@ const Index = () => {
 
     setIsSubmitting(true);
     const dosage = `${dosageAmount}${dosageUnit}`;
+    
+    // Calculate consumption time based on minutes ago
+    const consumptionTime = new Date();
+    consumptionTime.setMinutes(consumptionTime.getMinutes() - minutesAgo);
 
     const { error } = await supabase.from("journal_entries").insert({
       user_id: user.id,
@@ -240,6 +246,7 @@ const Index = () => {
       negative_side_effects: selectedNegativeSideEffects,
       notes: notes || null,
       icon: selectedIcon,
+      consumption_time: consumptionTime.toISOString(),
     });
 
     setIsSubmitting(false);
@@ -250,11 +257,12 @@ const Index = () => {
       setShowSuccessAnimation(true);
       toast.success("Entry saved successfully! 🎉");
       
-      // Clear notes, activities, observations, and negative side effects
+      // Clear form fields
       setNotes("");
       setSelectedActivities([]);
       setSelectedObservations([]);
       setSelectedNegativeSideEffects([]);
+      setMinutesAgo(0);
       
       // Refresh entries
       fetchEntries();
@@ -464,6 +472,32 @@ const Index = () => {
                   placeholder="e.g., Vape, Edible"
                   className="mt-1.5"
                 />
+              </div>
+            </div>
+
+            {/* Time Since Consumption */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Time Since Consumption</Label>
+                <span className="text-sm text-muted-foreground">
+                  {minutesAgo === 0 ? 'Now' : 
+                   minutesAgo < 60 ? `${minutesAgo} min ago` :
+                   minutesAgo < 1440 ? `${Math.floor(minutesAgo / 60)}h ${minutesAgo % 60}m ago` :
+                   `${Math.floor(minutesAgo / 1440)} days ago`}
+                </span>
+              </div>
+              <Slider
+                value={[minutesAgo]}
+                onValueChange={(value) => setMinutesAgo(value[0])}
+                max={1440}
+                step={5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Now</span>
+                <span>1 hour</span>
+                <span>12 hours</span>
+                <span>24 hours</span>
               </div>
             </div>
 
