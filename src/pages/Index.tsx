@@ -17,7 +17,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -90,6 +90,8 @@ const AVAILABLE_ICONS = [
   { name: "Heart", value: "heart" },
   { name: "Brain", value: "brain" },
   { name: "Zap", value: "zap" },
+  { name: "Space", value: "rocket" },
+  { name: "Fire", value: "flame" },
 ];
 
 const Index = () => {
@@ -328,6 +330,8 @@ const Index = () => {
       heart: Heart,
       brain: Brain,
       zap: Zap,
+      rocket: Rocket,
+      flame: Flame,
     };
     return iconMap[iconName] || Leaf;
   };
@@ -391,12 +395,12 @@ const Index = () => {
                       <DropdownMenuItem
                         key={icon.value}
                         onClick={() => setSelectedIcon(icon.value)}
-                        className={`p-6 justify-center cursor-pointer rounded-lg ${
-                          selectedIcon === icon.value ? 'bg-primary/10' : ''
+                        className={`p-6 justify-center cursor-pointer rounded-lg transition-all duration-200 hover:scale-110 hover:bg-primary/20 ${
+                          selectedIcon === icon.value ? 'bg-primary/10 scale-105' : ''
                         }`}
                         title={icon.name}
                       >
-                        <IconComponent className="h-10 w-10" />
+                        <IconComponent className="h-10 w-10 transition-transform" />
                       </DropdownMenuItem>
                     );
                   })}
