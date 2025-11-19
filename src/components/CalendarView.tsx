@@ -3,6 +3,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -155,6 +156,44 @@ export const CalendarView = ({
     return dates;
   };
 
+  const getDatesWithFilteredData = () => {
+    const dates = new Set<string>();
+    
+    // Filter entries based on active filters
+    const filteredEntries = entries.filter(entry => {
+      // Filter by observations
+      if (filterObservations.length > 0) {
+        if (!filterObservations.some(obs => entry.observations.includes(obs))) {
+          return false;
+        }
+      }
+      // Filter by activities
+      if (filterActivities.length > 0) {
+        if (!filterActivities.some(act => entry.activities.includes(act))) {
+          return false;
+        }
+      }
+      // Filter by side effects
+      if (filterSideEffects.length > 0) {
+        if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
+          return false;
+        }
+      }
+      return true;
+    });
+    
+    filteredEntries.forEach((entry) => {
+      dates.add(format(parseISO(entry.created_at), "yyyy-MM-dd"));
+    });
+    
+    // Always include reminders
+    reminders.forEach((reminder) => {
+      dates.add(format(parseISO(reminder.reminder_time), "yyyy-MM-dd"));
+    });
+    
+    return dates;
+  };
+
   const openNotesDialog = (entry: JournalEntry) => {
     setEditingEntryId(entry.id);
     setEditingNotes(entry.notes || "");
@@ -201,7 +240,7 @@ export const CalendarView = ({
     setDeleteEntryId(null);
   };
 
-  const datesWithData = getDatesWithData();
+  const datesWithData = getDatesWithFilteredData();
   const selectedDateEntries = selectedDate ? getEntriesForDate(selectedDate) : [];
   const selectedDateReminders = selectedDate ? getRemindersForDate(selectedDate) : [];
 
@@ -209,9 +248,38 @@ export const CalendarView = ({
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Calendar</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Calendar</CardTitle>
+            {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+              <Badge variant="secondary" className="text-xs">
+                {filterObservations.length + filterActivities.length + filterSideEffects.length} filter(s) active
+              </Badge>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
+          {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+            <div className="mb-4 p-3 rounded-lg bg-muted/50">
+              <Label className="text-xs font-semibold mb-2 block">Showing dates with:</Label>
+              <div className="flex flex-wrap gap-1">
+                {filterObservations.map(obs => (
+                  <Badge key={obs} className="text-xs bg-observation text-observation-foreground">
+                    {obs}
+                  </Badge>
+                ))}
+                {filterActivities.map(act => (
+                  <Badge key={act} className="text-xs bg-activity text-activity-foreground">
+                    {act}
+                  </Badge>
+                ))}
+                {filterSideEffects.map(eff => (
+                  <Badge key={eff} className="text-xs bg-side-effect text-side-effect-foreground">
+                    {eff}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
           <Calendar
             mode="single"
             selected={selectedDate}
