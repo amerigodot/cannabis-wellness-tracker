@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
@@ -334,10 +335,42 @@ const Index = () => {
 
         {/* Entry Form */}
         <Card className="p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-primary" />
-            New Entry
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-primary" />
+              New Entry
+            </h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  {(() => {
+                    const IconComponent = getIconComponent(selectedIcon);
+                    return <IconComponent className="h-4 w-4" />;
+                  })()}
+                  Select Icon
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="grid grid-cols-5 gap-1 p-2">
+                  {AVAILABLE_ICONS.map((icon) => {
+                    const IconComponent = getIconComponent(icon.value);
+                    return (
+                      <DropdownMenuItem
+                        key={icon.value}
+                        onClick={() => setSelectedIcon(icon.value)}
+                        className={`p-3 justify-center cursor-pointer ${
+                          selectedIcon === icon.value ? 'bg-primary/10' : ''
+                        }`}
+                        title={icon.name}
+                      >
+                        <IconComponent className="h-5 w-5" />
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           <div className="grid gap-6">
             {/* Basic Info */}
@@ -385,31 +418,6 @@ const Index = () => {
                   placeholder="e.g., Vape, Edible"
                   className="mt-1.5"
                 />
-              </div>
-            </div>
-
-            {/* Icon Selection */}
-            <div>
-              <Label className="mb-3 block">Entry Icon</Label>
-              <div className="flex flex-wrap gap-2">
-                {AVAILABLE_ICONS.map((icon) => {
-                  const IconComponent = getIconComponent(icon.value);
-                  return (
-                    <button
-                      key={icon.value}
-                      type="button"
-                      onClick={() => setSelectedIcon(icon.value)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
-                        selectedIcon === icon.value
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border bg-background hover:border-primary/50'
-                      }`}
-                      title={icon.name}
-                    >
-                      <IconComponent className="h-5 w-5" />
-                    </button>
-                  );
-                })}
               </div>
             </div>
 
