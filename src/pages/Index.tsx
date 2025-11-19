@@ -459,7 +459,9 @@ const Index = () => {
                   <Badge
                     key={activity}
                     variant={selectedActivities.includes(activity) ? "default" : "outline"}
-                    className="cursor-pointer transition-all duration-200 hover:scale-105"
+                    className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      !selectedActivities.includes(activity) ? "bg-gray-100 dark:bg-gray-800" : ""
+                    }`}
                     onClick={() => toggleActivity(activity)}
                   >
                     {activity}
@@ -476,7 +478,9 @@ const Index = () => {
                   <Badge
                     key={obs}
                     variant={selectedObservations.includes(obs) ? "default" : "outline"}
-                    className="cursor-pointer transition-all duration-200 hover:scale-105"
+                    className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      !selectedObservations.includes(obs) ? "bg-gray-100 dark:bg-gray-800" : ""
+                    }`}
                     onClick={() => toggleObservation(obs)}
                   >
                     {obs}
@@ -493,7 +497,9 @@ const Index = () => {
                   <Badge
                     key={effect}
                     variant={selectedNegativeSideEffects.includes(effect) ? "destructive" : "outline"}
-                    className="cursor-pointer transition-all duration-200 hover:scale-105"
+                    className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      !selectedNegativeSideEffects.includes(effect) ? "bg-gray-100 dark:bg-gray-800" : ""
+                    }`}
                     onClick={() => toggleNegativeSideEffect(effect)}
                   >
                     {effect}
