@@ -113,6 +113,9 @@ const Index = () => {
   const [selectedIcon, setSelectedIcon] = useState("leaf");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [filterObservations, setFilterObservations] = useState<string[]>([]);
+  const [filterActivities, setFilterActivities] = useState<string[]>([]);
+  const [filterSideEffects, setFilterSideEffects] = useState<string[]>([]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -461,7 +464,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedActivities.includes(activity) 
-                        ? "bg-activity-light border-activity text-activity" 
+                        ? "bg-activity text-activity-foreground border-activity" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleActivity(activity)}
@@ -482,7 +485,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedObservations.includes(obs) 
-                        ? "bg-observation-light border-observation text-observation" 
+                        ? "bg-observation text-observation-foreground border-observation" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleObservation(obs)}
@@ -503,7 +506,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedNegativeSideEffects.includes(effect) 
-                        ? "bg-side-effect-light border-side-effect text-side-effect" 
+                        ? "bg-side-effect text-side-effect-foreground border-side-effect" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleNegativeSideEffect(effect)}
@@ -591,6 +594,45 @@ const Index = () => {
               </TabsList>
 
               <TabsContent value="list" className="space-y-4">
+                {/* Active Filters */}
+                {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0) && (
+                  <Card className="p-4 mb-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <Label className="text-sm font-semibold mb-2 block">Active Filters:</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {filterObservations.map(obs => (
+                            <Badge key={obs} className="bg-observation text-observation-foreground">
+                              {obs}
+                            </Badge>
+                          ))}
+                          {filterActivities.map(act => (
+                            <Badge key={act} className="bg-activity text-activity-foreground">
+                              {act}
+                            </Badge>
+                          ))}
+                          {filterSideEffects.map(eff => (
+                            <Badge key={eff} className="bg-side-effect text-side-effect-foreground">
+                              {eff}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setFilterObservations([]);
+                          setFilterActivities([]);
+                          setFilterSideEffects([]);
+                        }}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+                
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold">Recent Entries</h2>
                   <div className="flex items-center gap-2">
@@ -611,7 +653,29 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {[...entries].sort((a, b) => {
+                  {[...entries]
+                    .filter(entry => {
+                      // Filter by observations
+                      if (filterObservations.length > 0) {
+                        if (!filterObservations.some(obs => entry.observations.includes(obs))) {
+                          return false;
+                        }
+                      }
+                      // Filter by activities
+                      if (filterActivities.length > 0) {
+                        if (!filterActivities.some(act => entry.activities.includes(act))) {
+                          return false;
+                        }
+                      }
+                      // Filter by side effects
+                      if (filterSideEffects.length > 0) {
+                        if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
+                          return false;
+                        }
+                      }
+                      return true;
+                    })
+                    .sort((a, b) => {
                     switch (sortBy) {
                       case "date-asc":
                         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
@@ -688,7 +752,21 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.observations.map((obs) => (
-                                <Badge key={obs} className="px-2 py-1 bg-observation-light border-observation text-observation">
+                                <Badge 
+                                  key={obs} 
+                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
+                                    filterObservations.includes(obs)
+                                      ? "bg-observation text-observation-foreground"
+                                      : "bg-observation-light text-observation-foreground"
+                                  }`}
+                                  onClick={() => {
+                                    setFilterObservations(prev => 
+                                      prev.includes(obs) 
+                                        ? prev.filter(o => o !== obs)
+                                        : [...prev, obs]
+                                    );
+                                  }}
+                                >
                                   {obs}
                                 </Badge>
                               ))}
@@ -701,7 +779,21 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.activities.map((activity) => (
-                                <Badge key={activity} className="px-2 py-1 bg-activity-light border-activity text-activity">
+                                <Badge 
+                                  key={activity} 
+                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
+                                    filterActivities.includes(activity)
+                                      ? "bg-activity text-activity-foreground"
+                                      : "bg-activity-light text-activity-foreground"
+                                  }`}
+                                  onClick={() => {
+                                    setFilterActivities(prev => 
+                                      prev.includes(activity) 
+                                        ? prev.filter(a => a !== activity)
+                                        : [...prev, activity]
+                                    );
+                                  }}
+                                >
                                   {activity}
                                 </Badge>
                               ))}
@@ -714,7 +806,21 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.negative_side_effects.map((effect) => (
-                                <Badge key={effect} className="px-2 py-1 bg-side-effect-light border-side-effect text-side-effect">
+                                <Badge 
+                                  key={effect} 
+                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
+                                    filterSideEffects.includes(effect)
+                                      ? "bg-side-effect text-side-effect-foreground"
+                                      : "bg-side-effect-light text-side-effect-foreground"
+                                  }`}
+                                  onClick={() => {
+                                    setFilterSideEffects(prev => 
+                                      prev.includes(effect) 
+                                        ? prev.filter(e => e !== effect)
+                                        : [...prev, effect]
+                                    );
+                                  }}
+                                >
                                   {effect}
                                 </Badge>
                               ))}
@@ -736,7 +842,14 @@ const Index = () => {
               </TabsContent>
 
               <TabsContent value="calendar">
-                <CalendarView />
+                <CalendarView 
+                  filterObservations={filterObservations}
+                  setFilterObservations={setFilterObservations}
+                  filterActivities={filterActivities}
+                  setFilterActivities={setFilterActivities}
+                  filterSideEffects={filterSideEffects}
+                  setFilterSideEffects={setFilterSideEffects}
+                />
               </TabsContent>
             </Tabs>
           </div>

@@ -31,7 +31,21 @@ interface Reminder {
   recurrence: string;
 }
 
-export const CalendarView = () => {
+export const CalendarView = ({ 
+  filterObservations, 
+  setFilterObservations, 
+  filterActivities, 
+  setFilterActivities, 
+  filterSideEffects, 
+  setFilterSideEffects 
+}: {
+  filterObservations: string[];
+  setFilterObservations: React.Dispatch<React.SetStateAction<string[]>>;
+  filterActivities: string[];
+  setFilterActivities: React.Dispatch<React.SetStateAction<string[]>>;
+  filterSideEffects: string[];
+  setFilterSideEffects: React.Dispatch<React.SetStateAction<string[]>>;
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -307,7 +321,21 @@ export const CalendarView = () => {
                         {entry.observations.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {entry.observations.map((obs, idx) => (
-                              <Badge key={idx} className="text-xs bg-observation-light border-observation text-observation">
+                              <Badge 
+                                key={idx} 
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                  filterObservations.includes(obs)
+                                    ? "bg-observation text-observation-foreground"
+                                    : "bg-observation-light text-observation-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterObservations(prev => 
+                                    prev.includes(obs) 
+                                      ? prev.filter(o => o !== obs)
+                                      : [...prev, obs]
+                                  );
+                                }}
+                              >
                                 {obs}
                               </Badge>
                             ))}
@@ -316,7 +344,21 @@ export const CalendarView = () => {
                         {entry.activities.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {entry.activities.map((activity, idx) => (
-                              <Badge key={idx} className="text-xs bg-activity-light border-activity text-activity">
+                              <Badge 
+                                key={idx} 
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                  filterActivities.includes(activity)
+                                    ? "bg-activity text-activity-foreground"
+                                    : "bg-activity-light text-activity-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterActivities(prev => 
+                                    prev.includes(activity) 
+                                      ? prev.filter(a => a !== activity)
+                                      : [...prev, activity]
+                                  );
+                                }}
+                              >
                                 {activity}
                               </Badge>
                             ))}
@@ -325,7 +367,21 @@ export const CalendarView = () => {
                         {entry.negative_side_effects.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {entry.negative_side_effects.map((effect, idx) => (
-                              <Badge key={idx} className="text-xs bg-side-effect-light border-side-effect text-side-effect">
+                              <Badge 
+                                key={idx} 
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                  filterSideEffects.includes(effect)
+                                    ? "bg-side-effect text-side-effect-foreground"
+                                    : "bg-side-effect-light text-side-effect-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterSideEffects(prev => 
+                                    prev.includes(effect) 
+                                      ? prev.filter(e => e !== effect)
+                                      : [...prev, effect]
+                                  );
+                                }}
+                              >
                                 {effect}
                               </Badge>
                             ))}

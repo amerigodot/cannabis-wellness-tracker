@@ -33,14 +33,17 @@ export default {
         },
         observation: {
           DEFAULT: "hsl(var(--observation))",
+          foreground: "hsl(var(--observation-foreground))",
           light: "hsl(var(--observation-light))",
         },
         activity: {
           DEFAULT: "hsl(var(--activity))",
+          foreground: "hsl(var(--activity-foreground))",
           light: "hsl(var(--activity-light))",
         },
         "side-effect": {
           DEFAULT: "hsl(var(--side-effect))",
+          foreground: "hsl(var(--side-effect-foreground))",
           light: "hsl(var(--side-effect-light))",
         },
         muted: {
