@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from "recharts";
 import { ScatterChart as ScatterChartIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,41 +21,41 @@ interface InsightsChartProps {
 
 export const InsightsChart = ({ entries }: InsightsChartProps) => {
   const [selectedBadges, setSelectedBadges] = useState<Set<string>>(new Set());
+  const [topCount, setTopCount] = useState<3 | 5 | 10>(5);
 
-  // Calculate top 5 most used badges
-  const getTopBadges = () => {
-    const badgeCounts: Record<string, { count: number; type: 'observation' | 'activity' | 'side-effect' }> = {};
+  // Calculate top N most used badges by type
+  const getTopBadgesByType = () => {
+    const observationCounts: Record<string, number> = {};
+    const activityCounts: Record<string, number> = {};
+    const sideEffectCounts: Record<string, number> = {};
     
     entries.forEach(entry => {
       (entry.observations || []).forEach(obs => {
-        if (!badgeCounts[obs]) {
-          badgeCounts[obs] = { count: 0, type: 'observation' };
-        }
-        badgeCounts[obs].count++;
+        observationCounts[obs] = (observationCounts[obs] || 0) + 1;
       });
       
       (entry.activities || []).forEach(act => {
-        if (!badgeCounts[act]) {
-          badgeCounts[act] = { count: 0, type: 'activity' };
-        }
-        badgeCounts[act].count++;
+        activityCounts[act] = (activityCounts[act] || 0) + 1;
       });
       
       (entry.negative_side_effects || []).forEach(eff => {
-        if (!badgeCounts[eff]) {
-          badgeCounts[eff] = { count: 0, type: 'side-effect' };
-        }
-        badgeCounts[eff].count++;
+        sideEffectCounts[eff] = (sideEffectCounts[eff] || 0) + 1;
       });
     });
     
-    return Object.entries(badgeCounts)
-      .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, 5)
-      .map(([badge, data]) => ({ badge, ...data }));
+    const sortAndLimit = (counts: Record<string, number>) => 
+      Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topCount);
+    
+    return {
+      observations: sortAndLimit(observationCounts),
+      activities: sortAndLimit(activityCounts),
+      sideEffects: sortAndLimit(sideEffectCounts)
+    };
   };
 
-  const topBadges = getTopBadges();
+  const topBadges = getTopBadgesByType();
 
   // Categorize strain type (for coloring only)
   const getStrainType = (strain: string): string => {
@@ -215,18 +216,6 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
     return selectedBadges.has(badge);
   };
 
-  // Get badge color based on type
-  const getBadgeColor = (type: 'observation' | 'activity' | 'side-effect') => {
-    switch (type) {
-      case 'observation':
-        return { bg: 'hsl(var(--observation))', fg: 'hsl(var(--observation-foreground))' };
-      case 'activity':
-        return { bg: 'hsl(var(--activity))', fg: 'hsl(var(--activity-foreground))' };
-      case 'side-effect':
-        return { bg: 'hsl(var(--side-effect))', fg: 'hsl(var(--side-effect-foreground))' };
-    }
-  };
-
   // Custom Tooltip Component
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -334,39 +323,129 @@ export const InsightsChart = ({ entries }: InsightsChartProps) => {
       </div>
 
       {/* Badge Filters */}
-      {topBadges.length > 0 && (
-        <div className="mt-6">
-          <p className="text-sm text-muted-foreground mb-3 text-center">Filter by most common:</p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {topBadges.map(({ badge, count, type }) => {
-              const colors = getBadgeColor(type);
-              const isSelected = isBadgeSelected(badge);
-              
-              return (
-                <Badge
-                  key={badge}
-                  className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
-                  style={{
-                    backgroundColor: isSelected ? colors.bg : 'transparent',
-                    borderColor: colors.bg,
-                    color: isSelected ? colors.fg : 'hsl(var(--foreground))',
-                    border: `1px solid ${colors.bg}`,
-                    opacity: isSelected ? 1 : 0.6
-                  }}
-                  onClick={() => toggleBadge(badge)}
+      <div className="mt-6 border-t border-border pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm font-semibold text-foreground">Filter by Most Common</p>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Show top:</span>
+            <div className="flex gap-1">
+              {([3, 5, 10] as const).map(count => (
+                <button
+                  key={count}
+                  onClick={() => setTopCount(count)}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    topCount === count
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
                 >
-                  {badge} ({count})
-                </Badge>
-              );
-            })}
+                  {count}
+                </button>
+              ))}
+            </div>
           </div>
-          {selectedBadges.size > 0 && (
-            <p className="text-xs text-center mt-2 text-muted-foreground">
+        </div>
+
+        {/* Observations Section */}
+        {topBadges.observations.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-observation mb-2">Observations</p>
+            <div className="flex flex-wrap gap-2">
+              {topBadges.observations.map(([badge, count]) => {
+                const isSelected = isBadgeSelected(badge);
+                return (
+                  <Badge
+                    key={badge}
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    style={{
+                      backgroundColor: isSelected ? 'hsl(var(--observation))' : 'transparent',
+                      borderColor: 'hsl(var(--observation))',
+                      color: isSelected ? 'hsl(var(--observation-foreground))' : 'hsl(var(--foreground))',
+                      border: '1px solid hsl(var(--observation))',
+                      opacity: isSelected ? 1 : 0.6
+                    }}
+                    onClick={() => toggleBadge(badge)}
+                  >
+                    {badge} ({count})
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Activities Section */}
+        {topBadges.activities.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-activity mb-2">Activities</p>
+            <div className="flex flex-wrap gap-2">
+              {topBadges.activities.map(([badge, count]) => {
+                const isSelected = isBadgeSelected(badge);
+                return (
+                  <Badge
+                    key={badge}
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    style={{
+                      backgroundColor: isSelected ? 'hsl(var(--activity))' : 'transparent',
+                      borderColor: 'hsl(var(--activity))',
+                      color: isSelected ? 'hsl(var(--activity-foreground))' : 'hsl(var(--foreground))',
+                      border: '1px solid hsl(var(--activity))',
+                      opacity: isSelected ? 1 : 0.6
+                    }}
+                    onClick={() => toggleBadge(badge)}
+                  >
+                    {badge} ({count})
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Side Effects Section */}
+        {topBadges.sideEffects.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-side-effect mb-2">Side Effects</p>
+            <div className="flex flex-wrap gap-2">
+              {topBadges.sideEffects.map(([badge, count]) => {
+                const isSelected = isBadgeSelected(badge);
+                return (
+                  <Badge
+                    key={badge}
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    style={{
+                      backgroundColor: isSelected ? 'hsl(var(--side-effect))' : 'transparent',
+                      borderColor: 'hsl(var(--side-effect))',
+                      color: isSelected ? 'hsl(var(--side-effect-foreground))' : 'hsl(var(--foreground))',
+                      border: '1px solid hsl(var(--side-effect))',
+                      opacity: isSelected ? 1 : 0.6
+                    }}
+                    onClick={() => toggleBadge(badge)}
+                  >
+                    {badge} ({count})
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {selectedBadges.size > 0 && (
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">
               Showing {filteredData.length} of {scatterData.length} entries
             </p>
-          )}
-        </div>
-      )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedBadges(new Set())}
+              className="text-xs h-7"
+            >
+              Clear filters
+            </Button>
+          </div>
+        )}
+      </div>
 
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         <div className="p-3 rounded-lg bg-muted/30">
