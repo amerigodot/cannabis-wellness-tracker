@@ -307,7 +307,7 @@ export const CalendarView = () => {
                         {entry.observations.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {entry.observations.map((obs, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
+                              <Badge key={idx} className="text-xs bg-observation-light border-observation text-observation">
                                 {obs}
                               </Badge>
                             ))}
@@ -316,7 +316,7 @@ export const CalendarView = () => {
                         {entry.activities.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {entry.activities.map((activity, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs bg-gray-100 dark:bg-gray-800">
+                              <Badge key={idx} className="text-xs bg-activity-light border-activity text-activity">
                                 {activity}
                               </Badge>
                             ))}
@@ -325,7 +325,7 @@ export const CalendarView = () => {
                         {entry.negative_side_effects.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {entry.negative_side_effects.map((effect, idx) => (
-                              <Badge key={idx} variant="destructive" className="text-xs">
+                              <Badge key={idx} className="text-xs bg-side-effect-light border-side-effect text-side-effect">
                                 {effect}
                               </Badge>
                             ))}

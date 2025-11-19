@@ -461,7 +461,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedActivities.includes(activity) 
-                        ? "bg-primary/10 dark:bg-primary/20 border-primary/30" 
+                        ? "bg-activity-light border-activity text-activity" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleActivity(activity)}
@@ -482,7 +482,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedObservations.includes(obs) 
-                        ? "bg-primary/10 dark:bg-primary/20 border-primary/30" 
+                        ? "bg-observation-light border-observation text-observation" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleObservation(obs)}
@@ -503,7 +503,7 @@ const Index = () => {
                     variant="outline"
                     className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedNegativeSideEffects.includes(effect) 
-                        ? "bg-destructive/10 dark:bg-destructive/20 border-destructive/30" 
+                        ? "bg-side-effect-light border-side-effect text-side-effect" 
                         : "bg-gray-100 dark:bg-gray-800"
                     }`}
                     onClick={() => toggleNegativeSideEffect(effect)}
@@ -688,7 +688,7 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.observations.map((obs) => (
-                                <Badge key={obs} variant="secondary" className="px-2 py-1">
+                                <Badge key={obs} className="px-2 py-1 bg-observation-light border-observation text-observation">
                                   {obs}
                                 </Badge>
                               ))}
@@ -701,7 +701,7 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.activities.map((activity) => (
-                                <Badge key={activity} variant="outline" className="px-2 py-1 bg-gray-100 dark:bg-gray-800">
+                                <Badge key={activity} className="px-2 py-1 bg-activity-light border-activity text-activity">
                                   {activity}
                                 </Badge>
                               ))}
@@ -714,7 +714,7 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.negative_side_effects.map((effect) => (
-                                <Badge key={effect} variant="destructive" className="px-2 py-1">
+                                <Badge key={effect} className="px-2 py-1 bg-side-effect-light border-side-effect text-side-effect">
                                   {effect}
                                 </Badge>
                               ))}
