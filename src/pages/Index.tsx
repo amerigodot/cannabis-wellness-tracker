@@ -540,16 +540,36 @@ const Index = () => {
                    `${Math.floor(minutesAgo / 1440)} days ago`}
                 </span>
               </div>
-              <Slider
-                value={[minutesAgo]}
-                onValueChange={(value) => setMinutesAgo(value[0])}
-                max={1440}
-                step={5}
-                className="w-full"
-              />
-              <div className="relative text-xs text-muted-foreground h-4">
+              <div className="relative">
+                <Slider
+                  value={[minutesAgo]}
+                  onValueChange={(value) => setMinutesAgo(value[0])}
+                  max={1440}
+                  step={5}
+                  className="w-full"
+                />
+                {/* Tick marks */}
+                <div className="absolute top-[9px] left-0 right-0 pointer-events-none">
+                  {/* 15min */}
+                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '1.04%' }} />
+                  {/* 30min */}
+                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '2.08%' }} />
+                  {/* 1h */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '4.17%' }} />
+                  {/* 2h */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '8.33%' }} />
+                  {/* 6h */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '25%' }} />
+                  {/* 12h */}
+                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '50%' }} />
+                  {/* 18h */}
+                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '75%' }} />
+                </div>
+              </div>
+              <div className="relative text-xs text-muted-foreground h-4 mt-1">
                 <span className="absolute left-0">Now</span>
-                <span className="absolute left-[4.2%] -translate-x-1/2">1h</span>
+                <span className="absolute left-[4.17%] -translate-x-1/2">1h</span>
+                <span className="absolute left-[25%] -translate-x-1/2">6h</span>
                 <span className="absolute left-1/2 -translate-x-1/2">12h</span>
                 <span className="absolute right-0">24h</span>
               </div>
