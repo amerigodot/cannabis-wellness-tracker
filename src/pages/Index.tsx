@@ -21,7 +21,6 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { format, isSameDay, parseISO } from "date-fns";
 
 interface JournalEntry {
   id: string;
@@ -805,9 +804,7 @@ const Index = () => {
                                 className="flex items-center gap-2 text-sm text-muted-foreground mt-1 hover:text-primary transition-colors cursor-pointer"
                               >
                                 <Clock className="h-3 w-3" />
-                                <span className="hover:underline">
-                                  {format(new Date(entry.consumption_time || entry.created_at), "MMM d, yyyy 'at' h:mm a")}
-                                </span>
+                                <span className="hover:underline">{new Date(entry.consumption_time || entry.created_at).toLocaleString()}</span>
                               </button>
                             </div>
                           </div>
