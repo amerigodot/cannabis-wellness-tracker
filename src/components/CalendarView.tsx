@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame } from "lucide-react";
+import { Leaf, Bell, FileText, Trash2, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface JournalEntry {
@@ -57,6 +59,8 @@ export const CalendarView = ({
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
+  const [editingTime, setEditingTime] = useState<Date>(new Date());
 
   const getIconComponent = (iconName: string) => {
     const iconMap: Record<string, typeof Leaf> = {
@@ -236,6 +240,28 @@ export const CalendarView = ({
     }
   };
 
+  const openTimeEditDialog = (entryId: string, currentTime: string) => {
+    setEditingTimeEntryId(entryId);
+    setEditingTime(new Date(currentTime));
+  };
+
+  const saveTimeEdit = async () => {
+    if (!editingTimeEntryId) return;
+
+    const { error } = await supabase
+      .from("journal_entries")
+      .update({ consumption_time: editingTime.toISOString() })
+      .eq("id", editingTimeEntryId);
+
+    if (error) {
+      toast.error("Error updating time: " + error.message);
+    } else {
+      toast.success("Consumption time updated!");
+      fetchData();
+      setEditingTimeEntryId(null);
+    }
+  };
+
   const deleteEntry = (entryId: string) => {
     setDeleteEntryId(entryId);
     setShowDeleteDialog(true);
@@ -383,11 +409,22 @@ export const CalendarView = ({
                     <Card key={entry.id} className="p-3">
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-full bg-primary/10 flex-shrink-0">
-                              <IconComponent className="h-4 w-4 text-primary" />
+                          <div className="space-y-1 flex-1">
+                            <div className="flex items-center gap-2">
+                              <div className="p-1.5 rounded-full bg-primary/10 flex-shrink-0">
+                                <IconComponent className="h-4 w-4 text-primary" />
+                              </div>
+                              <p className="font-medium">{entry.strain}</p>
                             </div>
-                            <p className="font-medium">{entry.strain}</p>
+                            <button
+                              onClick={() => openTimeEditDialog(entry.id, entry.consumption_time || entry.created_at)}
+                              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer ml-8"
+                            >
+                              <Clock className="h-3 w-3" />
+                              <span className="hover:underline">
+                                {format(parseISO(entry.consumption_time || entry.created_at), "p")}
+                              </span>
+                            </button>
                           </div>
                           <div className="flex gap-1">
                             <Sheet>
@@ -506,9 +543,6 @@ export const CalendarView = ({
                             {entry.notes}
                           </p>
                         )}
-                        <p className="text-xs text-muted-foreground">
-                          {format(parseISO(entry.created_at), "h:mm a")}
-                        </p>
                       </div>
                     </Card>
                     );
@@ -542,6 +576,56 @@ export const CalendarView = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Consumption Time Dialog */}
+      <Dialog open={!!editingTimeEntryId} onOpenChange={(open) => !open && setEditingTimeEntryId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Consumption Time</DialogTitle>
+            <DialogDescription>
+              Adjust when this entry was consumed
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="calendar-edit-date">Date</Label>
+              <Input
+                id="calendar-edit-date"
+                type="date"
+                value={editingTime.toISOString().split('T')[0]}
+                onChange={(e) => {
+                  const newDate = new Date(editingTime);
+                  const [year, month, day] = e.target.value.split('-').map(Number);
+                  newDate.setFullYear(year, month - 1, day);
+                  setEditingTime(newDate);
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="calendar-edit-time">Time</Label>
+              <Input
+                id="calendar-edit-time"
+                type="time"
+                value={editingTime.toTimeString().slice(0, 5)}
+                onChange={(e) => {
+                  const newDate = new Date(editingTime);
+                  const [hours, minutes] = e.target.value.split(':').map(Number);
+                  newDate.setHours(hours, minutes);
+                  setEditingTime(newDate);
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setEditingTimeEntryId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveTimeEdit}>
+              Save Time
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
