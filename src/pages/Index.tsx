@@ -536,7 +536,19 @@ const Index = () => {
                 <Label htmlFor="method">Method</Label>
                 <Select value={method} onValueChange={setMethod}>
                   <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Select method" />
+                    <SelectValue placeholder="Select method">
+                      {method && (
+                        <div className="flex items-center gap-2">
+                          {method === "Vape" && <Wind className="h-4 w-4" />}
+                          {method === "Smoke" && <Cigarette className="h-4 w-4" />}
+                          {method === "Oil" && <Droplet className="h-4 w-4" />}
+                          {method === "Tincture" && <Beaker className="h-4 w-4" />}
+                          {method === "Topical" && <Pipette className="h-4 w-4" />}
+                          {method === "Edible" && <Cookie className="h-4 w-4" />}
+                          <span>{method}</span>
+                        </div>
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Vape">
