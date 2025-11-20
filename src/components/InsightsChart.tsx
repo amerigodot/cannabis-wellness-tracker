@@ -78,26 +78,54 @@ export const InsightsChart = ({
   const getBadgeTrends = () => {
     if (entries.length === 0) return [];
     
-    // Create a data point for each entry (no grouping)
-    return entries
-      .map(entry => {
-        const date = new Date(entry.created_at);
-        const dateKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
-        
-        // Count badges for this entry
-        const badgeCounts: Record<string, number> = {};
-        [...(entry.observations || []), ...(entry.activities || []), ...(entry.negative_side_effects || [])].forEach(badge => {
-          badgeCounts[badge] = (badgeCounts[badge] || 0) + 1;
-        });
-        
-        return {
-          date: dateKey,
-          timestamp: date.getTime(),
-          ...badgeCounts
-        };
-      })
-      .sort((a, b) => a.timestamp - b.timestamp)
-      .map(({ timestamp, ...rest }) => rest); // Remove timestamp after sorting
+    // Find date range of entries
+    const dates = entries.map(e => new Date(e.created_at).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const daySpan = (maxDate - minDate) / (1000 * 60 * 60 * 24);
+    
+    // Determine grouping: daily if < 14 days, weekly if < 90 days, monthly otherwise
+    const groupBy = daySpan < 14 ? 'day' : daySpan < 90 ? 'week' : 'month';
+    
+    const groupedData: Record<string, Record<string, number>> = {};
+    
+    entries.forEach(entry => {
+      const date = new Date(entry.created_at);
+      let groupKey: string;
+      
+      if (groupBy === 'day') {
+        groupKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else if (groupBy === 'week') {
+        // Get the start of the week
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        groupKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else {
+        // Monthly grouping
+        groupKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+      
+      if (!groupedData[groupKey]) {
+        groupedData[groupKey] = {};
+      }
+      
+      // Count all badges for this time period
+      [...(entry.observations || []), ...(entry.activities || []), ...(entry.negative_side_effects || [])].forEach(badge => {
+        groupedData[groupKey][badge] = (groupedData[groupKey][badge] || 0) + 1;
+      });
+    });
+    
+    // Convert to array format for recharts
+    return Object.entries(groupedData)
+      .map(([period, badges]) => ({
+        period,
+        ...badges
+      }))
+      .sort((a, b) => {
+        const dateA = new Date(a.period);
+        const dateB = new Date(b.period);
+        return dateA.getTime() - dateB.getTime();
+      });
   };
 
   const trendData = getBadgeTrends();
@@ -106,7 +134,7 @@ export const InsightsChart = ({
   const allTrendBadges = new Set<string>();
   trendData.forEach(dataPoint => {
     Object.keys(dataPoint).forEach(key => {
-      if (key !== 'date') allTrendBadges.add(key);
+      if (key !== 'period') allTrendBadges.add(key);
     });
   });
   
@@ -239,19 +267,19 @@ export const InsightsChart = ({
       </div>
 
       {/* Trends Chart - Main Chart */}
-      {trendData.length > 0 && badgesToShow.length > 0 && (
+      {trendData.length > 1 && badgesToShow.length > 0 && (
         <div className="mb-6">
           <p className="text-xs text-muted-foreground mb-4">
             {selectedBadges.size > 0 
-              ? "Showing badge occurrences for selected badges across entries" 
-              : `Showing badge occurrences for top ${topCount} most common badges`}
+              ? "Showing trends for selected badges" 
+              : `Showing trends for top ${topCount} most common badges`}
           </p>
           <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="date" 
+                  dataKey="period" 
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   height={60}
                   angle={-45}
@@ -292,7 +320,7 @@ export const InsightsChart = ({
         </div>
       )}
 
-      {trendData.length === 0 && (
+      {trendData.length <= 1 && (
         <div className="text-center py-12 text-muted-foreground">
           <TrendingUp className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p className="text-lg">Not enough data to show trends yet</p>
