@@ -84,8 +84,29 @@ export const InsightsChart = ({
     const maxDate = Math.max(...dates);
     const daySpan = (maxDate - minDate) / (1000 * 60 * 60 * 24);
     
-    // Determine grouping: daily if < 14 days, weekly if < 90 days, monthly otherwise
-    const groupBy = daySpan < 14 ? 'day' : daySpan < 90 ? 'week' : 'month';
+    // Determine grouping to aim for 3-24 data points on X-axis
+    let groupBy: 'day' | 'week' | 'month';
+    const dailyPoints = Math.ceil(daySpan) + 1;
+    const weeklyPoints = Math.ceil(daySpan / 7);
+    const monthlyPoints = Math.ceil(daySpan / 30);
+    
+    // Choose grouping that gives us closest to 3-24 data points
+    if (dailyPoints >= 3 && dailyPoints <= 24) {
+      groupBy = 'day';
+    } else if (weeklyPoints >= 3 && weeklyPoints <= 24) {
+      groupBy = 'week';
+    } else if (monthlyPoints >= 3 && monthlyPoints <= 24) {
+      groupBy = 'month';
+    } else {
+      // If all options are outside range, pick the closest
+      if (dailyPoints < 3) {
+        groupBy = 'day'; // Too few points, use finest granularity
+      } else if (monthlyPoints > 24) {
+        groupBy = 'month'; // Too many points even with monthly, use coarsest
+      } else {
+        groupBy = weeklyPoints <= 24 ? 'week' : 'month';
+      }
+    }
     
     const groupedData: Record<string, Record<string, number>> = {};
     
