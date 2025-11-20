@@ -297,6 +297,24 @@ export const InsightsChart = ({
                     borderRadius: '6px',
                     color: 'hsl(var(--card-foreground))'
                   }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload || payload.length === 0) return null;
+                    return (
+                      <div className="bg-card border border-border rounded-md p-3 shadow-lg">
+                        {payload.map((entry, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm">
+                            <div 
+                              className="w-3 h-3 rounded-full" 
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="text-card-foreground">
+                              {entry.name}: <span className="font-semibold">{entry.value}</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }}
                 />
                 <Legend 
                   wrapperStyle={{ fontSize: '12px' }}
