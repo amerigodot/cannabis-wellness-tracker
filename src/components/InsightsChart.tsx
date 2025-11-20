@@ -288,6 +288,7 @@ export const InsightsChart = ({
                 <YAxis 
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 } }}
+                  allowDecimals={false}
                 />
                 <Tooltip 
                   contentStyle={{
