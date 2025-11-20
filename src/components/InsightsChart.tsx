@@ -78,35 +78,52 @@ export const InsightsChart = ({
   const getBadgeTrends = () => {
     if (entries.length === 0) return [];
     
-    // Group entries by week
-    const weeklyData: Record<string, Record<string, number>> = {};
+    // Find date range of entries
+    const dates = entries.map(e => new Date(e.created_at).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const daySpan = (maxDate - minDate) / (1000 * 60 * 60 * 24);
+    
+    // Determine grouping: daily if < 14 days, weekly if < 90 days, monthly otherwise
+    const groupBy = daySpan < 14 ? 'day' : daySpan < 90 ? 'week' : 'month';
+    
+    const groupedData: Record<string, Record<string, number>> = {};
     
     entries.forEach(entry => {
       const date = new Date(entry.created_at);
-      // Get the start of the week
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay());
-      const weekKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      let groupKey: string;
       
-      if (!weeklyData[weekKey]) {
-        weeklyData[weekKey] = {};
+      if (groupBy === 'day') {
+        groupKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else if (groupBy === 'week') {
+        // Get the start of the week
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        groupKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } else {
+        // Monthly grouping
+        groupKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       }
       
-      // Count all badges for this week
+      if (!groupedData[groupKey]) {
+        groupedData[groupKey] = {};
+      }
+      
+      // Count all badges for this time period
       [...(entry.observations || []), ...(entry.activities || []), ...(entry.negative_side_effects || [])].forEach(badge => {
-        weeklyData[weekKey][badge] = (weeklyData[weekKey][badge] || 0) + 1;
+        groupedData[groupKey][badge] = (groupedData[groupKey][badge] || 0) + 1;
       });
     });
     
     // Convert to array format for recharts
-    return Object.entries(weeklyData)
-      .map(([week, badges]) => ({
-        week,
+    return Object.entries(groupedData)
+      .map(([period, badges]) => ({
+        period,
         ...badges
       }))
       .sort((a, b) => {
-        const dateA = new Date(a.week);
-        const dateB = new Date(b.week);
+        const dateA = new Date(a.period);
+        const dateB = new Date(b.period);
         return dateA.getTime() - dateB.getTime();
       });
   };
@@ -115,9 +132,9 @@ export const InsightsChart = ({
   
   // Get all unique badges that appear in trends
   const allTrendBadges = new Set<string>();
-  trendData.forEach(week => {
-    Object.keys(week).forEach(key => {
-      if (key !== 'week') allTrendBadges.add(key);
+  trendData.forEach(dataPoint => {
+    Object.keys(dataPoint).forEach(key => {
+      if (key !== 'period') allTrendBadges.add(key);
     });
   });
   
@@ -262,7 +279,7 @@ export const InsightsChart = ({
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
-                  dataKey="week" 
+                  dataKey="period" 
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   height={60}
                   angle={-45}
