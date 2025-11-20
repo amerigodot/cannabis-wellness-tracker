@@ -87,45 +87,78 @@ export const InsightsChart = ({
     // Determine grouping: daily if < 14 days, weekly if < 90 days, monthly otherwise
     const groupBy = daySpan < 14 ? 'day' : daySpan < 90 ? 'week' : 'month';
     
-    const groupedData: Record<string, Record<string, number>> = {};
+    const groupedData: Record<string, { badges: Record<string, number>, startDate: Date, endDate: Date }> = {};
     
     entries.forEach(entry => {
       const date = new Date(entry.created_at);
       let groupKey: string;
+      let startDate: Date;
+      let endDate: Date;
       
       if (groupBy === 'day') {
         groupKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        startDate = new Date(date);
+        endDate = new Date(date);
       } else if (groupBy === 'week') {
         // Get the start of the week
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
-        groupKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        groupKey = weekStart.toISOString();
+        startDate = weekStart;
+        endDate = weekEnd;
       } else {
         // Monthly grouping
-        groupKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+        const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        groupKey = monthStart.toISOString();
+        startDate = monthStart;
+        endDate = monthEnd;
       }
       
       if (!groupedData[groupKey]) {
-        groupedData[groupKey] = {};
+        groupedData[groupKey] = { badges: {}, startDate, endDate };
+      } else {
+        // Update date range if needed
+        if (date < groupedData[groupKey].startDate) {
+          groupedData[groupKey].startDate = date;
+        }
+        if (date > groupedData[groupKey].endDate) {
+          groupedData[groupKey].endDate = date;
+        }
       }
       
       // Count all badges for this time period
       [...(entry.observations || []), ...(entry.activities || []), ...(entry.negative_side_effects || [])].forEach(badge => {
-        groupedData[groupKey][badge] = (groupedData[groupKey][badge] || 0) + 1;
+        groupedData[groupKey].badges[badge] = (groupedData[groupKey].badges[badge] || 0) + 1;
       });
     });
     
-    // Convert to array format for recharts
+    // Convert to array format for recharts with date range labels
     return Object.entries(groupedData)
-      .map(([period, badges]) => ({
-        period,
-        ...badges
-      }))
-      .sort((a, b) => {
-        const dateA = new Date(a.period);
-        const dateB = new Date(b.period);
-        return dateA.getTime() - dateB.getTime();
-      });
+      .map(([_, data]) => {
+        let periodLabel: string;
+        
+        if (groupBy === 'day') {
+          periodLabel = data.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else if (groupBy === 'week') {
+          const startStr = data.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const endStr = data.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          periodLabel = `${startStr} - ${endStr}`;
+        } else {
+          const startStr = data.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const endStr = data.endDate.toLocaleDateString('en-US', { day: 'numeric' });
+          periodLabel = `${startStr}-${endStr}`;
+        }
+        
+        return {
+          period: periodLabel,
+          sortKey: data.startDate.getTime(),
+          ...data.badges
+        };
+      })
+      .sort((a, b) => a.sortKey - b.sortKey);
   };
 
   const trendData = getBadgeTrends();
