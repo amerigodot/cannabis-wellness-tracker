@@ -605,7 +605,7 @@ const Index = () => {
         </header>
 
         {/* Entry Form */}
-        <Card className="p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <Card id="new-entry-card" className="p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold flex items-center gap-2">
               <Calendar className="w-6 h-6 text-primary" />
@@ -909,13 +909,13 @@ const Index = () => {
         </Card>
 
         {/* Reminders */}
-        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div id="reminders-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Reminders />
         </div>
 
         {/* Insights Chart */}
         {entries.length > 0 && (
-          <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div id="insights-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <InsightsChart 
               entries={entries}
               filterObservations={filterObservations}
