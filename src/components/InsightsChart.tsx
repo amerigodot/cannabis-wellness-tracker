@@ -317,6 +317,22 @@ export const InsightsChart = ({
     );
   };
 
+  // Get top strains from filtered entries
+  const getTopStrains = (limit: number = 5) => {
+    const strainCounts: Record<string, number> = {};
+    
+    entries.forEach(entry => {
+      strainCounts[entry.strain] = (strainCounts[entry.strain] || 0) + 1;
+    });
+    
+    return Object.entries(strainCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit);
+  };
+
+  const hasActiveFilters = selectedBadges.size > 0;
+  const topStrains = hasActiveFilters ? getTopStrains(5) : [];
+
   return (
     <TooltipProvider>
       <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
@@ -352,6 +368,30 @@ export const InsightsChart = ({
           )}
         </div>
       </div>
+
+      {/* Top Strains for Active Filters */}
+      {hasActiveFilters && topStrains.length > 0 && (
+        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm font-semibold mb-3 text-foreground">
+            Top Strains for Current Selection
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {topStrains.map(([strain, count]) => (
+              <Badge
+                key={strain}
+                variant="outline"
+                className="px-3 py-1.5 text-xs border-primary/30 bg-background"
+              >
+                <span className="font-medium">{strain}</span>
+                <span className="ml-1.5 text-muted-foreground">({count})</span>
+              </Badge>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Showing the most frequently used strains matching your current filters
+          </p>
+        </div>
+      )}
 
       {/* Trends Chart - Main Chart */}
       {trendData.length > 1 && badgesToShow.length > 0 && (
