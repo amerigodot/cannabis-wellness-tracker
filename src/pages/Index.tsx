@@ -744,16 +744,6 @@ const Index = () => {
                   step={1}
                   className="w-full"
                 />
-                {/* Tick marks - positions match non-linear distribution (2h at 50%) */}
-                <div className="absolute top-[9px] left-0 right-0 pointer-events-none">
-                  {/* 1h at 25% */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '25%' }} />
-                  {/* 2h at 50% - REMOVED to avoid overlap with default thumb position */}
-                  {/* 6h at 59.09% */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '59.09%' }} />
-                  {/* 12h at 72.73% */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '72.73%' }} />
-                </div>
               </div>
               <div className="relative text-xs text-muted-foreground h-4 mt-1">
                 <span className="absolute left-0">Now</span>
