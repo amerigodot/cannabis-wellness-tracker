@@ -111,9 +111,12 @@ export default function Auth() {
         <Card className="w-full max-w-md shadow-soft">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Medical Marijuana Journal</CardTitle>
-            <CardDescription className="text-center">
-              Sign in or create an account to track your usage
+            <CardDescription className="text-center text-base">
+              Start tracking your wellness journey
             </CardDescription>
+            <p className="text-center text-sm text-muted-foreground">
+              Discover patterns, optimize your experience
+            </p>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
