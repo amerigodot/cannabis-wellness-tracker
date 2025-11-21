@@ -16,6 +16,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -201,6 +202,7 @@ const Index = () => {
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
   const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -236,6 +238,12 @@ const Index = () => {
         
         if (!session) {
           navigate("/auth");
+        } else if (event === 'SIGNED_IN') {
+          // Check if this is the user's first time
+          const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${session.user.id}`);
+          if (!hasSeenOnboarding) {
+            setShowOnboarding(true);
+          }
         }
       }
     );
@@ -447,6 +455,13 @@ const Index = () => {
     await supabase.auth.signOut();
     navigate("/auth");
   };
+  
+  const handleOnboardingComplete = () => {
+    if (user) {
+      localStorage.setItem(`onboarding_completed_${user.id}`, "true");
+    }
+    setShowOnboarding(false);
+  };
 
   const openNotesDialog = (entryId?: string, existingNotes?: string) => {
     if (entryId) {
@@ -544,6 +559,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+      <OnboardingTour isOpen={showOnboarding} onComplete={handleOnboardingComplete} />
+      
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
         <header className="mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
