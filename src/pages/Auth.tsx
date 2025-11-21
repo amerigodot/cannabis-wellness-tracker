@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Shield, Lock, EyeOff, Calendar, LineChart, Bell } from "lucide-react";
+import { Shield, Lock, EyeOff, Calendar, LineChart, Bell, Sparkles } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -153,14 +153,20 @@ export default function Auth() {
           </div>
           
           <div className="text-center mb-8">
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="w-full max-w-xs mx-auto hover:border-primary hover:bg-primary/5 transition-colors" 
-              onClick={handleDemoMode}
-            >
-              Try Demo Mode
-            </Button>
+            <div className="relative inline-block">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full max-w-xs mx-auto hover:border-primary hover:bg-primary/5 transition-colors relative" 
+                onClick={handleDemoMode}
+              >
+                <Sparkles className="w-5 h-5 mr-2 text-accent" />
+                Try Demo Mode
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
+                  Free
+                </span>
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground mt-2">
               Explore the app with sample data (read-only)
             </p>
