@@ -258,12 +258,99 @@ export const InsightsChart = ({
     }
   };
 
+  // Filter presets for quick analysis
+  const filterPresets = {
+    'energizing': {
+      name: '⚡ Energizing Effects',
+      observations: ['Energy Increase', 'Improved Focus', 'Mood Lift'],
+      activities: ['Work', 'Exercise', 'Writing'],
+      sideEffects: []
+    },
+    'relaxation': {
+      name: '🧘 Relaxation Sessions',
+      observations: ['Relaxation', 'Reduced Anxiety', 'Muscle Relaxation'],
+      activities: ['Meditation', 'Relaxing', 'Reading'],
+      sideEffects: []
+    },
+    'sleep': {
+      name: '😴 Sleep Aid',
+      observations: ['Better Sleep', 'Relaxation', 'Reduced Anxiety'],
+      activities: ['Meditation', 'Relaxing'],
+      sideEffects: []
+    },
+    'social': {
+      name: '🎨 Social & Creative',
+      observations: ['Mood Lift', 'Creativity Boost'],
+      activities: ['Social', 'Painting', 'Music'],
+      sideEffects: []
+    },
+    'pain': {
+      name: '💊 Pain Management',
+      observations: ['Pain Relief', 'Reduced Inflammation', 'Muscle Relaxation'],
+      activities: ['Relaxing', 'Meditation'],
+      sideEffects: []
+    }
+  };
+
+  const applyPreset = (presetKey: keyof typeof filterPresets) => {
+    const preset = filterPresets[presetKey];
+    setFilterObservations(preset.observations);
+    setFilterActivities(preset.activities);
+    setFilterSideEffects(preset.sideEffects);
+  };
+
+  const clearAllFilters = () => {
+    setFilterObservations([]);
+    setFilterActivities([]);
+    setFilterSideEffects([]);
+  };
+
+  const isPresetActive = (presetKey: keyof typeof filterPresets) => {
+    const preset = filterPresets[presetKey];
+    return (
+      filterObservations.length === preset.observations.length &&
+      filterActivities.length === preset.activities.length &&
+      filterSideEffects.length === preset.sideEffects.length &&
+      preset.observations.every(obs => filterObservations.includes(obs)) &&
+      preset.activities.every(act => filterActivities.includes(act)) &&
+      preset.sideEffects.every(eff => filterSideEffects.includes(eff))
+    );
+  };
+
   return (
     <TooltipProvider>
       <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp className="w-6 h-6 text-primary" />
         <h2 className="text-2xl font-semibold">Badge Trends</h2>
+      </div>
+
+      {/* Filter Presets */}
+      <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border">
+        <p className="text-sm font-semibold mb-3 text-foreground">Quick Filter Presets</p>
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(filterPresets) as Array<keyof typeof filterPresets>).map(presetKey => (
+            <Button
+              key={presetKey}
+              variant={isPresetActive(presetKey) ? "default" : "outline"}
+              size="sm"
+              onClick={() => applyPreset(presetKey)}
+              className="text-xs"
+            >
+              {filterPresets[presetKey].name}
+            </Button>
+          ))}
+          {selectedBadges.size > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Trends Chart - Main Chart */}
