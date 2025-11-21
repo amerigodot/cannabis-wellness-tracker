@@ -922,7 +922,7 @@ const Index = () => {
         {entries.length > 0 && (
           <div id="insights-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <InsightsChart 
-              entries={entries}
+              entries={entries.filter(entry => isEntryInTimeRange(entry))}
               filterObservations={filterObservations}
               setFilterObservations={setFilterObservations}
               filterActivities={filterActivities}
