@@ -760,6 +760,13 @@ const Index = () => {
     toast.success(`Applied ${preset.name} preset`);
   };
 
+  const clearAllSelections = () => {
+    setSelectedObservations([]);
+    setSelectedActivities([]);
+    setSelectedNegativeSideEffects([]);
+    toast.success("All selections cleared");
+  };
+
   const isEntryInTimeRange = (entry: JournalEntry) => {
     const consumptionDate = parseISO(entry.consumption_time || entry.created_at);
     const now = new Date();
@@ -1253,6 +1260,20 @@ const Index = () => {
 
             {/* Experience Categories - Framed Sections */}
             <div className="space-y-4">
+              {/* Clear All Button */}
+              {(selectedObservations.length > 0 || selectedActivities.length > 0 || selectedNegativeSideEffects.length > 0) && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllSelections}
+                    className="text-muted-foreground hover:text-foreground gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Clear All Selections
+                  </Button>
+                </div>
+              )}
               {/* Observations */}
               <div className="border border-observation/30 rounded-lg p-4 bg-observation/5 hover:bg-observation/10 transition-colors duration-200">
                 <div className="flex items-center justify-between mb-3">
