@@ -922,33 +922,7 @@ const Index = () => {
         {entries.length > 0 && (
           <div id="insights-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <InsightsChart 
-              entries={entries.filter(entry => {
-                // Filter by time range
-                if (!isEntryInTimeRange(entry)) return false;
-                
-                // Filter by observations
-                if (filterObservations.length > 0) {
-                  if (!filterObservations.some(obs => entry.observations.includes(obs))) {
-                    return false;
-                  }
-                }
-                
-                // Filter by activities
-                if (filterActivities.length > 0) {
-                  if (!filterActivities.some(act => entry.activities.includes(act))) {
-                    return false;
-                  }
-                }
-                
-                // Filter by side effects
-                if (filterSideEffects.length > 0) {
-                  if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
-                    return false;
-                  }
-                }
-                
-                return true;
-              })}
+              entries={entries.filter(entry => isEntryInTimeRange(entry))}
               filterObservations={filterObservations}
               setFilterObservations={setFilterObservations}
               filterActivities={filterActivities}
