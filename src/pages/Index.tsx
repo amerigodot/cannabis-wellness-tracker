@@ -1274,6 +1274,7 @@ const Index = () => {
                   filterMethods={filterMethods}
                   setFilterMethods={setFilterMethods}
                   isDemoMode={isDemoMode}
+                  demoEntries={SAMPLE_ENTRIES}
                 />
               </TabsContent>
             </Tabs>
