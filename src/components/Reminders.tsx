@@ -180,8 +180,8 @@ export const Reminders = () => {
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold flex items-center gap-2">
-          <Bell className="w-6 h-6 text-primary" />
+        <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+          <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           Reminders
         </h2>
         <Button
@@ -189,8 +189,8 @@ export const Reminders = () => {
           variant={showForm ? "ghost" : "default"}
           size="sm"
         >
-          {showForm ? <X className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-          {showForm ? "Cancel" : "Add Reminder"}
+          {showForm ? <X className="w-4 h-4 sm:mr-2" /> : <Plus className="w-4 h-4 sm:mr-2" />}
+          <span className="hidden sm:inline">{showForm ? "Cancel" : "Add Reminder"}</span>
         </Button>
       </div>
 
