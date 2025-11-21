@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Calendar, Bell, LineChart, ArrowRight, Check, X } from "lucide-react";
 
 interface OnboardingTourProps {
@@ -134,6 +135,14 @@ export const OnboardingTour = ({ isOpen, onComplete }: OnboardingTourProps) => {
           <p className="text-sm text-muted-foreground">
             {step.description}
           </p>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Progress</span>
+              <span className="font-medium">{Math.round(((currentStep + 1) / STEPS.length) * 100)}%</span>
+            </div>
+            <Progress value={((currentStep + 1) / STEPS.length) * 100} className="h-2" />
+          </div>
           
           <div className="flex justify-center gap-2">
             {STEPS.map((_, index) => (
