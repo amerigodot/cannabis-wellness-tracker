@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, TrendingDown, Minus, Check } from "lucide-react";
+import { TrendingUp, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -255,39 +255,6 @@ export const InsightsChart = ({
     return selectedBadges.has(badge);
   };
 
-  // Calculate trend direction for a badge
-  const getBadgeTrend = (badge: string): 'increasing' | 'decreasing' | 'stable' | null => {
-    if (trendData.length < 2) return null;
-    
-    // Get first and last non-zero values for this badge
-    const values = trendData
-      .map(d => d[badge] as number || 0)
-      .filter(v => v > 0);
-    
-    if (values.length < 2) return null;
-    
-    const firstValue = values[0];
-    const lastValue = values[values.length - 1];
-    const percentChange = ((lastValue - firstValue) / firstValue) * 100;
-    
-    // Consider stable if change is less than 10%
-    if (Math.abs(percentChange) < 10) return 'stable';
-    return percentChange > 0 ? 'increasing' : 'decreasing';
-  };
-
-  // Get trend icon and color
-  const getTrendIcon = (trend: 'increasing' | 'decreasing' | 'stable' | null) => {
-    if (!trend) return null;
-    switch (trend) {
-      case 'increasing':
-        return <TrendingUp className="w-3 h-3 text-green-500" />;
-      case 'decreasing':
-        return <TrendingDown className="w-3 h-3 text-red-500" />;
-      case 'stable':
-        return <Minus className="w-3 h-3 text-muted-foreground" />;
-    }
-  };
-
   // Check if all badges in a category are selected
   const isAllCategorySelected = (badges: [string, number][]) => {
     const categoryBadges = badges.map(([badge]) => badge);
@@ -448,11 +415,10 @@ export const InsightsChart = ({
             <div className="flex flex-wrap gap-2">
               {topBadges.observations.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
-                const trend = isSelected ? getBadgeTrend(badge) : null;
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs inline-flex items-center gap-1.5"
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--observation))' : 'transparent',
                       borderColor: 'hsl(var(--observation))',
@@ -463,7 +429,6 @@ export const InsightsChart = ({
                     onClick={() => toggleBadge(badge)}
                   >
                     {badge} ({count})
-                    {trend && getTrendIcon(trend)}
                   </Badge>
                 );
               })}
@@ -495,11 +460,10 @@ export const InsightsChart = ({
             <div className="flex flex-wrap gap-2">
               {topBadges.activities.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
-                const trend = isSelected ? getBadgeTrend(badge) : null;
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs inline-flex items-center gap-1.5"
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--activity))' : 'transparent',
                       borderColor: 'hsl(var(--activity))',
@@ -510,7 +474,6 @@ export const InsightsChart = ({
                     onClick={() => toggleBadge(badge)}
                   >
                     {badge} ({count})
-                    {trend && getTrendIcon(trend)}
                   </Badge>
                 );
               })}
@@ -542,11 +505,10 @@ export const InsightsChart = ({
             <div className="flex flex-wrap gap-2">
               {topBadges.sideEffects.map(([badge, count]) => {
                 const isSelected = isBadgeSelected(badge);
-                const trend = isSelected ? getBadgeTrend(badge) : null;
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs inline-flex items-center gap-1.5"
+                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--side-effect))' : 'transparent',
                       borderColor: 'hsl(var(--side-effect))',
@@ -557,7 +519,6 @@ export const InsightsChart = ({
                     onClick={() => toggleBadge(badge)}
                   >
                     {badge} ({count})
-                    {trend && getTrendIcon(trend)}
                   </Badge>
                 );
               })}
