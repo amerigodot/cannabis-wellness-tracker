@@ -99,6 +99,39 @@ const AVAILABLE_ICONS = [
   { name: "Fire", value: "flame" },
 ];
 
+const ENTRY_PRESETS = [
+  {
+    name: "Morning Session",
+    icon: Coffee,
+    observations: ["Energy Increase", "Mood Lift", "Improved Focus"],
+    activities: ["Work", "Exercise", "Cooking"],
+  },
+  {
+    name: "Evening Relaxation",
+    icon: Heart,
+    observations: ["Relaxation", "Better Sleep", "Reduced Anxiety"],
+    activities: ["Reading", "Movies", "Meditation"],
+  },
+  {
+    name: "Social Gathering",
+    icon: Sparkles,
+    observations: ["Mood Lift", "Reduced Anxiety", "Creativity Boost"],
+    activities: ["Social", "Music", "Gaming"],
+  },
+  {
+    name: "Creative Work",
+    icon: Brain,
+    observations: ["Creativity Boost", "Improved Focus", "Mood Lift"],
+    activities: ["Writing", "Painting", "Music"],
+  },
+  {
+    name: "Pain Relief",
+    icon: Heart,
+    observations: ["Pain Relief", "Reduced Inflammation", "Muscle Relaxation"],
+    activities: ["Relaxing", "Meditation", "Reading"],
+  },
+];
+
 const getMethodIcon = (method: string) => {
   const methodIconMap: Record<string, any> = {
     "Vape": Wind,
@@ -721,6 +754,12 @@ const Index = () => {
     );
   };
 
+  const applyPreset = (preset: typeof ENTRY_PRESETS[0]) => {
+    setSelectedObservations(preset.observations);
+    setSelectedActivities(preset.activities);
+    toast.success(`Applied ${preset.name} preset`);
+  };
+
   const isEntryInTimeRange = (entry: JournalEntry) => {
     const consumptionDate = parseISO(entry.consumption_time || entry.created_at);
     const now = new Date();
@@ -1179,6 +1218,36 @@ const Index = () => {
                 <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
                 <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
                 <span className="absolute right-0">24h</span>
+              </div>
+            </div>
+
+            {/* Quick Presets */}
+            <div className="border border-primary/20 rounded-lg p-4 bg-primary/5">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-4 h-4 text-primary" />
+                <Label className="text-base font-semibold">Quick Presets</Label>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Apply common combinations for your session type
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {ENTRY_PRESETS.map((preset) => {
+                  const PresetIcon = preset.icon;
+                  return (
+                    <Button
+                      key={preset.name}
+                      variant="outline"
+                      size="sm"
+                      className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/10 hover:border-primary transition-all"
+                      onClick={() => applyPreset(preset)}
+                    >
+                      <PresetIcon className="w-5 h-5" />
+                      <span className="text-xs font-medium text-center leading-tight">
+                        {preset.name}
+                      </span>
+                    </Button>
+                  );
+                })}
               </div>
             </div>
 
