@@ -198,7 +198,7 @@ const Index = () => {
   const [filterMethods, setFilterMethods] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [minutesAgo, setMinutesAgo] = useState<number>(0);
+  const [minutesAgo, setMinutesAgo] = useState<number>(720); // Default to 2 hours (720 slider value = 120 minutes)
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
   const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
@@ -746,26 +746,21 @@ const Index = () => {
                 />
                 {/* Tick marks - positions match non-linear distribution (2h at 50%) */}
                 <div className="absolute top-[9px] left-0 right-0 pointer-events-none">
-                  {/* 15min at 6.25% */}
-                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '6.25%' }} />
-                  {/* 30min at 12.5% */}
-                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '12.5%' }} />
                   {/* 1h at 25% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '25%' }} />
-                  {/* 2h at 50% */}
-                  <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '50%' }} />
+                  {/* 2h at 50% - MIDPOINT */}
+                  <div className="absolute w-px h-4 bg-primary/60" style={{ left: '50%' }} />
                   {/* 6h at 59.09% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '59.09%' }} />
                   {/* 12h at 72.73% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '72.73%' }} />
-                  {/* 18h at 86.36% */}
-                  <div className="absolute w-px h-2 bg-muted-foreground/40" style={{ left: '86.36%' }} />
                 </div>
               </div>
               <div className="relative text-xs text-muted-foreground h-4 mt-1">
                 <span className="absolute left-0">Now</span>
                 <span className="absolute left-[25%] -translate-x-1/2">1h</span>
-                <span className="absolute left-[50%] -translate-x-1/2">2h</span>
+                <span className="absolute left-[50%] -translate-x-1/2 font-medium text-primary">2h</span>
+                <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
                 <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
                 <span className="absolute right-0">24h</span>
               </div>
