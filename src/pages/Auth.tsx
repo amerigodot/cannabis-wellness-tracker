@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<'calendar' | 'insights' | 'reminders' | null>(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -110,6 +112,85 @@ export default function Auth() {
         <ThemeToggle />
       </div>
       
+      {/* Feature Detail Dialogs */}
+      <Dialog open={activeFeature === 'calendar'} onOpenChange={() => setActiveFeature(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl text-center">Calendar Tracking</DialogTitle>
+            <DialogDescription className="text-base space-y-4 pt-4">
+              <p>
+                <strong className="text-foreground">Comprehensive Journal Entries:</strong> Record every detail of your cannabis consumption in one place. Log the strain name, dosage amount with units (grams, milliliters, or milligrams), and consumption method (vape, smoke, oil, edible, tincture, or topical).
+              </p>
+              <p>
+                <strong className="text-foreground">Track Your Experience:</strong> Document how you feel with customizable observations like pain relief, relaxation, focus, or creativity. Note what activities you engaged in—whether social, creative, exercise, or meditation. Keep track of any negative side effects such as dry mouth, dizziness, or anxiety.
+              </p>
+              <p>
+                <strong className="text-foreground">Personal Notes & Timestamps:</strong> Add private notes to any entry for context you want to remember later. Each entry automatically records when it was created, and you can also specify the exact time of consumption for accurate tracking.
+              </p>
+              <p>
+                <strong className="text-foreground">Unified Calendar View:</strong> See all your journal entries and reminders together in a visual calendar interface. Quickly identify patterns by viewing entries from specific dates, and access all your historical data in one organized timeline.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={activeFeature === 'insights'} onOpenChange={() => setActiveFeature(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <LineChart className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl text-center">Insights & Trends</DialogTitle>
+            <DialogDescription className="text-base space-y-4 pt-4">
+              <p>
+                <strong className="text-foreground">Visualize Your Patterns:</strong> Transform your journal entries into meaningful charts and graphs. See how your observations, activities, and side effects trend over time with intuitive visualizations that make complex data easy to understand.
+              </p>
+              <p>
+                <strong className="text-foreground">Smart Filtering:</strong> Focus on what matters most by filtering your data by specific badges (observations, activities, or side effects), consumption methods (vape, smoke, edible, etc.), or time ranges (today, this week, this month, or all time).
+              </p>
+              <p>
+                <strong className="text-foreground">Adaptive Time Grouping:</strong> The insights chart automatically adjusts its time scale based on your data. Short-term data is grouped by day for precision, mid-term by week for weekly patterns, and long-term by month for broader trends—ensuring you always see the most relevant view.
+              </p>
+              <p>
+                <strong className="text-foreground">Discover What Works:</strong> Identify which strains, methods, and dosages correlate with your desired effects. Understand when negative side effects occur and adjust your approach accordingly. Use these insights to optimize your wellness journey and make informed decisions.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={activeFeature === 'reminders'} onOpenChange={() => setActiveFeature(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl text-center">Smart Reminders</DialogTitle>
+            <DialogDescription className="text-base space-y-4 pt-4">
+              <p>
+                <strong className="text-foreground">Stay Consistent:</strong> Build a reliable tracking habit with customizable reminders. Set notifications to prompt you when it's time to log a new journal entry, take your medication, or review your progress.
+              </p>
+              <p>
+                <strong className="text-foreground">Flexible Scheduling:</strong> Create reminders with custom titles and specific times that fit your routine. Choose from multiple recurrence options: one-time reminders for special occasions, daily reminders for regular habits, weekly check-ins, or monthly reviews.
+              </p>
+              <p>
+                <strong className="text-foreground">Easy Management:</strong> View all your active reminders in one place. Toggle reminders on or off as your needs change without deleting them permanently. Delete reminders you no longer need with a single click.
+              </p>
+              <p>
+                <strong className="text-foreground">Calendar Integration:</strong> See your upcoming reminders directly in the calendar view alongside your journal entries. This unified view helps you plan ahead and ensures you never miss an important tracking moment or medication schedule.
+              </p>
+              <p>
+                <strong className="text-foreground">Browser Notifications:</strong> Receive timely toast notifications when reminders trigger, keeping you on track even when you're not actively viewing the app. Stay consistent with your wellness routine effortlessly.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      
       <main className="w-full max-w-4xl">
         {/* Features Preview Section */}
         <div className="mb-8 text-center">
@@ -121,7 +202,10 @@ export default function Auth() {
           </p>
           
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
+            <button 
+              onClick={() => setActiveFeature('calendar')}
+              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
@@ -129,9 +213,13 @@ export default function Auth() {
               <p className="text-sm text-muted-foreground">
                 Log entries with detailed consumption info, effects, and personal notes
               </p>
-            </div>
+              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
+            </button>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
+            <button 
+              onClick={() => setActiveFeature('insights')}
+              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <LineChart className="w-6 h-6 text-primary" />
               </div>
@@ -139,9 +227,13 @@ export default function Auth() {
               <p className="text-sm text-muted-foreground">
                 Visualize your usage patterns and understand what works best for you
               </p>
-            </div>
+              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
+            </button>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
+            <button 
+              onClick={() => setActiveFeature('reminders')}
+              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Bell className="w-6 h-6 text-primary" />
               </div>
@@ -149,7 +241,8 @@ export default function Auth() {
               <p className="text-sm text-muted-foreground">
                 Set recurring reminders to maintain consistent tracking habits
               </p>
-            </div>
+              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
+            </button>
           </div>
           
           <div className="text-center mb-8">
