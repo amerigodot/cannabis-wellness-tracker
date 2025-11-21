@@ -202,6 +202,11 @@ const Index = () => {
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
   const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [activeTab, setActiveTab] = useState<'list' | 'calendar'>('list');
+  
+  // Swipe detection state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -506,7 +511,7 @@ const Index = () => {
       setEditingTimeEntryId(null);
       return;
     }
-
+    
     if (!editingTimeEntryId) return;
 
     const { error } = await supabase
@@ -520,6 +525,33 @@ const Index = () => {
       toast.success("Consumption time updated!");
       fetchEntries();
       setEditingTimeEntryId(null);
+    }
+  };
+  
+  // Swipe detection - minimum distance for swipe (50px)
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && activeTab === 'list') {
+      setActiveTab('calendar');
+    }
+    if (isRightSwipe && activeTab === 'calendar') {
+      setActiveTab('list');
     }
   };
 
@@ -905,8 +937,13 @@ const Index = () => {
 
         {/* Entries List and Calendar View */}
         {entries.length > 0 && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-            <Tabs defaultValue="list" className="w-full">
+          <div 
+            className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'list' | 'calendar')} className="w-full">
               <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
                 <TabsTrigger value="list" className="flex items-center gap-2">
                   <List className="h-4 w-4" />
