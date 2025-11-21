@@ -748,8 +748,7 @@ const Index = () => {
                 <div className="absolute top-[9px] left-0 right-0 pointer-events-none">
                   {/* 1h at 25% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '25%' }} />
-                  {/* 2h at 50% - MIDPOINT */}
-                  <div className="absolute w-px h-4 bg-primary/60" style={{ left: '50%' }} />
+                  {/* 2h at 50% - REMOVED to avoid overlap with default thumb position */}
                   {/* 6h at 59.09% */}
                   <div className="absolute w-px h-3 bg-muted-foreground/60" style={{ left: '59.09%' }} />
                   {/* 12h at 72.73% */}
@@ -759,7 +758,7 @@ const Index = () => {
               <div className="relative text-xs text-muted-foreground h-4 mt-1">
                 <span className="absolute left-0">Now</span>
                 <span className="absolute left-[25%] -translate-x-1/2">1h</span>
-                <span className="absolute left-[50%] -translate-x-1/2 font-medium text-primary">2h</span>
+                <span className="absolute left-[50%] -translate-x-1/2 font-medium">2h</span>
                 <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
                 <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
                 <span className="absolute right-0">24h</span>
