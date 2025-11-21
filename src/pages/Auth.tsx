@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -106,6 +107,27 @@ export default function Auth() {
     navigate("/");
   };
 
+  const features = ['calendar', 'insights', 'reminders'] as const;
+  
+  const handleNextFeature = () => {
+    const currentIndex = features.indexOf(activeFeature!);
+    if (currentIndex < features.length - 1) {
+      setActiveFeature(features[currentIndex + 1]);
+    }
+  };
+  
+  const handlePreviousFeature = () => {
+    const currentIndex = features.indexOf(activeFeature!);
+    if (currentIndex > 0) {
+      setActiveFeature(features[currentIndex - 1]);
+    }
+  };
+  
+  const getCurrentStep = () => {
+    if (!activeFeature) return 0;
+    return features.indexOf(activeFeature) + 1;
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="absolute top-4 right-4">
@@ -116,6 +138,20 @@ export default function Auth() {
       <Dialog open={activeFeature === 'calendar'} onOpenChange={() => setActiveFeature(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Feature {getCurrentStep()} of 3</span>
+              <div className="flex gap-1">
+                {features.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-1.5 w-8 rounded-full transition-colors",
+                      index < getCurrentStep() ? "bg-primary" : "bg-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8 text-primary" />
             </div>
@@ -135,12 +171,39 @@ export default function Auth() {
               </p>
             </DialogDescription>
           </DialogHeader>
+          <div className="flex justify-between items-center pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setActiveFeature(null)}
+            >
+              Close
+            </Button>
+            <Button
+              onClick={handleNextFeature}
+            >
+              Next: Insights & Trends →
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={activeFeature === 'insights'} onOpenChange={() => setActiveFeature(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Feature {getCurrentStep()} of 3</span>
+              <div className="flex gap-1">
+                {features.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-1.5 w-8 rounded-full transition-colors",
+                      index < getCurrentStep() ? "bg-primary" : "bg-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <LineChart className="w-8 h-8 text-primary" />
             </div>
@@ -160,12 +223,39 @@ export default function Auth() {
               </p>
             </DialogDescription>
           </DialogHeader>
+          <div className="flex justify-between items-center pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={handlePreviousFeature}
+            >
+              ← Back: Calendar
+            </Button>
+            <Button
+              onClick={handleNextFeature}
+            >
+              Next: Smart Reminders →
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={activeFeature === 'reminders'} onOpenChange={() => setActiveFeature(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground font-medium">Feature {getCurrentStep()} of 3</span>
+              <div className="flex gap-1">
+                {features.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-1.5 w-8 rounded-full transition-colors",
+                      index < getCurrentStep() ? "bg-primary" : "bg-muted"
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Bell className="w-8 h-8 text-primary" />
             </div>
@@ -188,6 +278,19 @@ export default function Auth() {
               </p>
             </DialogDescription>
           </DialogHeader>
+          <div className="flex justify-between items-center pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={handlePreviousFeature}
+            >
+              ← Back: Insights
+            </Button>
+            <Button
+              onClick={() => setActiveFeature(null)}
+            >
+              Got it!
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
       
