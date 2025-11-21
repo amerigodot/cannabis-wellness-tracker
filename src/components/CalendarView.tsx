@@ -44,7 +44,8 @@ export const CalendarView = ({
   filterSideEffects, 
   setFilterSideEffects,
   filterMethods,
-  setFilterMethods
+  setFilterMethods,
+  isDemoMode
 }: {
   filterObservations: string[];
   setFilterObservations: React.Dispatch<React.SetStateAction<string[]>>;
@@ -54,6 +55,7 @@ export const CalendarView = ({
   setFilterSideEffects: React.Dispatch<React.SetStateAction<string[]>>;
   filterMethods: string[];
   setFilterMethods: React.Dispatch<React.SetStateAction<string[]>>;
+  isDemoMode: boolean;
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -272,11 +274,20 @@ export const CalendarView = ({
   };
 
   const openNotesDialog = (entry: JournalEntry) => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to add or edit notes!");
+      return;
+    }
     setEditingEntryId(entry.id);
     setEditingNotes(entry.notes || "");
   };
 
   const saveNotes = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      return;
+    }
+    
     if (!editingEntryId) return;
 
     const { error } = await supabase

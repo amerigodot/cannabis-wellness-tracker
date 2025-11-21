@@ -451,6 +451,11 @@ const Index = () => {
   
 
   const openNotesDialog = (entryId?: string, existingNotes?: string) => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to add or edit notes!");
+      return;
+    }
+    
     if (entryId) {
       setEditingEntryId(entryId);
       setTempNotes(existingNotes || "");
@@ -826,6 +831,7 @@ const Index = () => {
                     variant="outline"
                     className="w-full justify-start gap-2"
                     onClick={() => openNotesDialog()}
+                    disabled={isDemoMode}
                   >
                     <FileText className="h-4 w-4" />
                     {notes ? "Edit Notes" : "Add Notes"}
@@ -1267,6 +1273,7 @@ const Index = () => {
                   setFilterSideEffects={setFilterSideEffects}
                   filterMethods={filterMethods}
                   setFilterMethods={setFilterMethods}
+                  isDemoMode={isDemoMode}
                 />
               </TabsContent>
             </Tabs>
