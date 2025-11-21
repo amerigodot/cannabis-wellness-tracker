@@ -631,9 +631,20 @@ const Index = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
-  const [observationsOpen, setObservationsOpen] = useState(false);
-  const [activitiesOpen, setActivitiesOpen] = useState(false);
-  const [sideEffectsOpen, setSideEffectsOpen] = useState(false);
+  
+  // Collapsible sections state - initialize from localStorage
+  const [observationsOpen, setObservationsOpen] = useState(() => {
+    const saved = localStorage.getItem('observationsOpen');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [activitiesOpen, setActivitiesOpen] = useState(() => {
+    const saved = localStorage.getItem('activitiesOpen');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [sideEffectsOpen, setSideEffectsOpen] = useState(() => {
+    const saved = localStorage.getItem('sideEffectsOpen');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -711,6 +722,19 @@ const Index = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Save collapsible section states to localStorage
+  useEffect(() => {
+    localStorage.setItem('observationsOpen', JSON.stringify(observationsOpen));
+  }, [observationsOpen]);
+
+  useEffect(() => {
+    localStorage.setItem('activitiesOpen', JSON.stringify(activitiesOpen));
+  }, [activitiesOpen]);
+
+  useEffect(() => {
+    localStorage.setItem('sideEffectsOpen', JSON.stringify(sideEffectsOpen));
+  }, [sideEffectsOpen]);
 
   const fetchEntries = async () => {
     const { data, error } = await supabase
