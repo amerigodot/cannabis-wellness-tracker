@@ -1044,12 +1044,12 @@ const Index = () => {
                 <Card className="p-4 mb-6">
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm font-semibold">Filter by Time:</Label>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 sm:flex gap-2">
                       <Button
                         variant={timeRangeFilter === 'all' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setTimeRangeFilter('all')}
-                        className="flex-1"
+                        className="sm:flex-1"
                       >
                         All Time
                       </Button>
@@ -1057,7 +1057,7 @@ const Index = () => {
                         variant={timeRangeFilter === 'today' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setTimeRangeFilter('today')}
-                        className="flex-1"
+                        className="sm:flex-1"
                       >
                         Today
                       </Button>
@@ -1065,7 +1065,7 @@ const Index = () => {
                         variant={timeRangeFilter === 'week' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setTimeRangeFilter('week')}
-                        className="flex-1"
+                        className="sm:flex-1"
                       >
                         This Week
                       </Button>
@@ -1073,7 +1073,7 @@ const Index = () => {
                         variant={timeRangeFilter === 'month' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setTimeRangeFilter('month')}
-                        className="flex-1"
+                        className="sm:flex-1"
                       >
                         This Month
                       </Button>
