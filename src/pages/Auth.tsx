@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Shield, Lock, EyeOff } from "lucide-react";
+import { Shield, Lock, EyeOff, Calendar, LineChart, Bell } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -108,8 +108,50 @@ export default function Auth() {
         <ThemeToggle />
       </div>
       
-      <main>
-        <Card className="w-full max-w-md shadow-soft">
+      <main className="w-full max-w-4xl">
+        {/* Features Preview Section */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Track Your Cannabis Wellness Journey
+          </h1>
+          <p className="text-muted-foreground text-lg mb-8">
+            Discover patterns, optimize your experience, and take control of your wellness
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Calendar Tracking</h3>
+              <p className="text-sm text-muted-foreground">
+                Log entries with detailed consumption info, effects, and personal notes
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <LineChart className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Insights & Trends</h3>
+              <p className="text-sm text-muted-foreground">
+                Visualize your usage patterns and understand what works best for you
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Bell className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Smart Reminders</h3>
+              <p className="text-sm text-muted-foreground">
+                Set recurring reminders to maintain consistent tracking habits
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <Card className="w-full max-w-md mx-auto shadow-soft">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Medical Marijuana Journal</CardTitle>
             <CardDescription className="text-center text-base">
