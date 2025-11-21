@@ -20,7 +20,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
@@ -207,6 +207,7 @@ const Index = () => {
   // Swipe detection state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [showRemindersSheet, setShowRemindersSheet] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -915,10 +916,7 @@ const Index = () => {
           </div>
         </Card>
 
-        {/* Reminders */}
-        <div id="reminders-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Reminders />
-        </div>
+        {/* Reminders - Removed from main flow, now accessible via floating button */}
 
         {/* Insights Chart */}
         {entries.length > 0 && (
@@ -1397,6 +1395,30 @@ const Index = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Reminders Floating Action Button Sheet */}
+        <Sheet open={showRemindersSheet} onOpenChange={setShowRemindersSheet}>
+          <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Reminders</SheetTitle>
+              <SheetDescription>
+                Manage your wellness reminders
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6">
+              <Reminders />
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Floating Action Button */}
+        <button
+          onClick={() => setShowRemindersSheet(true)}
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-110 transition-all duration-200 flex items-center justify-center"
+          aria-label="Open reminders"
+        >
+          <Bell className="h-6 w-6" />
+        </button>
       </main>
     </div>
   );
