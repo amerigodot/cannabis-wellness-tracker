@@ -121,7 +121,7 @@ export default function Auth() {
           </p>
           
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
@@ -131,7 +131,7 @@ export default function Auth() {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <LineChart className="w-6 h-6 text-primary" />
               </div>
@@ -141,7 +141,7 @@ export default function Auth() {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-background/50 border border-border/50">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Bell className="w-6 h-6 text-primary" />
               </div>
@@ -167,7 +167,7 @@ export default function Auth() {
           </div>
         </div>
         
-        <Card className="w-full max-w-md mx-auto shadow-soft">
+        <Card className="w-full max-w-md mx-auto shadow-hover border-2">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Medical Marijuana Journal</CardTitle>
             <CardDescription className="text-center text-base">
