@@ -45,7 +45,8 @@ export const CalendarView = ({
   setFilterSideEffects,
   filterMethods,
   setFilterMethods,
-  isDemoMode
+  isDemoMode,
+  demoEntries = []
 }: {
   filterObservations: string[];
   setFilterObservations: React.Dispatch<React.SetStateAction<string[]>>;
@@ -56,6 +57,7 @@ export const CalendarView = ({
   filterMethods: string[];
   setFilterMethods: React.Dispatch<React.SetStateAction<string[]>>;
   isDemoMode: boolean;
+  demoEntries?: any[];
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -127,10 +129,12 @@ export const CalendarView = ({
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isDemoMode, demoEntries]);
 
-  // Real-time subscription for all entry changes
+  // Real-time subscription for all entry changes (skip in demo mode)
   useEffect(() => {
+    if (isDemoMode) return;
+    
     const entriesChannel = supabase
       .channel('calendar-entries-changes')
       .on(
@@ -167,9 +171,31 @@ export const CalendarView = ({
       supabase.removeChannel(entriesChannel);
       supabase.removeChannel(remindersChannel);
     };
-  }, []);
+  }, [isDemoMode]);
 
   const fetchData = async () => {
+    if (isDemoMode) {
+      setEntries(demoEntries || []);
+      setReminders([
+        {
+          id: "demo-reminder-1",
+          title: "Log evening entry",
+          reminder_time: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+          is_active: true,
+          recurrence: "daily"
+        },
+        {
+          id: "demo-reminder-2",
+          title: "Weekly wellness check",
+          reminder_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          is_active: true,
+          recurrence: "weekly"
+        }
+      ]);
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     
     const { data: entriesData, error: entriesError } = await supabase
@@ -305,11 +331,21 @@ export const CalendarView = ({
   };
 
   const openTimeEditDialog = (entryId: string, currentTime: string) => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to edit consumption times!");
+      return;
+    }
     setEditingTimeEntryId(entryId);
     setEditingTime(new Date(currentTime));
   };
 
   const saveTimeEdit = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      setEditingTimeEntryId(null);
+      return;
+    }
+    
     if (!editingTimeEntryId) return;
 
     const { error } = await supabase
@@ -327,11 +363,22 @@ export const CalendarView = ({
   };
 
   const deleteEntry = (entryId: string) => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      return;
+    }
     setDeleteEntryId(entryId);
     setShowDeleteDialog(true);
   };
 
   const handlePermanentDelete = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      setShowDeleteDialog(false);
+      setDeleteEntryId(null);
+      return;
+    }
+    
     if (!deleteEntryId) return;
     
     const { error } = await supabase
@@ -378,7 +425,7 @@ export const CalendarView = ({
   const selectedDateReminders = selectedDate ? getRemindersForDate(selectedDate) : [];
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
