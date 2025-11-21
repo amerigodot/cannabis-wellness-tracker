@@ -75,6 +75,11 @@ export default function Auth() {
     }
   };
 
+  const handleDemoMode = () => {
+    localStorage.setItem("demoMode", "true");
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted">
       <div className="absolute top-4 right-4">
@@ -156,6 +161,19 @@ export default function Auth() {
                 </form>
               </TabsContent>
             </Tabs>
+            
+            <div className="mt-6 pt-6 border-t">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleDemoMode}
+              >
+                Try Demo Mode
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Explore the app with sample data (read-only)
+              </p>
+            </div>
           </CardContent>
         </Card>
       </main>
