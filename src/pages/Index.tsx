@@ -258,6 +258,12 @@ const Index = () => {
       } else {
         setLoading(false);
         fetchEntries();
+        
+        // Check if this is the user's first time (for initial load)
+        const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${session.user.id}`);
+        if (!hasSeenOnboarding) {
+          setShowOnboarding(true);
+        }
       }
     });
 
