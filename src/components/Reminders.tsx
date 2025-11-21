@@ -179,7 +179,7 @@ export const Reminders = () => {
 
   return (
     <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold flex items-center gap-2">
           <Bell className="w-6 h-6 text-primary" />
           Reminders
@@ -252,7 +252,7 @@ export const Reminders = () => {
 
       <div className="space-y-3">
         {reminders.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-12">
             No active reminders. Create one to get started!
           </p>
         ) : (
