@@ -69,7 +69,6 @@ export const CalendarView = ({
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
-  const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
   const getIconComponent = (iconName: string) => {
     const iconMap: Record<string, typeof Leaf> = {
@@ -102,29 +101,7 @@ export const CalendarView = ({
   };
 
   const isEntryInTimeRange = (entry: JournalEntry) => {
-    const consumptionDate = parseISO(entry.consumption_time || entry.created_at);
-    const now = new Date();
-    
-    switch (timeRangeFilter) {
-      case 'today':
-        return isWithinInterval(consumptionDate, {
-          start: startOfDay(now),
-          end: endOfDay(now)
-        });
-      case 'week':
-        return isWithinInterval(consumptionDate, {
-          start: startOfWeek(now),
-          end: endOfWeek(now)
-        });
-      case 'month':
-        return isWithinInterval(consumptionDate, {
-          start: startOfMonth(now),
-          end: endOfMonth(now)
-        });
-      case 'all':
-      default:
-        return true;
-    }
+    return true; // Show all entries regardless of time
   };
 
   useEffect(() => {
@@ -435,40 +412,6 @@ export const CalendarView = ({
                 {filterObservations.length + filterActivities.length + filterSideEffects.length + filterMethods.length} filter(s) active
               </Badge>
             )}
-          </div>
-          <div className="flex gap-2 mt-4">
-            <Button
-              variant={timeRangeFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTimeRangeFilter('all')}
-              className="flex-1"
-            >
-              All Time
-            </Button>
-            <Button
-              variant={timeRangeFilter === 'today' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTimeRangeFilter('today')}
-              className="flex-1"
-            >
-              Today
-            </Button>
-            <Button
-              variant={timeRangeFilter === 'week' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTimeRangeFilter('week')}
-              className="flex-1"
-            >
-              This Week
-            </Button>
-            <Button
-              variant={timeRangeFilter === 'month' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTimeRangeFilter('month')}
-              className="flex-1"
-            >
-              This Month
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
