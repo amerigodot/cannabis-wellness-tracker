@@ -49,8 +49,10 @@ export default function Auth() {
     } else {
       toast({
         title: "Success!",
-        description: "You can now sign in with your credentials.",
+        description: "Welcome! Redirecting to your dashboard...",
       });
+      // Redirect to main page after successful signup
+      navigate("/");
     }
   };
 
