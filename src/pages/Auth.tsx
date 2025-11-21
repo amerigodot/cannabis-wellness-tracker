@@ -121,7 +121,7 @@ export default function Auth() {
           </p>
           
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
@@ -131,7 +131,7 @@ export default function Auth() {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <LineChart className="w-6 h-6 text-primary" />
               </div>
@@ -141,7 +141,7 @@ export default function Auth() {
               </p>
             </div>
             
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary/50 hover:shadow-hover transition-all cursor-default">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <Bell className="w-6 h-6 text-primary" />
               </div>
@@ -156,7 +156,7 @@ export default function Auth() {
             <Button 
               variant="outline" 
               size="lg"
-              className="w-full max-w-xs mx-auto" 
+              className="w-full max-w-xs mx-auto hover:border-primary hover:bg-primary/5 transition-colors" 
               onClick={handleDemoMode}
             >
               Try Demo Mode
