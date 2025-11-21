@@ -526,24 +526,24 @@ export const InsightsChart = ({
         )}
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-4 text-center">
-        <div className="p-3 rounded-lg bg-muted/30">
-          <p className="text-2xl font-bold text-primary">{entries.length}</p>
-          <p className="text-sm text-muted-foreground">Total Entries</p>
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+          <p className="text-3xl font-bold text-primary mb-1">{entries.length}</p>
+          <p className="text-xs text-muted-foreground text-center">Total Entries</p>
         </div>
-        <div className="p-3 rounded-lg bg-muted/30">
-          <p className="text-2xl font-bold text-primary">{Object.keys(entriesByDate).length}</p>
-          <p className="text-sm text-muted-foreground">Active Days</p>
+        <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+          <p className="text-3xl font-bold text-primary mb-1">{Object.keys(entriesByDate).length}</p>
+          <p className="text-xs text-muted-foreground text-center">Active Days</p>
         </div>
-        <div className="p-3 rounded-lg bg-muted/30">
-          <p className="text-2xl font-bold text-primary">
+        <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+          <p className="text-3xl font-bold text-primary mb-1">
             {entries.length > 0 ? (entries.length / Object.keys(entriesByDate).length).toFixed(1) : 0}
           </p>
-          <p className="text-sm text-muted-foreground">Avg per Day</p>
+          <p className="text-xs text-muted-foreground text-center whitespace-nowrap">Avg per Day</p>
         </div>
-        <div className="p-3 rounded-lg bg-muted/30">
-          <p className="text-2xl font-bold text-primary">{avgConsumption}g</p>
-          <p className="text-sm text-muted-foreground">Avg Consumption</p>
+        <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+          <p className="text-3xl font-bold text-primary mb-1">{avgConsumption}g</p>
+          <p className="text-xs text-muted-foreground text-center whitespace-nowrap">Avg Consumption</p>
         </div>
       </div>
     </Card>
