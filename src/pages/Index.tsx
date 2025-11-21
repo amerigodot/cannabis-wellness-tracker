@@ -645,6 +645,10 @@ const Index = () => {
     const saved = localStorage.getItem('sideEffectsOpen');
     return saved !== null ? JSON.parse(saved) : false;
   });
+  
+  // Highlight animation states for preset feedback
+  const [highlightObservations, setHighlightObservations] = useState(false);
+  const [highlightActivities, setHighlightActivities] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -785,6 +789,19 @@ const Index = () => {
   const applyPreset = (preset: typeof ENTRY_PRESETS[0]) => {
     setSelectedObservations(preset.observations);
     setSelectedActivities(preset.activities);
+    
+    // Expand sections and trigger highlight animation
+    setObservationsOpen(true);
+    setActivitiesOpen(true);
+    setHighlightObservations(true);
+    setHighlightActivities(true);
+    
+    // Remove highlight after animation
+    setTimeout(() => {
+      setHighlightObservations(false);
+      setHighlightActivities(false);
+    }, 800);
+    
     toast.success(`Applied ${preset.name} preset`);
   };
 
@@ -1269,11 +1286,11 @@ const Index = () => {
                 {ENTRY_PRESETS.map((preset) => {
                   const PresetIcon = preset.icon;
                   return (
-                    <Button
+                     <Button
                       key={preset.name}
                       variant="outline"
                       size="sm"
-                      className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/10 hover:border-primary transition-all"
+                      className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/20 hover:border-primary hover:shadow-md transition-all duration-200"
                       onClick={() => applyPreset(preset)}
                     >
                       <PresetIcon className="w-5 h-5" />
@@ -1304,7 +1321,9 @@ const Index = () => {
               )}
               {/* Observations - Collapsible */}
               <Collapsible open={observationsOpen} onOpenChange={setObservationsOpen}>
-                <div className="border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-colors duration-200">
+                <div className={`border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-all duration-300 ${
+                  highlightObservations ? 'ring-2 ring-observation shadow-lg scale-[1.02]' : ''
+                }`}>
                   <CollapsibleTrigger asChild>
                     <button className="w-full p-4 text-left">
                       <div className="flex items-center justify-between">
@@ -1351,7 +1370,9 @@ const Index = () => {
 
               {/* Activities - Collapsible */}
               <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen}>
-                <div className="border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-colors duration-200">
+                <div className={`border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-all duration-300 ${
+                  highlightActivities ? 'ring-2 ring-activity shadow-lg scale-[1.02]' : ''
+                }`}>
                   <CollapsibleTrigger asChild>
                     <button className="w-full p-4 text-left">
                       <div className="flex items-center justify-between">
