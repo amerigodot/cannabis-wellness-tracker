@@ -20,7 +20,8 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
@@ -630,6 +631,7 @@ const Index = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
+  const [observationsOpen, setObservationsOpen] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -1274,39 +1276,52 @@ const Index = () => {
                   </Button>
                 </div>
               )}
-              {/* Observations */}
-              <div className="border border-observation/30 rounded-lg p-4 bg-observation/5 hover:bg-observation/10 transition-colors duration-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-observation/20">
-                      <Smile className="w-4 h-4 text-observation" />
+              {/* Observations - Collapsible */}
+              <Collapsible open={observationsOpen} onOpenChange={setObservationsOpen}>
+                <div className="border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-colors duration-200">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full p-4 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-md bg-observation/20">
+                            <Smile className="w-4 h-4 text-observation" />
+                          </div>
+                          <Label className="text-base font-semibold text-foreground cursor-pointer">Positive Observations</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {selectedObservations.length > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {selectedObservations.length} selected
+                            </Badge>
+                          )}
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${observationsOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-4 pb-4">
+                      <p className="text-xs text-muted-foreground mb-3">What positive effects are you experiencing?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {COMMON_OBSERVATIONS.map((obs) => (
+                          <Badge
+                            key={obs}
+                            variant="outline"
+                            className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation ${
+                              selectedObservations.includes(obs) 
+                                ? "bg-observation text-observation-foreground border-observation scale-105" 
+                                : "bg-background hover:bg-observation/10"
+                            }`}
+                            onClick={() => toggleObservation(obs)}
+                          >
+                            {obs}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <Label className="text-base font-semibold text-foreground">Positive Observations</Label>
-                  </div>
-                  {selectedObservations.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {selectedObservations.length} selected
-                    </Badge>
-                  )}
+                  </CollapsibleContent>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">What positive effects are you experiencing?</p>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_OBSERVATIONS.map((obs) => (
-                    <Badge
-                      key={obs}
-                      variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation ${
-                        selectedObservations.includes(obs) 
-                          ? "bg-observation text-observation-foreground border-observation scale-105" 
-                          : "bg-background hover:bg-observation/10"
-                      }`}
-                      onClick={() => toggleObservation(obs)}
-                    >
-                      {obs}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              </Collapsible>
 
               {/* Activities */}
               <div className="border border-activity/30 rounded-lg p-4 bg-activity/5 hover:bg-activity/10 transition-colors duration-200">
