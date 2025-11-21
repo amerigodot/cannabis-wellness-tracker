@@ -149,6 +149,20 @@ export default function Auth() {
               </p>
             </div>
           </div>
+          
+          <div className="text-center mb-8">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="w-full max-w-xs mx-auto" 
+              onClick={handleDemoMode}
+            >
+              Try Demo Mode
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Explore the app with sample data (read-only)
+            </p>
+          </div>
         </div>
         
         <Card className="w-full max-w-md mx-auto shadow-soft">
@@ -310,19 +324,6 @@ export default function Auth() {
                 </form>
               </TabsContent>
             </Tabs>
-            
-            <div className="mt-6 pt-6 border-t">
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={handleDemoMode}
-              >
-                Try Demo Mode
-              </Button>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Explore the app with sample data (read-only)
-              </p>
-            </div>
             
             <div className="mt-6 pt-6 border-t">
               <div className="grid grid-cols-1 gap-3">
