@@ -157,13 +157,13 @@ export default function Auth() {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="w-full max-w-xs mx-auto hover:border-primary hover:bg-primary/5 transition-colors relative" 
+                className="w-full max-w-xs mx-auto hover:border-primary hover:bg-primary/5 hover:text-foreground transition-colors relative" 
                 onClick={handleDemoMode}
               >
                 <Sparkles className="w-5 h-5 mr-2 text-accent" />
                 Try Demo Mode
-                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
-                  Free
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">
+                  Take a look
                 </span>
               </Button>
             </div>
