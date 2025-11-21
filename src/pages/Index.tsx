@@ -241,7 +241,9 @@ const Index = () => {
         } else if (event === 'SIGNED_IN') {
           // Check if this is the user's first time
           const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${session.user.id}`);
+          console.log('[Onboarding] SIGNED_IN event - hasSeenOnboarding:', hasSeenOnboarding, 'userId:', session.user.id);
           if (!hasSeenOnboarding) {
+            console.log('[Onboarding] Showing onboarding tour');
             setShowOnboarding(true);
           }
         }
@@ -261,7 +263,9 @@ const Index = () => {
         
         // Check if this is the user's first time (for initial load)
         const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${session.user.id}`);
+        console.log('[Onboarding] Initial load - hasSeenOnboarding:', hasSeenOnboarding, 'userId:', session.user.id);
         if (!hasSeenOnboarding) {
+          console.log('[Onboarding] Showing onboarding tour');
           setShowOnboarding(true);
         }
       }
