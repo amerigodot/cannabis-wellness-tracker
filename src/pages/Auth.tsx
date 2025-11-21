@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Shield, Lock, EyeOff } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -279,6 +280,32 @@ export default function Auth() {
               <p className="text-xs text-muted-foreground text-center mt-2">
                 Explore the app with sample data (read-only)
               </p>
+            </div>
+            
+            <div className="mt-6 pt-6 border-t">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-start gap-2">
+                  <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-foreground">Your data is encrypted & private</p>
+                    <p className="text-muted-foreground text-xs">End-to-end security for your wellness data</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Lock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-foreground">You own your data</p>
+                    <p className="text-muted-foreground text-xs">Full control over your information</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <EyeOff className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-foreground">No ads, no data selling</p>
+                    <p className="text-muted-foreground text-xs">Your privacy is our priority</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
