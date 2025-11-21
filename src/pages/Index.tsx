@@ -110,8 +110,68 @@ const getMethodIcon = (method: string) => {
   return methodIconMap[method] || Leaf;
 };
 
+const SAMPLE_ENTRIES: JournalEntry[] = [
+  {
+    id: "demo-1",
+    user_id: "demo",
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    consumption_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    strain: "Blue Dream",
+    dosage: "0.5g",
+    method: "Vape",
+    observations: ["Pain Relief", "Relaxation", "Better Sleep"],
+    activities: ["Reading", "Music"],
+    negative_side_effects: ["Dry Mouth"],
+    notes: "Great for evening relaxation. Helped with back pain.",
+    icon: "leaf",
+  },
+  {
+    id: "demo-2",
+    user_id: "demo",
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    consumption_time: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    strain: "Sour Diesel",
+    dosage: "0.3g",
+    method: "Smoke",
+    observations: ["Energy Increase", "Improved Focus", "Creativity Boost"],
+    activities: ["Work", "Writing"],
+    negative_side_effects: [],
+    notes: "Perfect for morning productivity boost.",
+    icon: "zap",
+  },
+  {
+    id: "demo-3",
+    user_id: "demo",
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    consumption_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    strain: "OG Kush",
+    dosage: "1.0g",
+    method: "Edible",
+    observations: ["Mood Lift", "Appetite Increase", "Relaxation"],
+    activities: ["Social", "Cooking"],
+    negative_side_effects: ["Dry Eyes"],
+    notes: "Strong effects, lasted several hours.",
+    icon: "cookie",
+  },
+  {
+    id: "demo-4",
+    user_id: "demo",
+    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    consumption_time: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    strain: "Northern Lights",
+    dosage: "0.7g",
+    method: "Vape",
+    observations: ["Better Sleep", "Muscle Relaxation", "Reduced Anxiety"],
+    activities: ["Meditation", "Relaxing"],
+    negative_side_effects: ["Fatigue"],
+    notes: "Excellent for nighttime use. Very calming.",
+    icon: "sparkles",
+  },
+];
+
 const Index = () => {
   const navigate = useNavigate();
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -158,6 +218,16 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Check for demo mode
+    const demoMode = localStorage.getItem("demoMode") === "true";
+    setIsDemoMode(demoMode);
+    
+    if (demoMode) {
+      setEntries(SAMPLE_ENTRIES);
+      setLoading(false);
+      return;
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -282,6 +352,11 @@ const Index = () => {
   };
 
   const handleSubmit = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to save entries!");
+      return;
+    }
+
     if (!strain || !dosageAmount || !method) {
       toast.error("Please fill in strain, dosage, and method");
       return;
@@ -338,6 +413,13 @@ const Index = () => {
   };
 
   const handlePermanentDelete = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      setShowDeleteDialog(false);
+      setDeleteEntryId(null);
+      return;
+    }
+
     if (!deleteEntryId) return;
     
     const { error } = await supabase
@@ -357,6 +439,11 @@ const Index = () => {
   };
 
   const handleSignOut = async () => {
+    if (isDemoMode) {
+      localStorage.removeItem("demoMode");
+      navigate("/auth");
+      return;
+    }
     await supabase.auth.signOut();
     navigate("/auth");
   };
@@ -373,6 +460,12 @@ const Index = () => {
   };
 
   const saveNotes = async () => {
+    if (isDemoMode && editingEntryId) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      setNotesDialogOpen(false);
+      return;
+    }
+
     if (editingEntryId) {
       // Update existing entry
       const { error } = await supabase
@@ -401,6 +494,12 @@ const Index = () => {
   };
 
   const saveTimeEdit = async () => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to make changes!");
+      setEditingTimeEntryId(null);
+      return;
+    }
+
     if (!editingTimeEntryId) return;
 
     const { error } = await supabase
@@ -448,13 +547,32 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
         <header className="mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+          {isDemoMode && (
+            <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">
+                  🎭 Demo Mode - Exploring with sample data (read-only)
+                </p>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => {
+                    localStorage.removeItem("demoMode");
+                    navigate("/auth");
+                  }}
+                >
+                  Sign Up to Save Your Data
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="flex justify-between items-start mb-6">
             <div className="flex-1"></div>
             <div className="flex gap-2">
               <ThemeToggle />
               <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">
                 <LogOut className="h-5 w-5" />
-                <span className="sr-only">Sign out</span>
+                <span className="sr-only">{isDemoMode ? "Exit demo" : "Sign out"}</span>
               </Button>
             </div>
           </div>
