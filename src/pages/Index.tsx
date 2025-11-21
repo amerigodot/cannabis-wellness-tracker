@@ -20,7 +20,7 @@ import { CalendarView } from "@/components/CalendarView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
@@ -1182,66 +1182,108 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Activities */}
-            <div>
-              <Label className="mb-3 block">Activities</Label>
-              <div className="flex flex-wrap gap-2">
-                {COMMON_ACTIVITIES.map((activity) => (
-                  <Badge
-                    key={activity}
-                    variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-activity ${
-                      selectedActivities.includes(activity) 
-                        ? "bg-activity text-activity-foreground border-activity scale-105 animate-in zoom-in-95 duration-200" 
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}
-                    onClick={() => toggleActivity(activity)}
-                  >
-                    {activity}
-                  </Badge>
-                ))}
+            {/* Experience Categories - Framed Sections */}
+            <div className="space-y-4">
+              {/* Observations */}
+              <div className="border border-observation/30 rounded-lg p-4 bg-observation/5 hover:bg-observation/10 transition-colors duration-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-observation/20">
+                      <Smile className="w-4 h-4 text-observation" />
+                    </div>
+                    <Label className="text-base font-semibold text-foreground">Positive Observations</Label>
+                  </div>
+                  {selectedObservations.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedObservations.length} selected
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">What positive effects are you experiencing?</p>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_OBSERVATIONS.map((obs) => (
+                    <Badge
+                      key={obs}
+                      variant="outline"
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation ${
+                        selectedObservations.includes(obs) 
+                          ? "bg-observation text-observation-foreground border-observation scale-105" 
+                          : "bg-background hover:bg-observation/10"
+                      }`}
+                      onClick={() => toggleObservation(obs)}
+                    >
+                      {obs}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Observations */}
-            <div>
-              <Label className="mb-3 block">Observations</Label>
-              <div className="flex flex-wrap gap-2">
-                {COMMON_OBSERVATIONS.map((obs) => (
-                  <Badge
-                    key={obs}
-                    variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-observation ${
-                      selectedObservations.includes(obs) 
-                        ? "bg-observation text-observation-foreground border-observation scale-105 animate-in zoom-in-95 duration-200" 
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}
-                    onClick={() => toggleObservation(obs)}
-                  >
-                    {obs}
-                  </Badge>
-                ))}
+              {/* Activities */}
+              <div className="border border-activity/30 rounded-lg p-4 bg-activity/5 hover:bg-activity/10 transition-colors duration-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-activity/20">
+                      <Activity className="w-4 h-4 text-activity" />
+                    </div>
+                    <Label className="text-base font-semibold text-foreground">Activities</Label>
+                  </div>
+                  {selectedActivities.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedActivities.length} selected
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">What are you doing during or after use?</p>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_ACTIVITIES.map((activity) => (
+                    <Badge
+                      key={activity}
+                      variant="outline"
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity ${
+                        selectedActivities.includes(activity) 
+                          ? "bg-activity text-activity-foreground border-activity scale-105" 
+                          : "bg-background hover:bg-activity/10"
+                      }`}
+                      onClick={() => toggleActivity(activity)}
+                    >
+                      {activity}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Negative Side Effects */}
-            <div>
-              <Label className="mb-3 block">Negative Side Effects</Label>
-              <div className="flex flex-wrap gap-2">
-                {NEGATIVE_SIDE_EFFECTS.map((effect) => (
-                  <Badge
-                    key={effect}
-                    variant="outline"
-                    className={`cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-md hover:border-side-effect ${
-                      selectedNegativeSideEffects.includes(effect) 
-                        ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105 animate-in zoom-in-95 duration-200" 
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}
-                    onClick={() => toggleNegativeSideEffect(effect)}
-                  >
-                    {effect}
-                  </Badge>
-                ))}
+              {/* Negative Side Effects */}
+              <div className="border border-side-effect/30 rounded-lg p-4 bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-side-effect/20">
+                      <AlertCircle className="w-4 h-4 text-side-effect" />
+                    </div>
+                    <Label className="text-base font-semibold text-foreground">Negative Side Effects</Label>
+                  </div>
+                  {selectedNegativeSideEffects.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedNegativeSideEffects.length} selected
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">Any unwanted effects you're noticing?</p>
+                <div className="flex flex-wrap gap-2">
+                  {NEGATIVE_SIDE_EFFECTS.map((effect) => (
+                    <Badge
+                      key={effect}
+                      variant="outline"
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect ${
+                        selectedNegativeSideEffects.includes(effect) 
+                          ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
+                          : "bg-background hover:bg-side-effect/10"
+                      }`}
+                      onClick={() => toggleNegativeSideEffect(effect)}
+                    >
+                      {effect}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
 
