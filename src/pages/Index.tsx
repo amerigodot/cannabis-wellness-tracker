@@ -632,6 +632,8 @@ const Index = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
   const [observationsOpen, setObservationsOpen] = useState(false);
+  const [activitiesOpen, setActivitiesOpen] = useState(false);
+  const [sideEffectsOpen, setSideEffectsOpen] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -1323,73 +1325,99 @@ const Index = () => {
                 </div>
               </Collapsible>
 
-              {/* Activities */}
-              <div className="border border-activity/30 rounded-lg p-4 bg-activity/5 hover:bg-activity/10 transition-colors duration-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-activity/20">
-                      <Activity className="w-4 h-4 text-activity" />
+              {/* Activities - Collapsible */}
+              <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen}>
+                <div className="border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-colors duration-200">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full p-4 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-md bg-activity/20">
+                            <Activity className="w-4 h-4 text-activity" />
+                          </div>
+                          <Label className="text-base font-semibold text-foreground cursor-pointer">Activities</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {selectedActivities.length > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {selectedActivities.length} selected
+                            </Badge>
+                          )}
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activitiesOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-4 pb-4">
+                      <p className="text-xs text-muted-foreground mb-3">What are you doing during or after use?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {COMMON_ACTIVITIES.map((activity) => (
+                          <Badge
+                            key={activity}
+                            variant="outline"
+                            className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity ${
+                              selectedActivities.includes(activity) 
+                                ? "bg-activity text-activity-foreground border-activity scale-105" 
+                                : "bg-background hover:bg-activity/10"
+                            }`}
+                            onClick={() => toggleActivity(activity)}
+                          >
+                            {activity}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <Label className="text-base font-semibold text-foreground">Activities</Label>
-                  </div>
-                  {selectedActivities.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {selectedActivities.length} selected
-                    </Badge>
-                  )}
+                  </CollapsibleContent>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">What are you doing during or after use?</p>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_ACTIVITIES.map((activity) => (
-                    <Badge
-                      key={activity}
-                      variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity ${
-                        selectedActivities.includes(activity) 
-                          ? "bg-activity text-activity-foreground border-activity scale-105" 
-                          : "bg-background hover:bg-activity/10"
-                      }`}
-                      onClick={() => toggleActivity(activity)}
-                    >
-                      {activity}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              </Collapsible>
 
-              {/* Negative Side Effects */}
-              <div className="border border-side-effect/30 rounded-lg p-4 bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-side-effect/20">
-                      <AlertCircle className="w-4 h-4 text-side-effect" />
+              {/* Negative Side Effects - Collapsible */}
+              <Collapsible open={sideEffectsOpen} onOpenChange={setSideEffectsOpen}>
+                <div className="border border-side-effect/30 rounded-lg bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full p-4 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-md bg-side-effect/20">
+                            <AlertCircle className="w-4 h-4 text-side-effect" />
+                          </div>
+                          <Label className="text-base font-semibold text-foreground cursor-pointer">Negative Side Effects</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {selectedNegativeSideEffects.length > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {selectedNegativeSideEffects.length} selected
+                            </Badge>
+                          )}
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sideEffectsOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="px-4 pb-4">
+                      <p className="text-xs text-muted-foreground mb-3">Any unwanted effects you're noticing?</p>
+                      <div className="flex flex-wrap gap-2">
+                        {NEGATIVE_SIDE_EFFECTS.map((effect) => (
+                          <Badge
+                            key={effect}
+                            variant="outline"
+                            className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect ${
+                              selectedNegativeSideEffects.includes(effect) 
+                                ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
+                                : "bg-background hover:bg-side-effect/10"
+                            }`}
+                            onClick={() => toggleNegativeSideEffect(effect)}
+                          >
+                            {effect}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <Label className="text-base font-semibold text-foreground">Negative Side Effects</Label>
-                  </div>
-                  {selectedNegativeSideEffects.length > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {selectedNegativeSideEffects.length} selected
-                    </Badge>
-                  )}
+                  </CollapsibleContent>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">Any unwanted effects you're noticing?</p>
-                <div className="flex flex-wrap gap-2">
-                  {NEGATIVE_SIDE_EFFECTS.map((effect) => (
-                    <Badge
-                      key={effect}
-                      variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect ${
-                        selectedNegativeSideEffects.includes(effect) 
-                          ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
-                          : "bg-background hover:bg-side-effect/10"
-                      }`}
-                      onClick={() => toggleNegativeSideEffect(effect)}
-                    >
-                      {effect}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              </Collapsible>
             </div>
 
             {/* Personal Notes */}
