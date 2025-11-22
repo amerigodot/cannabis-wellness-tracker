@@ -129,32 +129,32 @@ const ENTRY_PRESETS = [
   {
     name: "Morning Session",
     icon: Coffee,
-    observations: ["Energy Increase", "Mood Lift", "Improved Focus"],
-    activities: ["Work", "Exercise", "Cooking"],
+    observations: ["Energy Increase", "Mood Lift", "Improved Focus", "Mind Clarity"],
+    activities: ["Work", "Exercise", "Studying", "Learning"],
   },
   {
     name: "Evening Relaxation",
     icon: Heart,
-    observations: ["Relaxation", "Better Sleep", "Reduced Anxiety"],
-    activities: ["Reading", "Movies", "Meditation"],
+    observations: ["Relaxation", "Better Sleep", "Reduced Anxiety", "Calm/Peaceful"],
+    activities: ["Reading", "TV Shows", "Meditation", "Nature/Outdoors"],
   },
   {
     name: "Social Gathering",
     icon: Sparkles,
-    observations: ["Mood Lift", "Reduced Anxiety", "Creativity Boost"],
-    activities: ["Social", "Music", "Gaming"],
+    observations: ["Mood Lift", "Increased Sociability", "Giggly/Happy", "Euphoria"],
+    activities: ["Social", "Music", "Dancing", "Gaming"],
   },
   {
     name: "Creative Work",
     icon: Brain,
-    observations: ["Creativity Boost", "Improved Focus", "Mood Lift"],
-    activities: ["Writing", "Painting", "Music"],
+    observations: ["Creativity Boost", "Improved Focus", "Increased Sensation", "Mood Lift"],
+    activities: ["Writing", "Painting", "Music", "Photography", "Crafts"],
   },
   {
     name: "Pain Relief",
     icon: Heart,
-    observations: ["Pain Relief", "Reduced Inflammation", "Muscle Relaxation"],
-    activities: ["Relaxing", "Meditation", "Reading"],
+    observations: ["Pain Relief", "Reduced Inflammation", "Muscle Relaxation", "Body Tingling"],
+    activities: ["Relaxing", "Yoga", "Meditation", "Nature/Outdoors"],
   },
 ];
 
