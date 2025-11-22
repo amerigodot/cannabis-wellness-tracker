@@ -53,6 +53,14 @@ const COMMON_OBSERVATIONS = [
   "Creativity Boost",
   "Nausea Relief",
   "Energy Increase",
+  "Euphoria",
+  "Increased Sociability",
+  "Time Distortion",
+  "Body Tingling",
+  "Increased Sensation",
+  "Giggly/Happy",
+  "Calm/Peaceful",
+  "Mind Clarity",
 ];
 
 const COMMON_ACTIVITIES = [
@@ -66,13 +74,26 @@ const COMMON_ACTIVITIES = [
   "Writing",
   "Meditation",
   "Movies",
+  "TV Shows",
+  "Learning",
+  "Studying",
   "Work",
   "Relaxing",
+  "Photography",
+  "Crafts",
+  "Gardening",
+  "Shopping",
+  "Cleaning",
+  "Nature/Outdoors",
+  "Yoga",
+  "Dancing",
+  "Sports",
 ];
 
 const NEGATIVE_SIDE_EFFECTS = [
   "Dry Mouth",
   "Dry Eyes",
+  "Red Eyes",
   "Dizziness",
   "Paranoia",
   "Anxiety",
@@ -80,9 +101,13 @@ const NEGATIVE_SIDE_EFFECTS = [
   "Fatigue",
   "Increased Heart Rate",
   "Coughing",
+  "Throat Irritation",
   "Nausea",
   "Memory Issues",
   "Confusion",
+  "Restlessness",
+  "Impaired Coordination",
+  "Hunger/Munchies",
 ];
 
 const AVAILABLE_ICONS = [
