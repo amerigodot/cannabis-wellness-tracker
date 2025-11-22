@@ -1290,7 +1290,7 @@ const Index = () => {
                       key={preset.name}
                       variant="outline"
                       size="sm"
-                      className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/20 hover:border-primary hover:shadow-md transition-all duration-200"
+                      className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/30 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-200"
                       onClick={() => applyPreset(preset)}
                     >
                       <PresetIcon className="w-5 h-5" />
