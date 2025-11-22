@@ -1624,8 +1624,9 @@ const Index = () => {
                           {filterObservations.map(obs => (
                             <Badge 
                               key={obs} 
-                              className="bg-observation text-observation-foreground cursor-pointer hover:opacity-80"
+                              className="bg-observation text-observation-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
                               onClick={() => setFilterObservations(prev => prev.filter(o => o !== obs))}
+                              title="Click to remove filter"
                             >
                               {obs} ×
                             </Badge>
@@ -1633,8 +1634,9 @@ const Index = () => {
                           {filterActivities.map(act => (
                             <Badge 
                               key={act} 
-                              className="bg-activity text-activity-foreground cursor-pointer hover:opacity-80"
+                              className="bg-activity text-activity-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
                               onClick={() => setFilterActivities(prev => prev.filter(a => a !== act))}
+                              title="Click to remove filter"
                             >
                               {act} ×
                             </Badge>
@@ -1642,8 +1644,9 @@ const Index = () => {
                           {filterSideEffects.map(eff => (
                             <Badge 
                               key={eff} 
-                              className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-80"
+                              className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
                               onClick={() => setFilterSideEffects(prev => prev.filter(e => e !== eff))}
+                              title="Click to remove filter"
                             >
                               {eff} ×
                             </Badge>
@@ -1652,8 +1655,9 @@ const Index = () => {
                             <Badge 
                               key={method} 
                               variant="default"
-                              className="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                              className="flex items-center gap-1 cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
                               onClick={() => setFilterMethods(prev => prev.filter(m => m !== method))}
+                              title="Click to remove filter"
                             >
                               {(() => {
                                 const MethodIcon = getMethodIcon(method);
@@ -1869,21 +1873,22 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.observations.map((obs) => (
-                                <Badge 
-                                  key={obs} 
-                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
-                                    filterObservations.includes(obs)
-                                      ? "bg-observation text-observation-foreground"
-                                      : "bg-observation-light text-observation-foreground"
-                                  }`}
-                                  onClick={() => {
-                                    setFilterObservations(prev => 
-                                      prev.includes(obs) 
-                                        ? prev.filter(o => o !== obs)
-                                        : [...prev, obs]
-                                    );
-                                  }}
-                                >
+                              <Badge 
+                                key={obs} 
+                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
+                                  filterObservations.includes(obs)
+                                    ? "bg-observation text-observation-foreground"
+                                    : "bg-observation-light text-observation-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterObservations(prev => 
+                                    prev.includes(obs) 
+                                      ? prev.filter(o => o !== obs)
+                                      : [...prev, obs]
+                                  );
+                                }}
+                                title={filterObservations.includes(obs) ? "Click to remove filter" : "Click to add filter"}
+                              >
                                   {obs}
                                 </Badge>
                               ))}
@@ -1896,21 +1901,22 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.activities.map((activity) => (
-                                <Badge 
-                                  key={activity} 
-                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
-                                    filterActivities.includes(activity)
-                                      ? "bg-activity text-activity-foreground"
-                                      : "bg-activity-light text-activity-foreground"
-                                  }`}
-                                  onClick={() => {
-                                    setFilterActivities(prev => 
-                                      prev.includes(activity) 
-                                        ? prev.filter(a => a !== activity)
-                                        : [...prev, activity]
-                                    );
-                                  }}
-                                >
+                              <Badge 
+                                key={activity} 
+                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
+                                  filterActivities.includes(activity)
+                                    ? "bg-activity text-activity-foreground"
+                                    : "bg-activity-light text-activity-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterActivities(prev => 
+                                    prev.includes(activity) 
+                                      ? prev.filter(a => a !== activity)
+                                      : [...prev, activity]
+                                  );
+                                }}
+                                title={filterActivities.includes(activity) ? "Click to remove filter" : "Click to add filter"}
+                              >
                                   {activity}
                                 </Badge>
                               ))}
@@ -1923,21 +1929,22 @@ const Index = () => {
                             <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
                             <div className="flex flex-wrap gap-2">
                               {entry.negative_side_effects.map((effect) => (
-                                <Badge 
-                                  key={effect} 
-                                  className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 ${
-                                    filterSideEffects.includes(effect)
-                                      ? "bg-side-effect text-side-effect-foreground"
-                                      : "bg-side-effect-light text-side-effect-foreground"
-                                  }`}
-                                  onClick={() => {
-                                    setFilterSideEffects(prev => 
-                                      prev.includes(effect) 
-                                        ? prev.filter(e => e !== effect)
-                                        : [...prev, effect]
-                                    );
-                                  }}
-                                >
+                              <Badge 
+                                key={effect} 
+                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
+                                  filterSideEffects.includes(effect)
+                                    ? "bg-side-effect text-side-effect-foreground"
+                                    : "bg-side-effect-light text-side-effect-foreground"
+                                }`}
+                                onClick={() => {
+                                  setFilterSideEffects(prev => 
+                                    prev.includes(effect) 
+                                      ? prev.filter(e => e !== effect)
+                                      : [...prev, effect]
+                                  );
+                                }}
+                                title={filterSideEffects.includes(effect) ? "Click to remove filter" : "Click to add filter"}
+                              >
                                   {effect}
                                 </Badge>
                               ))}

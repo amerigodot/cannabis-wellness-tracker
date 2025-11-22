@@ -571,7 +571,7 @@ export const CalendarView = ({
                           <Badge variant="outline">{entry.dosage}</Badge>
                           <Badge 
                             variant="outline" 
-                            className={`flex items-center gap-1 cursor-pointer transition-all hover:scale-105 ${
+                            className={`flex items-center gap-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                               filterMethods.includes(entry.method) ? "ring-2 ring-primary" : ""
                             }`}
                             onClick={() => {
@@ -581,6 +581,7 @@ export const CalendarView = ({
                                   : [...prev, entry.method]
                               );
                             }}
+                            title={filterMethods.includes(entry.method) ? "Click to remove filter" : "Click to add filter"}
                           >
                             {(() => {
                               const MethodIcon = getMethodIcon(entry.method);
@@ -594,7 +595,7 @@ export const CalendarView = ({
                             {entry.observations.map((obs, idx) => (
                               <Badge 
                                 key={idx} 
-                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                                   filterObservations.includes(obs)
                                     ? "bg-observation text-observation-foreground"
                                     : "bg-observation-light text-observation-foreground"
@@ -606,6 +607,7 @@ export const CalendarView = ({
                                       : [...prev, obs]
                                   );
                                 }}
+                                title={filterObservations.includes(obs) ? "Click to remove filter" : "Click to add filter"}
                               >
                                 {obs}
                               </Badge>
@@ -617,7 +619,7 @@ export const CalendarView = ({
                             {entry.activities.map((activity, idx) => (
                               <Badge 
                                 key={idx} 
-                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                                   filterActivities.includes(activity)
                                     ? "bg-activity text-activity-foreground"
                                     : "bg-activity-light text-activity-foreground"
@@ -629,6 +631,7 @@ export const CalendarView = ({
                                       : [...prev, activity]
                                   );
                                 }}
+                                title={filterActivities.includes(activity) ? "Click to remove filter" : "Click to add filter"}
                               >
                                 {activity}
                               </Badge>
@@ -640,7 +643,7 @@ export const CalendarView = ({
                             {entry.negative_side_effects.map((effect, idx) => (
                               <Badge 
                                 key={idx} 
-                                className={`text-xs cursor-pointer transition-all hover:scale-105 ${
+                                className={`text-xs cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                                   filterSideEffects.includes(effect)
                                     ? "bg-side-effect text-side-effect-foreground"
                                     : "bg-side-effect-light text-side-effect-foreground"
@@ -652,6 +655,7 @@ export const CalendarView = ({
                                       : [...prev, effect]
                                   );
                                 }}
+                                title={filterSideEffects.includes(effect) ? "Click to remove filter" : "Click to add filter"}
                               >
                                 {effect}
                               </Badge>
