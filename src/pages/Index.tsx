@@ -815,6 +815,12 @@ const Index = () => {
     setSelectedObservations(preset.observations);
     setSelectedActivities(preset.activities);
     
+    // Clear all active filters
+    setFilterObservations([]);
+    setFilterActivities([]);
+    setFilterSideEffects([]);
+    setFilterMethods([]);
+    
     // Expand sections and trigger highlight animation
     setObservationsOpen(true);
     setActivitiesOpen(true);
