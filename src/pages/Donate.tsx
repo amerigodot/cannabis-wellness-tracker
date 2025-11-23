@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Coffee, Sparkles, Crown, Check } from "lucide-react";
+import { ArrowLeft, Heart, Coffee, Sparkles, Crown, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const contributionTiers = [
   {
@@ -53,9 +54,28 @@ const contributionTiers = [
   }
 ];
 
+const cryptoAddresses = [
+  {
+    name: "Bitcoin (BTC)",
+    address: "3F5zzXzgu4CZo1ioVUvTabhKoj6BuEWzmz",
+    symbol: "₿"
+  },
+  {
+    name: "Ethereum (ETH)",
+    address: "0xC55Bf0f3dc882E6FF4Dc2e25B4b95a135A38C38b",
+    symbol: "Ξ"
+  },
+  {
+    name: "Monero (XMR)",
+    address: "86xExcT5MESGR9X2bQ7NwAheWUZK8bmu7KjBCTxo1Msm5s9UeufjbsHAQmhmsbuyXHg7PtNyhXMakgty4noFwQ7ULAx1RSe",
+    symbol: "ɱ"
+  }
+];
+
 export default function Donate() {
   const navigate = useNavigate();
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const paypalUrls: Record<string, string> = {
     supporter: "https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=5&no_recurring=0&item_name=Cannabis+Wellness+Tracker",
@@ -69,6 +89,14 @@ export default function Donate() {
     if (url) {
       window.open(url, '_blank');
     }
+  };
+
+  const copyToClipboard = (address: string, name: string) => {
+    navigator.clipboard.writeText(address);
+    toast({
+      title: "Address copied!",
+      description: `${name} address copied to clipboard`,
+    });
   };
 
   return (
@@ -163,6 +191,39 @@ export default function Donate() {
             );
           })}
         </div>
+
+        {/* Crypto Donations Section */}
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle className="text-2xl">Donate with Cryptocurrency</CardTitle>
+            <CardDescription>
+              Support us directly with crypto donations
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {cryptoAddresses.map((crypto) => (
+              <div key={crypto.name} className="flex flex-col gap-2 p-4 rounded-lg border bg-card">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{crypto.symbol}</span>
+                    <span className="font-semibold">{crypto.name}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(crypto.address, crypto.name)}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </Button>
+                </div>
+                <code className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
+                  {crypto.address}
+                </code>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
         {/* Why Support Section */}
         <Card className="mb-12">
