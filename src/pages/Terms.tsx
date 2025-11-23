@@ -91,6 +91,14 @@ export default function Terms() {
             <p className="text-foreground/90 mb-4">
               You are responsible for maintaining the security of your account. We cannot and will not be liable for any loss or damage arising from your failure to comply with this security obligation.
             </p>
+
+            <h3 className="text-xl font-semibold mb-3 mt-6">Individual Account Use</h3>
+            <p className="text-foreground/90 mb-4">
+              <strong>Your account is for your individual use only.</strong> You may not share your account credentials with any other person, allow others to access your account, or use your account on behalf of another individual. Each user must create and maintain their own separate account.
+            </p>
+            <p className="text-foreground/90 mb-4">
+              Sharing accounts compromises the privacy and security of your personal health data and violates these Terms. Any violation of this policy may result in immediate account suspension or termination.
+            </p>
           </section>
 
           <section className="mb-8">
