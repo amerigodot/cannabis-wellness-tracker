@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
-import { Calendar, LineChart, Bell, Sparkles, Shield, Lock, EyeOff } from "lucide-react";
+import { Calendar, LineChart, Bell, Sparkles } from "lucide-react";
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -283,22 +283,6 @@ export function LandingPage() {
               </p>
               <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
             </button>
-          </div>
-          
-          {/* Trust Signals */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 border-t border-border">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Lock className="w-4 h-4" />
-              <span>Encrypted & Private</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Shield className="w-4 h-4" />
-              <span>You Own Your Data</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <EyeOff className="w-4 h-4" />
-              <span>No Ads</span>
-            </div>
           </div>
         </div>
       </main>
