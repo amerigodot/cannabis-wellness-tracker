@@ -15,9 +15,9 @@ const contributionTiers = [
     amount: "$5",
     description: "Buy us a coffee",
     features: [
-      "Help keep the servers running",
-      "Support ongoing development",
-      "Feel good about helping others"
+      "Covers hosting for 50 users for a month",
+      "Supports 2 hours of development work",
+      "Helps maintain server infrastructure"
     ],
     color: "primary"
   },
@@ -28,10 +28,10 @@ const contributionTiers = [
     amount: "$15",
     description: "Show your appreciation",
     features: [
-      "Everything in Supporter",
-      "Help fund new features",
-      "Priority bug fixes",
-      "Our heartfelt gratitude"
+      "Covers hosting for 150 users for a month",
+      "Funds 6 hours of feature development",
+      "Supports database backup and security",
+      "Enables one major bug fix or improvement"
     ],
     color: "secondary",
     popular: true
@@ -43,11 +43,11 @@ const contributionTiers = [
     amount: "$50",
     description: "Become a wellness champion",
     features: [
-      "Everything in Contributor",
-      "Influence feature roadmap",
-      "Early access to new features",
-      "Special supporter badge (coming soon)",
-      "Listed as a project supporter"
+      "Covers hosting for 500 users for a month",
+      "Funds 20 hours of feature development",
+      "Enables development of a complete new feature",
+      "Supports third-party integrations",
+      "Helps us reach sustainability goals"
     ],
     color: "accent"
   }
