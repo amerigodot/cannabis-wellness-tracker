@@ -16,6 +16,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
+import { LandingPage } from "@/components/LandingPage";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -705,23 +706,17 @@ const Index = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (!session) {
-          navigate("/auth");
-        }
-      }
-    );
+      setUser(session?.user ?? null);
+    }
+  );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
       
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setLoading(false);
+      if (session) {
         fetchEntries();
       }
     });
@@ -1091,7 +1086,12 @@ const Index = () => {
         <p className="text-muted-foreground">Loading...</p>
       </main>
     );
-  };
+  }
+  
+  // Show landing page if not logged in and not in demo mode
+  if (!user && !isDemoMode) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
