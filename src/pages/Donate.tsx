@@ -57,10 +57,18 @@ export default function Donate() {
   const navigate = useNavigate();
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
+  const paypalUrls: Record<string, string> = {
+    supporter: "https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=5&no_recurring=0&item_name=Cannabis+Wellness+Tracker",
+    contributor: "https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=15&no_recurring=0&item_name=Cannabis+Wellness+Tracker",
+    champion: "https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=50&no_recurring=0&item_name=Cannabis+Wellness+Tracker"
+  };
+
   const handleContribute = (tierId: string) => {
     setSelectedTier(tierId);
-    // TODO: Integrate with payment processor (Stripe)
-    console.log("Selected tier:", tierId);
+    const url = paypalUrls[tierId];
+    if (url) {
+      window.open(url, '_blank');
+    }
   };
 
   return (
