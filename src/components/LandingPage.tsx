@@ -207,8 +207,37 @@ export function LandingPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Track Your Cannabis Wellness Journey
           </h1>
-          <p className="text-muted-foreground text-lg mb-8">
+          <p className="text-muted-foreground text-lg mb-8 text-justify max-w-2xl mx-auto">
             Discover patterns, optimize your experience, and take control of your wellness
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Button 
+              size="lg"
+              onClick={() => navigate("/auth")}
+              className="w-full sm:w-auto"
+            >
+              Get Started
+            </Button>
+            
+            <div className="relative">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full sm:w-auto hover:border-primary hover:bg-primary/5 hover:text-foreground transition-colors relative" 
+                onClick={handleDemoMode}
+              >
+                <Sparkles className="w-5 h-5 mr-2 text-accent" />
+                Try Demo Mode
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
+                  Take a look
+                </span>
+              </Button>
+            </div>
+          </div>
+          
+          <p className="text-xs text-muted-foreground mb-8">
+            Explore the app with sample data (read-only) • No signup required
           </p>
           
           <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -254,35 +283,6 @@ export function LandingPage() {
               <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
             </button>
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Button 
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="w-full sm:w-auto"
-            >
-              Get Started
-            </Button>
-            
-            <div className="relative">
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="w-full sm:w-auto hover:border-primary hover:bg-primary/5 hover:text-foreground transition-colors relative" 
-                onClick={handleDemoMode}
-              >
-                <Sparkles className="w-5 h-5 mr-2 text-accent" />
-                Try Demo Mode
-                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
-                  Take a look
-                </span>
-              </Button>
-            </div>
-          </div>
-          
-          <p className="text-xs text-muted-foreground mb-8">
-            Explore the app with sample data (read-only) • No signup required
-          </p>
           
           {/* Trust Signals */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8 border-t border-border">
