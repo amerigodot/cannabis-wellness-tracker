@@ -37,7 +37,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -202,8 +202,8 @@ export function LandingPage() {
         </DialogContent>
       </Dialog>
 
-      <main className="w-full max-w-4xl">
-        <div className="text-center">
+      <main className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Track Your Cannabis Wellness Journey
           </h1>
@@ -303,7 +303,7 @@ export function LandingPage() {
       </main>
       
       {/* Footer */}
-      <footer className="w-full border-t border-border mt-16 py-8">
+      <footer className="w-full border-t border-border py-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6 text-sm text-muted-foreground">
             <a 
