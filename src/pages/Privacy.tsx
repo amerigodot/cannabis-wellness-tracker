@@ -2,17 +2,18 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Footer } from "@/components/Footer";
 
 export default function Privacy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
@@ -257,6 +258,8 @@ export default function Privacy() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
