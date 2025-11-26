@@ -146,13 +146,13 @@ export default function Auth() {
           
           {/* Trust Signals */}
           <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
               <Shield className="w-4 h-4 text-primary" />
-              <span className="text-xs font-medium">Your data is encrypted & private</span>
+              <span className="text-xs font-medium text-foreground">Your data is encrypted & private</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
               <Lock className="w-4 h-4 text-primary" />
-              <span className="text-xs font-medium">No ads, no data selling</span>
+              <span className="text-xs font-medium text-foreground">No ads, no data selling</span>
             </div>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function Auth() {
                 <Button
                   key={index}
                   variant="ghost"
-                  className="w-full justify-start h-auto p-3 hover:bg-background hover:ring-2 hover:ring-primary/20"
+                  className="w-full justify-start h-auto p-3 hover:bg-background hover:ring-2 hover:ring-primary/30 hover:text-foreground transition-all"
                   onClick={() => {
                     setCurrentFeature(index);
                     setFeatureDialogOpen(true);
@@ -302,7 +302,7 @@ export default function Auth() {
                       <IconComponent className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-medium text-sm">{feature.title}</p>
+                      <p className="font-medium text-sm text-foreground">{feature.title}</p>
                       <p className="text-xs text-muted-foreground">{feature.description}</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -326,29 +326,29 @@ export default function Auth() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="mt-1 p-2 rounded-full bg-primary/10">
+              <div className="mt-1 p-2 rounded-full bg-primary/15 border border-primary/20">
                 <Sparkles className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">10 Entries</p>
+                <p className="font-semibold text-sm text-foreground">10 Entries</p>
                 <p className="text-xs text-muted-foreground">Build awareness of your patterns and responses</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="mt-1 p-2 rounded-full bg-primary/10">
+              <div className="mt-1 p-2 rounded-full bg-primary/15 border border-primary/20">
                 <TrendingUp className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">50 Entries</p>
+                <p className="font-semibold text-sm text-foreground">50 Entries</p>
                 <p className="text-xs text-muted-foreground">Unlock valuable insights and optimize your experience</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="mt-1 p-2 rounded-full bg-primary/10">
+              <div className="mt-1 p-2 rounded-full bg-primary/15 border border-primary/20">
                 <Award className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">100+ Entries</p>
+                <p className="font-semibold text-sm text-foreground">100+ Entries</p>
                 <p className="text-xs text-muted-foreground">Master your wellness journey with comprehensive data</p>
               </div>
             </div>
