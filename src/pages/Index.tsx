@@ -1143,7 +1143,18 @@ const Index = () => {
             </div>
           )}
           <div className="flex justify-between items-start mb-6">
-            <div className="flex-1"></div>
+            <div className="flex-1">
+              {entries.length >= 10 && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate("/tools")}
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Wellness Tools
+                </Button>
+              )}
+            </div>
             <div className="flex gap-2">
               <ThemeToggle />
               <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">

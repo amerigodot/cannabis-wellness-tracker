@@ -15,6 +15,7 @@ const MILESTONES = [
     description: "Build awareness of your patterns",
     icon: Sparkles,
     color: "from-purple-500 to-pink-500",
+    perk: "Report Generator",
   },
   {
     count: 50,
@@ -22,6 +23,7 @@ const MILESTONES = [
     description: "Unlock valuable insights",
     icon: TrendingUp,
     color: "from-blue-500 to-cyan-500",
+    perk: "Timing Analysis",
   },
   {
     count: 100,
@@ -29,6 +31,7 @@ const MILESTONES = [
     description: "Master your wellness journey",
     icon: Trophy,
     color: "from-amber-500 to-orange-500",
+    perk: "Goal Optimization",
   },
 ];
 
@@ -97,6 +100,16 @@ export function AchievementBadges({ entryCount }: AchievementBadgesProps) {
                     <p className="text-xs text-muted-foreground mb-2">
                       {milestone.description}
                     </p>
+                    {isUnlocked && (
+                      <p className="text-xs font-medium text-primary mb-2">
+                        🎁 {milestone.perk} unlocked
+                      </p>
+                    )}
+                    {!isUnlocked && (
+                      <p className="text-xs text-muted-foreground/70 mb-2">
+                        🔒 Unlocks: {milestone.perk}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div

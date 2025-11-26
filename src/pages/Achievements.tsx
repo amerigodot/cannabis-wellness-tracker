@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Award, ArrowLeft, Lock, Sparkles, TrendingUp, Trophy, Calendar, Activity, Target } from "lucide-react";
+import { Award, ArrowLeft, Lock, Sparkles, TrendingUp, Trophy, Calendar, Activity, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 
@@ -27,6 +27,7 @@ const MILESTONES = [
       "Understand which strains work best for you",
       "Identify optimal dosages and methods",
     ],
+    perk: "Unlock Comprehensive Wellness Report Generator - AI-powered analysis of your usage patterns with personalized recommendations",
   },
   {
     count: 50,
@@ -39,6 +40,7 @@ const MILESTONES = [
       "Identify correlations between activities and effects",
       "Optimize timing and dosage for desired outcomes",
     ],
+    perk: "Unlock Correlation & Timing Analysis - Discover temporal patterns and optimal timing strategies for maximum effectiveness",
   },
   {
     count: 100,
@@ -51,6 +53,7 @@ const MILESTONES = [
       "Expert-level pattern recognition",
       "Fully personalized optimization strategies",
     ],
+    perk: "Unlock Goal-Based Optimization Strategy - Personalized wellness optimization plan tailored to your specific goals using advanced AI",
   },
 ];
 
@@ -191,10 +194,18 @@ export default function Achievements() {
         {/* Overall Statistics */}
         <Card className="mb-8 shadow-[var(--shadow-soft)] animate-in fade-in slide-in-from-bottom-2 duration-700">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-primary" />
-              Your Progress
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                Your Progress
+              </CardTitle>
+              {entryCount >= 10 && (
+                <Button onClick={() => navigate("/tools")} className="gap-2">
+                  <Zap className="w-4 h-4" />
+                  Use Your Tools
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -350,7 +361,7 @@ export default function Achievements() {
                         </div>
                       )}
 
-                      <div className="bg-background/50 rounded-lg p-4">
+                      <div className="bg-background/50 rounded-lg p-4 mb-3">
                         <p className="text-sm font-medium mb-2">Benefits:</p>
                         <ul className="space-y-1.5">
                           {achievement.benefits.map((benefit, index) => (
@@ -361,6 +372,33 @@ export default function Achievements() {
                           ))}
                         </ul>
                       </div>
+
+                      {achievement.perk && (
+                        <div className={cn(
+                          "rounded-lg p-4 border-2",
+                          achievement.isUnlocked 
+                            ? "bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/30" 
+                            : "bg-muted/50 border-muted"
+                        )}>
+                          <p className="text-sm font-semibold mb-1 flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            {achievement.isUnlocked ? "Unlocked Perk" : "Locked Perk"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {achievement.perk}
+                          </p>
+                          {achievement.isUnlocked && (
+                            <Button
+                              onClick={() => navigate("/tools")}
+                              size="sm"
+                              className="mt-3 w-full"
+                              variant="outline"
+                            >
+                              Use This Tool
+                            </Button>
+                          )}
+                        </div>
+                      )}
 
                       {!achievement.isUnlocked && (
                         <div className="mt-3">
