@@ -30,14 +30,6 @@ export const Reminders = () => {
 
   useEffect(() => {
     fetchReminders();
-    
-    // Check for due reminders every minute
-    const interval = setInterval(checkDueReminders, 60000);
-    
-    // Check immediately on mount
-    checkDueReminders();
-    
-    return () => clearInterval(interval);
   }, []);
 
   const fetchReminders = async () => {
@@ -54,76 +46,6 @@ export const Reminders = () => {
     }
   };
 
-  const checkDueReminders = async () => {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) return;
-
-    const now = new Date();
-    const { data, error } = await supabase
-      .from("reminders")
-      .select("*")
-      .eq("is_active", true)
-      .lte("reminder_time", now.toISOString());
-
-    if (!error && data && data.length > 0) {
-      data.forEach((reminder) => {
-        toast.info(`Reminder: ${reminder.title}`, {
-          duration: 10000,
-          action: {
-            label: "Dismiss",
-            onClick: () => dismissReminder(reminder.id),
-          },
-        });
-        
-        // Handle recurring reminders
-        if (reminder.recurrence !== "none") {
-          createNextRecurrence(reminder);
-        }
-      });
-      
-      // Mark reminders as inactive
-      const ids = data.map((r) => r.id);
-      await supabase
-        .from("reminders")
-        .update({ is_active: false })
-        .in("id", ids);
-      
-      fetchReminders();
-    }
-  };
-
-  const createNextRecurrence = async (reminder: Reminder) => {
-    const currentTime = new Date(reminder.reminder_time);
-    let nextTime = new Date(currentTime);
-
-    switch (reminder.recurrence) {
-      case "daily":
-        nextTime.setDate(nextTime.getDate() + 1);
-        break;
-      case "weekly":
-        nextTime.setDate(nextTime.getDate() + 7);
-        break;
-      case "monthly":
-        nextTime.setMonth(nextTime.getMonth() + 1);
-        break;
-    }
-
-    await supabase.from("reminders").insert({
-      user_id: reminder.user_id,
-      title: reminder.title,
-      reminder_time: nextTime.toISOString(),
-      recurrence: reminder.recurrence,
-    });
-  };
-
-  const dismissReminder = async (id: string) => {
-    await supabase
-      .from("reminders")
-      .update({ is_active: false })
-      .eq("id", id);
-    
-    fetchReminders();
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
