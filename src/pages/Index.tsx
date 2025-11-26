@@ -17,6 +17,7 @@ import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { LandingPage } from "@/components/LandingPage";
+import { AchievementBadges } from "@/components/AchievementBadges";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -1137,6 +1138,11 @@ const Index = () => {
             <p className="text-muted-foreground text-lg">Track your wellness journey with ease</p>
           </div>
         </header>
+
+        {/* Achievement Badges */}
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <AchievementBadges entryCount={entries.length} />
+        </div>
 
         {/* Entry Form */}
         <Card id="new-entry-card" className="p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
