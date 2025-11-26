@@ -26,6 +26,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
 
 interface JournalEntry {
   id: string;
@@ -878,6 +879,9 @@ const Index = () => {
 
     if (!user) return;
 
+    // Store current entry count before submission
+    const previousEntryCount = entries.length;
+
     setIsSubmitting(true);
     const dosage = `${dosageAmount}${dosageUnit}`;
     
@@ -904,7 +908,27 @@ const Index = () => {
       toast.error("Error saving entry: " + error.message);
     } else {
       setShowSuccessAnimation(true);
-      toast.success("Entry saved successfully! 🎉");
+      
+      // Check if a milestone was reached
+      const newEntryCount = previousEntryCount + 1;
+      const milestoneReached = MILESTONES.find(
+        (milestone) => milestone === newEntryCount
+      );
+
+      if (milestoneReached) {
+        const details = MILESTONE_DETAILS[milestoneReached as keyof typeof MILESTONE_DETAILS];
+        
+        // Trigger confetti celebration
+        triggerMilestoneCelebration(milestoneReached);
+        
+        // Show special milestone toast
+        toast.success(details.message, {
+          description: `${details.icon} You've logged ${milestoneReached} entries! Keep going!`,
+          duration: 6000,
+        });
+      } else {
+        toast.success("Entry saved successfully! 🎉");
+      }
       
       // Clear form fields
       setNotes("");
