@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2, Download, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -19,6 +19,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NotificationPreferences {
   browserNotifications: boolean;
@@ -36,6 +42,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     browserNotifications: true,
@@ -191,6 +198,101 @@ export default function Settings() {
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
+    }
+  };
+
+  const handleExportData = async (format: "json" | "csv") => {
+    setExporting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("No user found");
+        return;
+      }
+
+      // Fetch all journal entries
+      const { data: entries, error } = await supabase
+        .from("journal_entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      if (!entries || entries.length === 0) {
+        toast.error("No journal entries to export");
+        return;
+      }
+
+      let fileContent: string;
+      let fileName: string;
+      let mimeType: string;
+
+      if (format === "json") {
+        // Export as JSON
+        fileContent = JSON.stringify(entries, null, 2);
+        fileName = `journal-entries-${new Date().toISOString().split("T")[0]}.json`;
+        mimeType = "application/json";
+      } else {
+        // Export as CSV
+        const headers = [
+          "ID",
+          "Created At",
+          "Consumption Time",
+          "Strain",
+          "Dosage",
+          "Method",
+          "Observations",
+          "Activities",
+          "Negative Side Effects",
+          "Notes",
+          "Icon",
+        ];
+
+        const csvRows = entries.map((entry) => [
+          entry.id,
+          entry.created_at,
+          entry.consumption_time || "",
+          entry.strain,
+          entry.dosage,
+          entry.method,
+          (entry.observations || []).join("; "),
+          (entry.activities || []).join("; "),
+          (entry.negative_side_effects || []).join("; "),
+          entry.notes || "",
+          entry.icon || "",
+        ]);
+
+        fileContent =
+          headers.join(",") +
+          "\n" +
+          csvRows
+            .map((row) =>
+              row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+            )
+            .join("\n");
+
+        fileName = `journal-entries-${new Date().toISOString().split("T")[0]}.csv`;
+        mimeType = "text/csv";
+      }
+
+      // Create and trigger download
+      const blob = new Blob([fileContent], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Data exported successfully as ${format.toUpperCase()}`);
+    } catch (error: any) {
+      console.error("Error exporting data:", error);
+      toast.error(error.message || "Failed to export data");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -372,12 +474,64 @@ export default function Settings() {
               Irreversible and destructive actions
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
+            {/* Export Data */}
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Deleting your account will permanently remove all your data including journal entries, 
-                reminders, settings, and preferences. This action cannot be undone.
-              </p>
+              <div>
+                <h3 className="text-sm font-semibold mb-1">Export Your Data</h3>
+                <p className="text-sm text-muted-foreground">
+                  Download all your journal entries before deleting your account. 
+                  Choose between JSON or CSV format.
+                </p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    disabled={exporting || accountInfo.totalEntries === 0}
+                    className="w-full sm:w-auto"
+                  >
+                    {exporting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Export Data
+                        <ChevronDown className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => handleExportData("json")}>
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExportData("csv")}>
+                    Export as CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {accountInfo.totalEntries === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  No journal entries to export
+                </p>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Delete Account */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold mb-1">Delete Account</h3>
+                <p className="text-sm text-muted-foreground">
+                  Permanently remove all your data including journal entries, 
+                  reminders, settings, and preferences. This action cannot be undone.
+                </p>
+              </div>
               <Button
                 variant="destructive"
                 onClick={() => setShowDeleteDialog(true)}
