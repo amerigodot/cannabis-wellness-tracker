@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_preferences: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          tool_notifications_enabled: boolean
+          updated_at: string
+          user_id: string
+          weekly_summary_enabled: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          tool_notifications_enabled?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_summary_enabled?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          tool_notifications_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_summary_enabled?: boolean
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           activities: string[]
