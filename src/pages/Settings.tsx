@@ -6,9 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Bell, Mail, Volume2 } from "lucide-react";
+import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NotificationPreferences {
   browserNotifications: boolean;
@@ -25,6 +35,8 @@ interface AccountInfo {
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     browserNotifications: true,
     emailNotifications: true,
@@ -140,6 +152,45 @@ export default function Settings() {
       toast.success("Test notification sent!");
     } else {
       toast.error("Browser notifications are not enabled");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("No active session found");
+        return;
+      }
+
+      // Call edge function to delete account
+      const { data, error } = await supabase.functions.invoke("delete-account", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      // Sign out and clear local storage
+      await supabase.auth.signOut();
+      localStorage.clear();
+
+      toast.success("Account deleted successfully");
+      navigate("/auth");
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      toast.error(error.message || "Failed to delete account. Please try again or contact support.");
+    } finally {
+      setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -299,7 +350,7 @@ export default function Settings() {
 
         {/* Browser Permission Info */}
         {Notification.permission === "denied" && (
-          <Card className="border-destructive/50 bg-destructive/5">
+          <Card className="border-destructive/50 bg-destructive/5 mb-6">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
                 <strong>Browser notifications blocked:</strong> To enable browser notifications, 
@@ -309,7 +360,82 @@ export default function Settings() {
             </CardContent>
           </Card>
         )}
+
+        {/* Danger Zone */}
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>
+              Irreversible and destructive actions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Deleting your account will permanently remove all your data including journal entries, 
+                reminders, settings, and preferences. This action cannot be undone.
+              </p>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+                className="w-full sm:w-auto"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Account Permanently?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 pt-2">
+              <p className="font-semibold text-foreground">
+                This action cannot be undone. This will permanently delete:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>All {accountInfo.totalEntries} journal entries</li>
+                <li>All reminders and notifications</li>
+                <li>All settings and preferences</li>
+                <li>Your account and profile data</li>
+              </ul>
+              <p className="text-destructive font-medium pt-2">
+                Are you absolutely sure you want to delete your account?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Account
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
