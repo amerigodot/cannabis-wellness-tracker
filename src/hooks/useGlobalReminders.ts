@@ -11,8 +11,48 @@ interface Reminder {
   recurrence: string;
 }
 
+const requestNotificationPermission = async () => {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support notifications");
+    return false;
+  }
+
+  if (Notification.permission === "granted") {
+    return true;
+  }
+
+  if (Notification.permission !== "denied") {
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
+  }
+
+  return false;
+};
+
+const showBrowserNotification = (title: string, onDismiss: () => void) => {
+  if (Notification.permission === "granted") {
+    const notification = new Notification("Medical Cannabis Log", {
+      body: title,
+      icon: "/favicon.ico",
+      badge: "/favicon.ico",
+      tag: "reminder",
+      requireInteraction: true,
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+      onDismiss();
+    };
+
+    // Auto-dismiss after 30 seconds
+    setTimeout(() => notification.close(), 30000);
+  }
+};
+
 export const useGlobalReminders = () => {
   const processedReminders = useRef<Set<string>>(new Set());
+  const notificationPermissionRequested = useRef(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -37,11 +77,17 @@ export const useGlobalReminders = () => {
         for (const reminder of newReminders) {
           processedReminders.current.add(reminder.id);
 
+          const dismissAction = () => dismissReminder(reminder.id);
+
+          // Show browser notification (system notification)
+          showBrowserNotification(reminder.title, dismissAction);
+
+          // Also show toast notification as fallback/backup
           toast.info(`Reminder: ${reminder.title}`, {
             duration: 10000,
             action: {
               label: "Dismiss",
-              onClick: () => dismissReminder(reminder.id),
+              onClick: dismissAction,
             },
           });
 
@@ -114,6 +160,20 @@ export const useGlobalReminders = () => {
     };
 
     const initializeReminders = async () => {
+      // Request notification permission once
+      if (!notificationPermissionRequested.current) {
+        notificationPermissionRequested.current = true;
+        const granted = await requestNotificationPermission();
+        
+        if (granted) {
+          toast.success("Browser notifications enabled for reminders");
+        } else if (Notification.permission === "denied") {
+          toast.info("Enable browser notifications in settings to receive reminders when this tab is in background", {
+            duration: 6000,
+          });
+        }
+      }
+
       // Check immediately on mount
       await checkDueReminders();
       
