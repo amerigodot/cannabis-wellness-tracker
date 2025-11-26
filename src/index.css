@@ -24,7 +24,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 150 20% 94%;
-    --muted-foreground: 160 10% 38%;
+    --muted-foreground: 160 15% 30%;
 
     --accent: 40 96% 60%;
     --accent-foreground: 160 20% 15%;
@@ -42,8 +42,8 @@ All colors MUST be HSL.
     --side-effect-foreground: 0 0% 100%;
     --side-effect-light: 0 72% 90%;
 
-    --border: 150 20% 88%;
-    --input: 150 20% 88%;
+    --border: 150 20% 82%;
+    --input: 150 20% 82%;
     --ring: 158 64% 36%;
 
     --radius: 0.75rem;
@@ -102,7 +102,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 160 10% 22%;
-    --muted-foreground: 150 15% 65%;
+    --muted-foreground: 150 20% 75%;
 
     --accent: 40 90% 55%;
     --accent-foreground: 160 20% 15%;
@@ -120,8 +120,8 @@ All colors MUST be HSL.
     --side-effect-foreground: 0 0% 100%;
     --side-effect-light: 0 70% 25%;
 
-    --border: 160 10% 25%;
-    --input: 160 10% 25%;
+    --border: 160 10% 30%;
+    --input: 160 10% 30%;
     --ring: 158 64% 52%;
     
     /* Vibrant strain colors - dark mode */
