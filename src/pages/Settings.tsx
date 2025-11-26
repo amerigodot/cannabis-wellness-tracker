@@ -16,6 +16,12 @@ interface NotificationPreferences {
   soundEnabled: boolean;
 }
 
+interface AccountInfo {
+  email: string;
+  createdAt: string;
+  totalEntries: number;
+}
+
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -24,7 +30,11 @@ export default function Settings() {
     emailNotifications: true,
     soundEnabled: false,
   });
-  const [email, setEmail] = useState("");
+  const [accountInfo, setAccountInfo] = useState<AccountInfo>({
+    email: "",
+    createdAt: "",
+    totalEntries: 0,
+  });
 
   useEffect(() => {
     loadPreferences();
@@ -39,7 +49,21 @@ export default function Settings() {
         return;
       }
 
-      setEmail(user.email || "");
+      // Get account creation date
+      const createdAt = user.created_at || "";
+
+      // Get total entries count
+      const { count } = await supabase
+        .from("journal_entries")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_deleted", false);
+
+      setAccountInfo({
+        email: user.email || "",
+        createdAt,
+        totalEntries: count || 0,
+      });
 
       // Load browser notification preferences from localStorage
       const browserNotifs = localStorage.getItem("browserNotificationsEnabled");
@@ -50,7 +74,7 @@ export default function Settings() {
         .from("email_preferences")
         .select("tool_notifications_enabled")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       setPreferences({
         browserNotifications: browserNotifs !== "false",
@@ -153,10 +177,35 @@ export default function Settings() {
             <CardTitle>Account</CardTitle>
             <CardDescription>Your account information</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <p className="text-sm text-muted-foreground">{email}</p>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+                <p className="text-sm font-medium">{accountInfo.email}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Member Since</Label>
+                <p className="text-sm font-medium">
+                  {accountInfo.createdAt ? new Date(accountInfo.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  }) : "N/A"}
+                </p>
+              </div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between pt-2">
+              <div className="space-y-1">
+                <Label className="text-sm font-medium text-muted-foreground">Total Journal Entries</Label>
+                <p className="text-2xl font-bold text-primary">{accountInfo.totalEntries}</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/")}
+              >
+                View Journal
+              </Button>
             </div>
           </CardContent>
         </Card>
