@@ -16,6 +16,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Donate = lazy(() => import("./pages/Donate"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Tools = lazy(() => import("./pages/Tools"));
+const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const AppContent = () => {
               <Route path="/donate" element={<Donate />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/tools" element={<Tools />} />
+              <Route path="/settings" element={<Settings />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
