@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowLeft, Target, TrendingUp, Sparkles, Award } from "lucide-react";
+import { ArrowLeft, Target, TrendingUp, Sparkles, Award, Calendar, BarChart3, Bell, Shield, Lock, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -16,6 +17,29 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
+  const [currentFeature, setCurrentFeature] = useState(0);
+
+  const features = [
+    {
+      icon: Calendar,
+      title: "Calendar Tracking",
+      description: "Visualize your wellness journey over time",
+      details: "Track every session with detailed notes about strain, dosage, method, and effects. See your entries on an interactive calendar view that helps you identify patterns and trends. Never lose track of what works best for you."
+    },
+    {
+      icon: BarChart3,
+      title: "Insights & Trends",
+      description: "Discover patterns in your wellness data",
+      details: "Advanced analytics reveal correlations between strains, activities, and effects. Filter by observations, activities, or side effects to understand what combinations work best. Unlock AI-powered tools at milestones for deeper insights."
+    },
+    {
+      icon: Bell,
+      title: "Smart Reminders",
+      description: "Never miss an entry with customizable reminders",
+      details: "Set up recurring reminders (daily, weekly, monthly) to maintain consistency in your journaling. Get timely notifications to help you track your wellness journey without forgetting important details."
+    }
+  ];
 
   useEffect(() => {
     // Check if user is already logged in
@@ -110,12 +134,35 @@ export default function Auth() {
         <ThemeToggle />
       </div>
       
-      <main className="w-full max-w-md">
+      <main className="w-full max-w-md space-y-6">
+        {/* Hero Section */}
+        <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-700">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Start tracking your wellness journey
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Discover patterns, optimize your experience
+          </p>
+          
+          {/* Trust Signals */}
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+              <Shield className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium">Your data is encrypted & private</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+              <Lock className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium">No ads, no data selling</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Auth Card */}
         <Card className="w-full shadow-hover border-2">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Get Started</CardTitle>
             <CardDescription className="text-center text-base">
-              Access your wellness journal
+              Create your account or sign in
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -229,8 +276,45 @@ export default function Auth() {
           </CardContent>
         </Card>
 
+        {/* Features Preview Section */}
+        <Card className="w-full shadow-hover border-2 bg-gradient-to-br from-primary/5 to-accent/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold">Explore Features</CardTitle>
+            <CardDescription>
+              See what makes your wellness journey powerful
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-3 hover:bg-background/50"
+                  onClick={() => {
+                    setCurrentFeature(index);
+                    setFeatureDialogOpen(true);
+                  }}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <IconComponent className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-sm">{feature.title}</p>
+                      <p className="text-xs text-muted-foreground">{feature.description}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </Button>
+              );
+            })}
+          </CardContent>
+        </Card>
+
         {/* Journaling Milestones Promotion Card */}
-        <Card className="w-full shadow-hover border-2 mt-6 bg-gradient-to-br from-primary/5 to-accent/5">
+        <Card className="w-full shadow-hover border-2 bg-gradient-to-br from-primary/5 to-accent/5">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
@@ -270,6 +354,66 @@ export default function Auth() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Features Dialog */}
+        <Dialog open={featureDialogOpen} onOpenChange={setFeatureDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                {(() => {
+                  const IconComponent = features[currentFeature].icon;
+                  return (
+                    <div className="p-3 rounded-full bg-primary/10">
+                      <IconComponent className="w-6 h-6 text-primary" />
+                    </div>
+                  );
+                })()}
+                <div className="flex-1">
+                  <DialogTitle>{features[currentFeature].title}</DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground">
+                    Feature {currentFeature + 1} of {features.length}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {features[currentFeature].details}
+              </p>
+              
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentFeature((prev) => (prev === 0 ? features.length - 1 : prev - 1))}
+                  className="gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <div className="flex gap-1">
+                  {features.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                        index === currentFeature ? 'bg-primary' : 'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentFeature((prev) => (prev === features.length - 1 ? 0 : prev + 1))}
+                  className="gap-2"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
