@@ -185,7 +185,16 @@ export const Reminders = () => {
           Reminders
         </h2>
         <Button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (!showForm) {
+              const now = new Date();
+              const dateStr = format(now, "yyyy-MM-dd");
+              const timeStr = format(now, "HH:mm");
+              setDate(dateStr);
+              setTime(timeStr);
+            }
+            setShowForm(!showForm);
+          }}
           variant={showForm ? "ghost" : "default"}
           size="sm"
         >
