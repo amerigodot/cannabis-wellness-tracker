@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { lazy, Suspense } from "react";
+import { useGlobalReminders } from "@/hooks/useGlobalReminders";
 
 // Lazy load route components for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -19,13 +20,11 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+const AppContent = () => {
+  useGlobalReminders();
+  
+  return (
+    <BrowserRouter>
           <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -41,6 +40,16 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
