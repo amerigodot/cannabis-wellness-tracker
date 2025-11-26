@@ -22,6 +22,11 @@ interface JournalEntry {
   negative_side_effects: string[];
 }
 
+interface ToolUsage {
+  tool_id: string;
+  last_used_at: string;
+}
+
 const TOOLS = [
   {
     id: "report",
@@ -56,6 +61,7 @@ export default function Tools() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [toolUsage, setToolUsage] = useState<Record<string, ToolUsage>>({});
   const [loading, setLoading] = useState(true);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -67,6 +73,7 @@ export default function Tools() {
       if (session?.user) {
         setUser(session.user);
         fetchEntries(session.user.id);
+        fetchToolUsage(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -78,6 +85,7 @@ export default function Tools() {
       if (session?.user) {
         setUser(session.user);
         fetchEntries(session.user.id);
+        fetchToolUsage(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -104,6 +112,39 @@ export default function Tools() {
     setLoading(false);
   };
 
+  const fetchToolUsage = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("tool_usage")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error fetching tool usage:", error);
+    } else {
+      const usageMap: Record<string, ToolUsage> = {};
+      data?.forEach((usage) => {
+        usageMap[usage.tool_id] = usage;
+      });
+      setToolUsage(usageMap);
+    }
+  };
+
+  const getToolAvailability = (toolId: string) => {
+    const usage = toolUsage[toolId];
+    if (!usage) return { available: true, daysRemaining: 0 };
+
+    const lastUsed = new Date(usage.last_used_at);
+    const now = new Date();
+    const daysSinceLastUse = (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60 * 24);
+    const daysRemaining = Math.max(0, Math.ceil(7 - daysSinceLastUse));
+    
+    return {
+      available: daysSinceLastUse >= 7,
+      daysRemaining,
+      availableDate: new Date(lastUsed.getTime() + 7 * 24 * 60 * 60 * 1000),
+    };
+  };
+
   const handleGenerateReport = async () => {
     setGenerating(true);
     setResult("");
@@ -114,8 +155,11 @@ export default function Tools() {
       });
 
       if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit")) {
-          toast.error("Rate limit exceeded. Please try again in a moment.");
+        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
+          const availability = getToolAvailability("report");
+          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
+          // Refresh tool usage
+          if (user) await fetchToolUsage(user.id);
         } else if (error.message.includes("402") || error.message.includes("credits")) {
           toast.error("AI credits required. Please add funds to continue.");
         } else {
@@ -127,6 +171,8 @@ export default function Tools() {
 
       setResult(data.report);
       toast.success("Report generated successfully!");
+      // Refresh tool usage
+      if (user) await fetchToolUsage(user.id);
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while generating the report");
@@ -145,8 +191,11 @@ export default function Tools() {
       });
 
       if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit")) {
-          toast.error("Rate limit exceeded. Please try again in a moment.");
+        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
+          const availability = getToolAvailability("correlations");
+          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
+          // Refresh tool usage
+          if (user) await fetchToolUsage(user.id);
         } else if (error.message.includes("402") || error.message.includes("credits")) {
           toast.error("AI credits required. Please add funds to continue.");
         } else {
@@ -158,6 +207,8 @@ export default function Tools() {
 
       setResult(data.analysis);
       toast.success("Analysis complete!");
+      // Refresh tool usage
+      if (user) await fetchToolUsage(user.id);
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred during analysis");
@@ -181,8 +232,11 @@ export default function Tools() {
       });
 
       if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit")) {
-          toast.error("Rate limit exceeded. Please try again in a moment.");
+        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
+          const availability = getToolAvailability("optimize");
+          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
+          // Refresh tool usage
+          if (user) await fetchToolUsage(user.id);
         } else if (error.message.includes("402") || error.message.includes("credits")) {
           toast.error("AI credits required. Please add funds to continue.");
         } else {
@@ -194,6 +248,8 @@ export default function Tools() {
 
       setResult(data.strategy);
       toast.success("Optimization strategy generated!");
+      // Refresh tool usage
+      if (user) await fetchToolUsage(user.id);
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while generating strategy");
@@ -261,6 +317,8 @@ export default function Tools() {
             const isUnlocked = entryCount >= tool.requiredEntries;
             const IconComponent = tool.icon;
             const isActive = activeToolId === tool.id;
+            const availability = getToolAvailability(tool.id);
+            const isOnCooldown = !availability.available;
 
             return (
               <Card
@@ -292,19 +350,28 @@ export default function Tools() {
                             ({tool.requiredEntries} entries)
                           </span>
                         </div>
+                        {isUnlocked && isOnCooldown && (
+                          <div className="mt-2 px-3 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+                            <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                              ⏱️ Available in {availability.daysRemaining} day{availability.daysRemaining !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     {isUnlocked && (
                       <Button
                         onClick={() => handleToolAction(tool.id)}
-                        disabled={generating}
-                        className={`bg-gradient-to-r ${tool.color} hover:opacity-90`}
+                        disabled={generating || isOnCooldown}
+                        className={`bg-gradient-to-r ${tool.color} hover:opacity-90 ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {generating && isActive ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Generating...
                           </>
+                        ) : isOnCooldown ? (
+                          `In ${availability.daysRemaining}d`
                         ) : (
                           "Use Tool"
                         )}
@@ -329,8 +396,8 @@ export default function Tools() {
                       </div>
                       <Button
                         onClick={handleOptimizeWellness}
-                        disabled={generating || !goals.trim()}
-                        className={`w-full bg-gradient-to-r ${tool.color} hover:opacity-90`}
+                        disabled={generating || !goals.trim() || isOnCooldown}
+                        className={`w-full bg-gradient-to-r ${tool.color} hover:opacity-90 ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {generating ? (
                           <>
