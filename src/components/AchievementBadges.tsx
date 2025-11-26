@@ -1,6 +1,8 @@
-import { Award, Lock, Sparkles, TrendingUp, Trophy } from "lucide-react";
+import { Award, Lock, Sparkles, TrendingUp, Trophy, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface AchievementBadgesProps {
   entryCount: number;
@@ -31,16 +33,31 @@ const MILESTONES = [
 ];
 
 export function AchievementBadges({ entryCount }: AchievementBadgesProps) {
+  const navigate = useNavigate();
+
   return (
     <Card className="mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-semibold flex items-center gap-2">
-          <Award className="w-5 h-5 text-primary" />
-          Your Achievements
-        </CardTitle>
-        <CardDescription>
-          {entryCount} {entryCount === 1 ? 'entry' : 'entries'} logged
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Your Achievements
+            </CardTitle>
+            <CardDescription>
+              {entryCount} {entryCount === 1 ? 'entry' : 'entries'} logged
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/achievements")}
+            className="gap-2"
+          >
+            View All
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
