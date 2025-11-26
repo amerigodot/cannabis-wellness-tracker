@@ -21,6 +21,59 @@ serve(async (req) => {
       );
     }
 
+    // Initialize Supabase client
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "No authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Get user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check tool usage (weekly rate limit)
+    const { data: usageData, error: usageError } = await supabase
+      .from("tool_usage")
+      .select("last_used_at")
+      .eq("user_id", user.id)
+      .eq("tool_id", "report")
+      .maybeSingle();
+
+    if (usageError) {
+      console.error("Error checking tool usage:", usageError);
+    }
+
+    if (usageData) {
+      const lastUsed = new Date(usageData.last_used_at);
+      const now = new Date();
+      const daysSinceLastUse = (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60 * 24);
+      
+      if (daysSinceLastUse < 7) {
+        const daysRemaining = Math.ceil(7 - daysSinceLastUse);
+        return new Response(
+          JSON.stringify({ 
+            error: `Tool can only be used once per week. Available again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
+            availableAt: new Date(lastUsed.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -94,6 +147,15 @@ Format the report in clear markdown with appropriate headings, bullet points, an
 
     const data = await response.json();
     const report = data.choices[0].message.content;
+
+    // Record tool usage
+    await supabase
+      .from("tool_usage")
+      .upsert({
+        user_id: user.id,
+        tool_id: "report",
+        last_used_at: new Date().toISOString(),
+      });
 
     return new Response(
       JSON.stringify({ report }),
