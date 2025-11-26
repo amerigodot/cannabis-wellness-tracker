@@ -291,7 +291,7 @@ export default function Auth() {
                 <Button
                   key={index}
                   variant="ghost"
-                  className="w-full justify-start h-auto p-3 hover:bg-background/50"
+                  className="w-full justify-start h-auto p-3 hover:bg-background hover:ring-2 hover:ring-primary/20"
                   onClick={() => {
                     setCurrentFeature(index);
                     setFeatureDialogOpen(true);
