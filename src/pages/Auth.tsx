@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Target, TrendingUp, Sparkles, Award } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -226,6 +226,48 @@ export default function Auth() {
                 </form>
               </TabsContent>
             </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Journaling Milestones Promotion Card */}
+        <Card className="w-full shadow-hover border-2 mt-6 bg-gradient-to-br from-primary/5 to-accent/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              Your Journey to Wellness
+            </CardTitle>
+            <CardDescription>
+              Track measurable progress with every entry
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-full bg-primary/10">
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">10 Entries</p>
+                <p className="text-xs text-muted-foreground">Build awareness of your patterns and responses</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-full bg-primary/10">
+                <TrendingUp className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">50 Entries</p>
+                <p className="text-xs text-muted-foreground">Unlock valuable insights and optimize your experience</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 rounded-full bg-primary/10">
+                <Award className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">100+ Entries</p>
+                <p className="text-xs text-muted-foreground">Master your wellness journey with comprehensive data</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </main>
