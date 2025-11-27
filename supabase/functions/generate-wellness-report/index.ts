@@ -7,6 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
+const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per hour
+const ACCOUNT_AGE_DAYS = 7; // Minimum account age in days
+
 // Input validation schema
 const EntrySchema = z.object({
   created_at: z.string(),
@@ -21,6 +26,72 @@ const EntrySchema = z.object({
 const RequestSchema = z.object({
   entries: z.array(EntrySchema).min(1).max(1000),
 });
+
+async function checkRateLimit(supabase: any, userId: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+  const now = new Date();
+  const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+
+  // Get or create rate limit record for current window
+  const { data: existingLimit, error: fetchError } = await supabase
+    .from("rate_limits")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("endpoint", endpoint)
+    .gte("window_start", windowStart.toISOString())
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("Rate limit fetch error:", fetchError);
+    return { allowed: true }; // Fail open on errors
+  }
+
+  if (!existingLimit) {
+    // Create new rate limit record
+    await supabase
+      .from("rate_limits")
+      .insert({
+        user_id: userId,
+        endpoint: endpoint,
+        request_count: 1,
+        window_start: now.toISOString(),
+      });
+    return { allowed: true };
+  }
+
+  // Check if limit exceeded
+  if (existingLimit.request_count >= RATE_LIMIT_MAX_REQUESTS) {
+    const resetTime = new Date(new Date(existingLimit.window_start).getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+    const minutesRemaining = Math.ceil((resetTime.getTime() - now.getTime()) / (1000 * 60));
+    return { 
+      allowed: false, 
+      error: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per hour. Try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.` 
+    };
+  }
+
+  // Increment counter
+  await supabase
+    .from("rate_limits")
+    .update({ request_count: existingLimit.request_count + 1 })
+    .eq("id", existingLimit.id);
+
+  return { allowed: true };
+}
+
+async function checkAccountAge(userCreatedAt: string): Promise<{ allowed: boolean; error?: string }> {
+  const createdDate = new Date(userCreatedAt);
+  const now = new Date();
+  const daysSinceCreation = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (daysSinceCreation < ACCOUNT_AGE_DAYS) {
+    const daysRemaining = Math.ceil(ACCOUNT_AGE_DAYS - daysSinceCreation);
+    return {
+      allowed: false,
+      error: `Account must be at least ${ACCOUNT_AGE_DAYS} days old to use tools. Your account will be eligible in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`
+    };
+  }
+
+  return { allowed: true };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -55,7 +126,7 @@ serve(async (req) => {
 
     const { entries } = validation.data;
 
-    // Initialize Supabase client
+    // Initialize Supabase client with service role for rate limiting
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
@@ -66,9 +137,13 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
     });
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -76,6 +151,24 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check account age
+    const accountAgeCheck = await checkAccountAge(user.created_at);
+    if (!accountAgeCheck.allowed) {
+      return new Response(
+        JSON.stringify({ error: accountAgeCheck.error }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check rate limit
+    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, "report");
+    if (!rateLimitCheck.allowed) {
+      return new Response(
+        JSON.stringify({ error: rateLimitCheck.error }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
