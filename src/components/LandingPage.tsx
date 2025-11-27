@@ -211,141 +211,155 @@ export function LandingPage() {
         </DialogContent>
       </Dialog>
 
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Track Your Cannabis Wellness Journey
-          </h1>
-          <p className="text-muted-foreground text-lg mb-8 text-justify max-w-2xl mx-auto">
-            Discover patterns, optimize your experience, and take control of your wellness
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <Button 
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="w-full sm:w-auto"
-            >
-              Get Started
-            </Button>
+      <main className="flex-1 flex flex-col">
+        {/* Hero Section - Demo Mode Emphasized */}
+        <section className="flex items-center justify-center px-4 py-12 md:py-16">
+          <div className="w-full max-w-4xl text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Track Your Cannabis Wellness Journey
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+              Discover patterns, optimize your experience, and take control of your wellness with private, encrypted tracking
+            </p>
             
-            <div className="relative">
+            {/* Demo Mode - Primary CTA */}
+            <div className="mb-6">
               <Button 
-                variant="outline" 
                 size="lg"
-                className="w-full sm:w-auto hover:border-primary hover:bg-primary/5 hover:text-foreground transition-colors relative" 
+                className="text-lg px-8 py-6 h-auto relative animate-scale-in hover:scale-105 transition-transform shadow-lg"
                 onClick={handleDemoMode}
               >
-                <Sparkles className="w-5 h-5 mr-2 text-accent" />
-                Try Demo Mode
-                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
-                  Take a look
+                <Sparkles className="w-6 h-6 mr-2 text-accent-foreground" />
+                Try Demo Mode - No Signup Required
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full animate-pulse">
+                  Free
                 </span>
               </Button>
             </div>
-          </div>
-          
-          <p className="text-xs text-muted-foreground mb-8">
-            Explore the app with sample data (read-only) • No signup required
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <button 
-              onClick={() => setActiveFeature('calendar')}
-              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Calendar className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Calendar Tracking</h3>
-              <p className="text-sm text-muted-foreground">
-                Log entries with detailed consumption info, effects, and personal notes
-              </p>
-              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
-            </button>
             
-            <button 
-              onClick={() => setActiveFeature('insights')}
-              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <LineChart className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Insights & Trends</h3>
-              <p className="text-sm text-muted-foreground">
-                Visualize your usage patterns and understand what works best for you
-              </p>
-              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
-            </button>
-            
-            <button 
-              onClick={() => setActiveFeature('reminders')}
-              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Bell className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Smart Reminders</h3>
-              <p className="text-sm text-muted-foreground">
-                Set recurring reminders to maintain consistent tracking habits
-              </p>
-              <p className="text-xs text-primary mt-2 font-medium">Click to learn more →</p>
-            </button>
-          </div>
-        </div>
-
-        {/* Blog Preview Section */}
-        <div className="max-w-5xl mx-auto px-8 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Learn & Optimize</h2>
-            <p className="text-lg text-muted-foreground mb-6">
-              Expert guides on tracking, strain selection, and wellness optimization
+            <p className="text-sm text-muted-foreground mb-6">
+              Explore the full app with sample data • Read-only mode • See all features instantly
             </p>
-            <Button
+            
+            <Button 
               variant="outline"
-              onClick={() => navigate('/blog')}
-              className="gap-2"
+              size="lg"
+              onClick={() => navigate("/auth")}
+              className="hover:border-primary hover:text-primary transition-colors"
             >
-              View All Articles
-              <Sparkles className="w-4 h-4" />
+              Or Create Your Free Account
             </Button>
           </div>
+        </section>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <button 
-              onClick={() => navigate('/blog/complete-guide-tracking-medical-marijuana')}
-              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <h3 className="font-semibold mb-2">Complete Tracking Guide</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Learn why tracking is essential and how to do it effectively
-              </p>
-              <span className="text-xs text-primary font-medium">8 min read →</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/blog/understanding-thc-cbd-ratios-wellness')}
-              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <h3 className="font-semibold mb-2">THC:CBD Ratios Explained</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Discover which cannabinoid ratios work best for your wellness goals
-              </p>
-              <span className="text-xs text-primary font-medium">6 min read →</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/blog/top-strains-chronic-pain-relief')}
-              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
-            >
-              <h3 className="font-semibold mb-2">Top Pain Relief Strains</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Comprehensive guide to the most effective strains for chronic pain
-              </p>
-              <span className="text-xs text-primary font-medium">10 min read →</span>
-            </button>
+        {/* App Functionality Section */}
+        <section className="px-4 py-12 bg-muted/30">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-4">Everything You Need to Optimize Your Wellness</h2>
+            <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
+              Comprehensive tracking tools with powerful insights to help you discover what works best
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <button 
+                onClick={() => setActiveFeature('calendar')}
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Calendar className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Calendar Tracking</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Log entries with detailed consumption info, effects, and personal notes
+                </p>
+                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+              </button>
+              
+              <button 
+                onClick={() => setActiveFeature('insights')}
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <LineChart className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Insights & Trends</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Visualize your usage patterns and understand what works best for you
+                </p>
+                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+              </button>
+              
+              <button 
+                onClick={() => setActiveFeature('reminders')}
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Bell className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Smart Reminders</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Set recurring reminders to maintain consistent tracking habits
+                </p>
+                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* Resources & Learning Section */}
+        <section className="px-4 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Expert Guides & Resources</h2>
+              <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Learn from comprehensive guides on tracking, strain selection, dosage optimization, and wellness strategies
+              </p>
+              <Button
+                size="lg"
+                onClick={() => navigate('/blog')}
+                className="gap-2"
+              >
+                Explore All Articles
+                <Sparkles className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <button 
+                onClick={() => navigate('/blog/complete-guide-tracking-medical-marijuana')}
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Complete Tracking Guide</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Learn why tracking is essential and how to do it effectively
+                </p>
+                <span className="text-xs text-primary font-medium">8 min read →</span>
+              </button>
+
+              <button 
+                onClick={() => navigate('/blog/understanding-thc-cbd-ratios-wellness')}
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">THC:CBD Ratios Explained</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Discover which cannabinoid ratios work best for your wellness goals
+                </p>
+                <span className="text-xs text-primary font-medium">6 min read →</span>
+              </button>
+
+              <button 
+                onClick={() => navigate('/blog/top-strains-chronic-pain-relief')}
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+              >
+                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Top Pain Relief Strains</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Comprehensive guide to the most effective strains for chronic pain
+                </p>
+                <span className="text-xs text-primary font-medium">10 min read →</span>
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
       
       <Footer />
