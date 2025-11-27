@@ -8,8 +8,10 @@ const corsHeaders = {
 };
 
 // Rate limiting configuration
-const RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
-const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per hour
+const IP_RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
+const IP_RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per hour per IP
+const USER_RATE_LIMIT_WINDOW_MINUTES = 60; // 1 hour
+const USER_RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per hour per user
 const ACCOUNT_AGE_DAYS = 7; // Minimum account age in days
 
 // Input validation schema
@@ -28,9 +30,85 @@ const RequestSchema = z.object({
   entries: z.array(EntrySchema).min(50).max(1000),
 });
 
-async function checkRateLimit(supabase: any, userId: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+function getClientIP(req: Request): string {
+  // Check common proxy headers first
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const ips = forwardedFor.split(",");
+    return ips[0].trim();
+  }
+
+  const realIP = req.headers.get("x-real-ip");
+  if (realIP) {
+    return realIP.trim();
+  }
+
+  // Fallback to connection info (may not work in all environments)
+  return "unknown";
+}
+
+async function checkIPRateLimit(supabase: any, ipAddress: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+  if (ipAddress === "unknown") {
+    return { allowed: true }; // Fail open if IP cannot be determined
+  }
+
   const now = new Date();
-  const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+  const windowStart = new Date(now.getTime() - IP_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+
+  try {
+    // Get or create rate limit record for current window
+    const { data: existingLimit, error: fetchError } = await supabase
+      .from("ip_rate_limits")
+      .select("*")
+      .eq("ip_address", ipAddress)
+      .eq("endpoint", endpoint)
+      .gte("window_start", windowStart.toISOString())
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("IP rate limit fetch error:", fetchError);
+      return { allowed: true }; // Fail open on errors
+    }
+
+    if (!existingLimit) {
+      // Create new rate limit record
+      await supabase
+        .from("ip_rate_limits")
+        .insert({
+          ip_address: ipAddress,
+          endpoint: endpoint,
+          request_count: 1,
+          window_start: now.toISOString(),
+        });
+      return { allowed: true };
+    }
+
+    // Check if limit exceeded
+    if (existingLimit.request_count >= IP_RATE_LIMIT_MAX_REQUESTS) {
+      const resetTime = new Date(new Date(existingLimit.window_start).getTime() + IP_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+      const minutesRemaining = Math.ceil((resetTime.getTime() - now.getTime()) / (1000 * 60));
+      return { 
+        allowed: false, 
+        error: `Too many requests from your IP address. Maximum ${IP_RATE_LIMIT_MAX_REQUESTS} requests per hour. Try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.` 
+      };
+    }
+
+    // Increment counter
+    await supabase
+      .from("ip_rate_limits")
+      .update({ request_count: existingLimit.request_count + 1 })
+      .eq("id", existingLimit.id);
+
+    return { allowed: true };
+  } catch (error) {
+    console.error("IP rate limit error:", error);
+    return { allowed: true }; // Fail open on errors
+  }
+}
+
+async function checkUserRateLimit(supabase: any, userId: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+  const now = new Date();
+  const windowStart = new Date(now.getTime() - USER_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
 
   // Get or create rate limit record for current window
   const { data: existingLimit, error: fetchError } = await supabase
@@ -42,7 +120,7 @@ async function checkRateLimit(supabase: any, userId: string, endpoint: string): 
     .maybeSingle();
 
   if (fetchError) {
-    console.error("Rate limit fetch error:", fetchError);
+    console.error("User rate limit fetch error:", fetchError);
     return { allowed: true }; // Fail open on errors
   }
 
@@ -60,12 +138,12 @@ async function checkRateLimit(supabase: any, userId: string, endpoint: string): 
   }
 
   // Check if limit exceeded
-  if (existingLimit.request_count >= RATE_LIMIT_MAX_REQUESTS) {
-    const resetTime = new Date(new Date(existingLimit.window_start).getTime() + RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
+  if (existingLimit.request_count >= USER_RATE_LIMIT_MAX_REQUESTS) {
+    const resetTime = new Date(new Date(existingLimit.window_start).getTime() + USER_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
     const minutesRemaining = Math.ceil((resetTime.getTime() - now.getTime()) / (1000 * 60));
     return { 
       allowed: false, 
-      error: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per hour. Try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.` 
+      error: `Rate limit exceeded. Maximum ${USER_RATE_LIMIT_MAX_REQUESTS} requests per hour. Try again in ${minutesRemaining} minute${minutesRemaining !== 1 ? 's' : ''}.` 
     };
   }
 
@@ -100,6 +178,23 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize admin client for rate limiting (before authentication)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check IP-based rate limit FIRST (before authentication)
+    const clientIP = getClientIP(req);
+    console.log(`Request from IP: ${clientIP}`);
+    
+    const ipRateLimitCheck = await checkIPRateLimit(supabaseAdmin, clientIP, "correlations");
+    if (!ipRateLimitCheck.allowed) {
+      return new Response(
+        JSON.stringify({ error: ipRateLimitCheck.error }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse and validate request body
     let body;
     try {
@@ -127,7 +222,7 @@ serve(async (req) => {
 
     const { entries } = validation.data;
 
-    // Initialize Supabase client with service role for rate limiting
+    // Now authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
@@ -136,15 +231,10 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
     });
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -164,11 +254,11 @@ serve(async (req) => {
       );
     }
 
-    // Check rate limit
-    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, "correlations");
-    if (!rateLimitCheck.allowed) {
+    // Check user-based rate limit
+    const userRateLimitCheck = await checkUserRateLimit(supabaseAdmin, user.id, "correlations");
+    if (!userRateLimitCheck.allowed) {
       return new Response(
-        JSON.stringify({ error: rateLimitCheck.error }),
+        JSON.stringify({ error: userRateLimitCheck.error }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
