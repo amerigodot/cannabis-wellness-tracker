@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, Check } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
+import { TrendingUp, Check, Pill } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface JournalEntry {
   id: string;
@@ -39,6 +40,7 @@ export const InsightsChart = ({
   setFilterSideEffects
 }: InsightsChartProps) => {
   const [topCount, setTopCount] = useState<3 | 5 | 10>(5);
+  const [activeTab, setActiveTab] = useState<'trends' | 'cannabinoids'>('trends');
   
   // Combine all filters into a single set for backward compatibility
   const selectedBadges = new Set([...filterObservations, ...filterActivities, ...filterSideEffects]);
@@ -336,14 +338,65 @@ export const InsightsChart = ({
   const hasActiveFilters = selectedBadges.size > 0;
   const topStrains = hasActiveFilters ? getTopStrains(5) : [];
 
+  // Calculate cannabinoid correlations
+  const getCannabinoidCorrelations = () => {
+    // Filter entries that have cannabinoid data
+    const entriesWithCannabinoids = entries.filter(e => 
+      e.thc_percentage != null || e.cbd_percentage != null
+    );
+
+    if (entriesWithCannabinoids.length === 0) return [];
+
+    const observationStats: Record<string, { thcTotal: number; cbdTotal: number; count: number }> = {};
+
+    entriesWithCannabinoids.forEach(entry => {
+      (entry.observations || []).forEach(obs => {
+        if (!observationStats[obs]) {
+          observationStats[obs] = { thcTotal: 0, cbdTotal: 0, count: 0 };
+        }
+        observationStats[obs].thcTotal += entry.thc_percentage || 0;
+        observationStats[obs].cbdTotal += entry.cbd_percentage || 0;
+        observationStats[obs].count += 1;
+      });
+    });
+
+    return Object.entries(observationStats)
+      .map(([observation, stats]) => ({
+        observation,
+        avgTHC: parseFloat((stats.thcTotal / stats.count).toFixed(1)),
+        avgCBD: parseFloat((stats.cbdTotal / stats.count).toFixed(1)),
+        count: stats.count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  };
+
+  const cannabinoidData = getCannabinoidCorrelations();
+  const hasEntriesWithCannabinoids = entries.some(e => 
+    e.thc_percentage != null || e.cbd_percentage != null
+  );
+
   return (
     <TooltipProvider>
       <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
-      <div className="flex items-center gap-2 mb-6">
-        <TrendingUp className="w-6 h-6 text-primary" />
-        <h2 className="text-2xl font-semibold">Badge Trends</h2>
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'trends' | 'cannabinoids')} className="w-full">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-primary" />
+            <h2 className="text-2xl font-semibold">Insights</h2>
+          </div>
+          <TabsList>
+            <TabsTrigger value="trends">Badge Trends</TabsTrigger>
+            {hasEntriesWithCannabinoids && (
+              <TabsTrigger value="cannabinoids" className="flex items-center gap-1.5">
+                <Pill className="w-3.5 h-3.5" />
+                THC/CBD Analysis
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
+        <TabsContent value="trends" className="mt-0">
       {/* Filter Presets */}
       <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border">
         <p className="text-sm font-semibold mb-3 text-foreground">Quick Filter Presets</p>
@@ -676,6 +729,123 @@ export const InsightsChart = ({
           <p className="text-xs text-muted-foreground text-center whitespace-nowrap">Avg Consumption</p>
         </div>
       </div>
+        </TabsContent>
+
+        <TabsContent value="cannabinoids" className="mt-0">
+          <div className="space-y-6">
+            <div className="p-4 bg-muted/50 rounded-lg border border-border">
+              <p className="text-sm font-semibold mb-2 text-foreground">Cannabinoid-Effect Correlation</p>
+              <p className="text-xs text-muted-foreground">
+                This chart shows the average THC and CBD percentages for entries reporting specific observations. 
+                Higher bars indicate stronger correlations between cannabinoid levels and reported effects.
+              </p>
+            </div>
+
+            {cannabinoidData.length > 0 ? (
+              <>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={cannabinoidData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                      <XAxis 
+                        dataKey="observation" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        tick={{ fill: 'hsl(var(--foreground))', fontSize: 11 }}
+                      />
+                      <YAxis 
+                        label={{ value: 'Average %', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--foreground))' } }}
+                        tick={{ fill: 'hsl(var(--foreground))' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          color: 'hsl(var(--foreground))'
+                        }}
+                        formatter={(value: number) => [`${value}%`, '']}
+                        labelFormatter={(label) => `${label}`}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        iconType="circle"
+                      />
+                      <Bar 
+                        dataKey="avgTHC" 
+                        fill="hsl(142, 71%, 45%)" 
+                        name="Avg THC %"
+                        radius={[8, 8, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="avgCBD" 
+                        fill="hsl(217, 91%, 60%)" 
+                        name="Avg CBD %"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <p className="text-sm font-semibold text-foreground">THC Insights</p>
+                    </div>
+                    {cannabinoidData.length > 0 && (() => {
+                      const highestTHC = cannabinoidData.reduce((max, item) => 
+                        item.avgTHC > max.avgTHC ? item : max
+                      );
+                      return (
+                        <p className="text-xs text-muted-foreground">
+                          Highest average THC: <span className="font-medium text-foreground">{highestTHC.observation}</span> ({highestTHC.avgTHC}%)
+                        </p>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <p className="text-sm font-semibold text-foreground">CBD Insights</p>
+                    </div>
+                    {cannabinoidData.length > 0 && (() => {
+                      const highestCBD = cannabinoidData.reduce((max, item) => 
+                        item.avgCBD > max.avgCBD ? item : max
+                      );
+                      return (
+                        <p className="text-xs text-muted-foreground">
+                          Highest average CBD: <span className="font-medium text-foreground">{highestCBD.observation}</span> ({highestCBD.avgCBD}%)
+                        </p>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <p className="text-xs font-semibold mb-2 text-foreground">Top 10 Observations by Entry Count</p>
+                  <div className="flex flex-wrap gap-2">
+                    {cannabinoidData.map(item => (
+                      <Badge key={item.observation} variant="outline" className="text-xs">
+                        {item.observation} <span className="ml-1 text-muted-foreground">({item.count})</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center">
+                <Pill className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-sm text-muted-foreground">
+                  No cannabinoid data available yet. Start tracking THC and CBD percentages in your entries to see correlations with effects.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </Card>
     </TooltipProvider>
   );
