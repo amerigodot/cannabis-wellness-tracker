@@ -23,6 +23,12 @@ export function Footer() {
         {/* Footer Links */}
         <div className="flex flex-col sm:flex-row justify-center items-center gap-6 text-sm text-muted-foreground">
           <a 
+            href="/blog" 
+            className="hover:text-foreground transition-colors"
+          >
+            Blog
+          </a>
+          <a 
             href="/settings" 
             className="hover:text-foreground transition-colors"
           >

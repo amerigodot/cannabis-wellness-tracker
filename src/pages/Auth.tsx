@@ -132,17 +132,20 @@ export default function Auth() {
         canonicalUrl="https://medical-marijuana-journal.lovable.app/auth"
       />
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 flex gap-2">
           <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
+          <Button variant="ghost" onClick={() => navigate("/blog")} className="gap-2">
+            Blog
+          </Button>
         </div>
         <div className="absolute top-4 right-4">
           <ThemeToggle />
-      </div>
+        </div>
       
-      <main className="w-full max-w-md space-y-6">
+        <main className="w-full max-w-md space-y-6">
         {/* Hero Section */}
         <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-700">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
