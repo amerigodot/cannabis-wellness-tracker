@@ -19,6 +19,7 @@ interface JournalEntry {
   created_at: string;
   consumption_time: string;
   strain: string;
+  strain_2?: string | null;
   dosage: string;
   method: string;
   observations: string[];
@@ -516,7 +517,10 @@ export const CalendarView = ({
                               <div className="p-1.5 rounded-full bg-primary/10 flex-shrink-0">
                                 <IconComponent className="h-4 w-4 text-primary" />
                               </div>
-                              <p className="font-medium">{entry.strain}</p>
+                              <p className="font-medium">
+                                {entry.strain}
+                                {entry.strain_2 && <span className="text-muted-foreground"> + {entry.strain_2}</span>}
+                              </p>
                             </div>
                             <button
                               onClick={() => openTimeEditDialog(entry.id, entry.consumption_time || entry.created_at)}
@@ -542,7 +546,10 @@ export const CalendarView = ({
                               </SheetTrigger>
                               <SheetContent>
                                 <SheetHeader>
-                                  <SheetTitle>Notes for {entry.strain}</SheetTitle>
+                                  <SheetTitle>
+                                    Notes for {entry.strain}
+                                    {entry.strain_2 && <span> + {entry.strain_2}</span>}
+                                  </SheetTitle>
                                 </SheetHeader>
                                 <div className="mt-4 space-y-4">
                                   <Textarea

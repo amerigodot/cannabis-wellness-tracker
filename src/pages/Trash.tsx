@@ -13,6 +13,7 @@ interface DeletedEntry {
   created_at: string;
   consumption_time: string;
   strain: string;
+  strain_2?: string | null;
   dosage: string;
   method: string;
   observations: string[];
