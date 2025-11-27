@@ -20,6 +20,8 @@ interface JournalEntry {
   consumption_time: string;
   strain: string;
   strain_2?: string | null;
+  thc_percentage?: number | null;
+  cbd_percentage?: number | null;
   dosage: string;
   method: string;
   observations: string[];
@@ -596,6 +598,16 @@ export const CalendarView = ({
                             })()}
                             {entry.method}
                           </Badge>
+                          {entry.thc_percentage != null && (
+                            <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-400">
+                              THC {entry.thc_percentage}%
+                            </Badge>
+                          )}
+                          {entry.cbd_percentage != null && (
+                            <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400">
+                              CBD {entry.cbd_percentage}%
+                            </Badge>
+                          )}
                         </div>
                         {entry.observations.length > 0 && (
                           <div className="flex flex-wrap gap-1">

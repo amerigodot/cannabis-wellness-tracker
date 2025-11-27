@@ -47,6 +47,7 @@ export type Database = {
       journal_entries: {
         Row: {
           activities: string[]
+          cbd_percentage: number | null
           consumption_time: string | null
           created_at: string
           dosage: string
@@ -59,10 +60,12 @@ export type Database = {
           observations: string[]
           strain: string
           strain_2: string | null
+          thc_percentage: number | null
           user_id: string
         }
         Insert: {
           activities?: string[]
+          cbd_percentage?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage: string
@@ -75,10 +78,12 @@ export type Database = {
           observations?: string[]
           strain: string
           strain_2?: string | null
+          thc_percentage?: number | null
           user_id: string
         }
         Update: {
           activities?: string[]
+          cbd_percentage?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage?: string
@@ -91,6 +96,7 @@ export type Database = {
           observations?: string[]
           strain?: string
           strain_2?: string | null
+          thc_percentage?: number | null
           user_id?: string
         }
         Relationships: []
