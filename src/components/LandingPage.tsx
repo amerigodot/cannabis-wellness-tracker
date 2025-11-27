@@ -245,7 +245,7 @@ export function LandingPage() {
               variant="outline"
               size="lg"
               onClick={() => navigate("/auth")}
-              className="hover:border-primary hover:text-primary transition-colors"
+              className="hover:border-primary hover:text-foreground hover:bg-primary/5 transition-colors font-medium"
             >
               Or Create Your Free Account
             </Button>
