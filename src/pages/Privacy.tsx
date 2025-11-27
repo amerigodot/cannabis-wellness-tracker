@@ -3,12 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 export default function Privacy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <>
+      <SEO 
+        title="Privacy Policy - Medical Marijuana Journal"
+        description="Learn how Medical Marijuana Journal protects your privacy. Your data is encrypted, private, and never sold. Comprehensive privacy policy and data security information."
+        keywords="privacy policy, data security, encrypted journal, medical marijuana privacy"
+        canonicalUrl="https://medical-marijuana-journal.lovable.app/privacy"
+        noindex={true}
+      />
+      <div className="min-h-screen flex flex-col bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -260,6 +269,7 @@ export default function Privacy() {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }

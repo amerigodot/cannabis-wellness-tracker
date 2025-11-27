@@ -3,12 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 export default function Terms() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <>
+      <SEO 
+        title="Terms of Service - Medical Marijuana Journal"
+        description="Terms of Service for Medical Marijuana Journal. Understand your rights and responsibilities when using our wellness tracking platform."
+        keywords="terms of service, user agreement, medical marijuana journal terms"
+        canonicalUrl="https://medical-marijuana-journal.lovable.app/terms"
+        noindex={true}
+      />
+      <div className="min-h-screen flex flex-col bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -348,6 +357,7 @@ export default function Terms() {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }

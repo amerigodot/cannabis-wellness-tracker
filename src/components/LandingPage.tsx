@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { Calendar, LineChart, Bell, Sparkles } from "lucide-react";
 
@@ -38,10 +39,17 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
+    <>
+      <SEO 
+        title="Medical Marijuana Journal - Track Your Wellness Journey"
+        description="Private, encrypted journal to track medical marijuana use. Monitor THC/CBD levels, discover patterns, and optimize your wellness with smart insights and AI-powered analysis."
+        keywords="medical marijuana journal, cannabis tracker, THC CBD tracking, wellness journal, strain tracking, private health journal"
+        canonicalUrl="https://medical-marijuana-journal.lovable.app/"
+      />
+      <div className="min-h-screen flex flex-col bg-background">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
       
       {/* Feature Detail Dialogs */}
       <Dialog open={activeFeature === 'calendar'} onOpenChange={() => setActiveFeature(null)}>
@@ -288,6 +296,7 @@ export function LandingPage() {
       </main>
       
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
