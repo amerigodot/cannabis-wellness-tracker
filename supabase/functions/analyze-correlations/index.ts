@@ -1,10 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const EntrySchema = z.object({
+  consumption_time: z.string().optional(),
+  created_at: z.string(),
+  strain: z.string().min(1).max(200),
+  dosage: z.string().min(1).max(100),
+  method: z.string().min(1).max(100),
+  observations: z.array(z.string().max(200)).max(50),
+  activities: z.array(z.string().max(200)).max(50),
+  negative_side_effects: z.array(z.string().max(200)).max(50),
+});
+
+const RequestSchema = z.object({
+  entries: z.array(EntrySchema).min(50).max(1000),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,14 +29,32 @@ serve(async (req) => {
   }
 
   try {
-    const { entries } = await req.json();
-    
-    if (!entries || entries.length < 50) {
+    // Parse and validate request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (error) {
+      console.error("Invalid JSON:", error);
       return new Response(
-        JSON.stringify({ error: "Minimum 50 entries required for correlation analysis" }),
+        JSON.stringify({ error: "Invalid JSON in request body" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Validate input schema
+    const validation = RequestSchema.safeParse(body);
+    if (!validation.success) {
+      console.error("Validation error:", validation.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data", 
+          details: validation.error.flatten().fieldErrors 
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { entries } = validation.data;
 
     // Initialize Supabase client
     const authHeader = req.headers.get("Authorization");
@@ -80,7 +115,7 @@ serve(async (req) => {
     }
 
     // Format entries with timing data
-    const entriesWithTiming = entries.map((entry: any) => {
+    const entriesWithTiming = entries.map((entry) => {
       const date = new Date(entry.consumption_time || entry.created_at);
       return {
         date: date.toLocaleDateString(),
