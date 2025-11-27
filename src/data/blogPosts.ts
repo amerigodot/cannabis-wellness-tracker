@@ -2676,3 +2676,30 @@ export const getAllTags = (): string[] => {
   const tags = blogPosts.flatMap(post => post.tags);
   return [...new Set(tags)];
 };
+
+export const getRelatedPosts = (currentPostSlug: string, limit: number = 3): BlogPost[] => {
+  const currentPost = getPostBySlug(currentPostSlug);
+  if (!currentPost) return [];
+
+  // Score posts based on shared tags and category
+  const scoredPosts = blogPosts
+    .filter(post => post.slug !== currentPostSlug)
+    .map(post => {
+      let score = 0;
+      
+      // Same category gets 2 points
+      if (post.category === currentPost.category) {
+        score += 2;
+      }
+      
+      // Each shared tag gets 1 point
+      const sharedTags = post.tags.filter(tag => currentPost.tags.includes(tag));
+      score += sharedTags.length;
+      
+      return { post, score };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return scoredPosts.slice(0, limit).map(item => item.post);
+};
