@@ -1,4 +1,5 @@
 import { Lock, Shield, EyeOff } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export function Footer() {
   return (
@@ -48,9 +49,15 @@ export function Footer() {
           </a>
           <a 
             href="/donate" 
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors flex items-center gap-2"
           >
             Support Us
+            <Badge 
+              variant="default" 
+              className="animate-pulse bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--primary),0.5)]"
+            >
+              💝
+            </Badge>
           </a>
         </div>
         
