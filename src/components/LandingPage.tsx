@@ -293,6 +293,59 @@ export function LandingPage() {
             </button>
           </div>
         </div>
+
+        {/* Blog Preview Section */}
+        <div className="max-w-5xl mx-auto px-8 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Learn & Optimize</h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Expert guides on tracking, strain selection, and wellness optimization
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/blog')}
+              className="gap-2"
+            >
+              View All Articles
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <button 
+              onClick={() => navigate('/blog/complete-guide-tracking-medical-marijuana')}
+              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
+              <h3 className="font-semibold mb-2">Complete Tracking Guide</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Learn why tracking is essential and how to do it effectively
+              </p>
+              <span className="text-xs text-primary font-medium">8 min read →</span>
+            </button>
+
+            <button 
+              onClick={() => navigate('/blog/understanding-thc-cbd-ratios-wellness')}
+              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
+              <h3 className="font-semibold mb-2">THC:CBD Ratios Explained</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Discover which cannabinoid ratios work best for your wellness goals
+              </p>
+              <span className="text-xs text-primary font-medium">6 min read →</span>
+            </button>
+
+            <button 
+              onClick={() => navigate('/blog/top-strains-chronic-pain-relief')}
+              className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer"
+            >
+              <h3 className="font-semibold mb-2">Top Pain Relief Strains</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Comprehensive guide to the most effective strains for chronic pain
+              </p>
+              <span className="text-xs text-primary font-medium">10 min read →</span>
+            </button>
+          </div>
+        </div>
       </main>
       
       <Footer />
