@@ -34,6 +34,7 @@ interface JournalEntry {
   created_at: string;
   consumption_time: string;
   strain: string;
+  strain_2?: string | null;
   dosage: string;
   method: string;
   observations: string[];
@@ -628,6 +629,7 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [strain, setStrain] = useState("");
+  const [strain2, setStrain2] = useState("");
   const [dosageAmount, setDosageAmount] = useState("");
   const [dosageUnit, setDosageUnit] = useState("g");
   const [method, setMethod] = useState("");
@@ -778,6 +780,7 @@ const Index = () => {
       if (data && data.length > 0) {
         const lastEntry = data[0];
         setStrain(lastEntry.strain);
+        setStrain2(lastEntry.strain_2 || "");
         setMethod(lastEntry.method);
         
         // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
@@ -892,6 +895,7 @@ const Index = () => {
     const { error } = await supabase.from("journal_entries").insert({
       user_id: user.id,
       strain,
+      strain_2: strain2 || null,
       dosage,
       method,
       observations: selectedObservations,
@@ -1241,6 +1245,16 @@ const Index = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="strain2">Second Strain (Optional)</Label>
+                <Input
+                  id="strain2"
+                  value={strain2}
+                  onChange={(e) => setStrain2(e.target.value)}
+                  placeholder="e.g., OG Kush"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
                 <Label htmlFor="dosage">Dosage</Label>
                 <div className="flex gap-2 mt-1.5">
                   <Input
@@ -1264,6 +1278,10 @@ const Index = () => {
                   </Select>
                 </div>
               </div>
+            </div>
+
+            {/* Method - separate row */}
+            <div>
               <div>
                 <Label htmlFor="method">Method</Label>
                 <Select value={method} onValueChange={setMethod}>
@@ -1877,7 +1895,10 @@ const Index = () => {
                               <IconComponent className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-lg">{entry.strain}</h3>
+                              <h3 className="font-semibold text-lg">
+                                {entry.strain}
+                                {entry.strain_2 && <span className="text-muted-foreground"> + {entry.strain_2}</span>}
+                              </h3>
                               <button
                                 onClick={() => openTimeEditDialog(entry.id, entry.consumption_time || entry.created_at)}
                                 className="flex items-center gap-2 text-sm text-muted-foreground mt-1 hover:text-primary transition-colors cursor-pointer"

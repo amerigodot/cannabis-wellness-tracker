@@ -58,6 +58,7 @@ export type Database = {
           notes: string | null
           observations: string[]
           strain: string
+          strain_2: string | null
           user_id: string
         }
         Insert: {
@@ -73,6 +74,7 @@ export type Database = {
           notes?: string | null
           observations?: string[]
           strain: string
+          strain_2?: string | null
           user_id: string
         }
         Update: {
@@ -88,6 +90,7 @@ export type Database = {
           notes?: string | null
           observations?: string[]
           strain?: string
+          strain_2?: string | null
           user_id?: string
         }
         Relationships: []

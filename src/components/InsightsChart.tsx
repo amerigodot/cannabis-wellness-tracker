@@ -11,6 +11,7 @@ interface JournalEntry {
   created_at: string;
   dosage: string;
   strain: string;
+  strain_2?: string | null;
   observations?: string[];
   activities?: string[];
   negative_side_effects?: string[];
