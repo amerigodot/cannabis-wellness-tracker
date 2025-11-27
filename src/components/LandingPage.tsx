@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { Calendar, LineChart, Bell, Sparkles } from "lucide-react";
+import heroMockup from "@/assets/hero-app-mockup.png";
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -214,41 +215,53 @@ export function LandingPage() {
       <main className="flex-1 flex flex-col">
         {/* Hero Section - Demo Mode Emphasized */}
         <section className="flex items-center justify-center px-4 py-12 md:py-16">
-          <div className="w-full max-w-4xl text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Track Your Cannabis Wellness Journey
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Discover patterns, optimize your experience, and take control of your wellness with private, encrypted tracking
-            </p>
-            
-            {/* Demo Mode - Primary CTA */}
-            <div className="mb-6">
+          <div className="w-full max-w-6xl">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Track Your Cannabis Wellness Journey
+              </h1>
+              <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                Discover patterns, optimize your experience, and take control of your wellness with private, encrypted tracking
+              </p>
+              
+              {/* Demo Mode - Primary CTA */}
+              <div className="mb-6">
+                <Button 
+                  size="lg"
+                  className="text-lg px-8 py-6 h-auto relative animate-scale-in hover:scale-105 transition-transform shadow-lg"
+                  onClick={handleDemoMode}
+                >
+                  <Sparkles className="w-6 h-6 mr-2 text-accent-foreground" />
+                  Try Demo Mode - No Signup Required
+                  <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full animate-pulse">
+                    Free
+                  </span>
+                </Button>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-6">
+                Explore the full app with sample data • Read-only mode • See all features instantly
+              </p>
+              
               <Button 
+                variant="outline"
                 size="lg"
-                className="text-lg px-8 py-6 h-auto relative animate-scale-in hover:scale-105 transition-transform shadow-lg"
-                onClick={handleDemoMode}
+                onClick={() => navigate("/auth")}
+                className="hover:border-primary hover:text-primary transition-colors"
               >
-                <Sparkles className="w-6 h-6 mr-2 text-accent-foreground" />
-                Try Demo Mode - No Signup Required
-                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full animate-pulse">
-                  Free
-                </span>
+                Or Create Your Free Account
               </Button>
             </div>
-            
-            <p className="text-sm text-muted-foreground mb-6">
-              Explore the full app with sample data • Read-only mode • See all features instantly
-            </p>
-            
-            <Button 
-              variant="outline"
-              size="lg"
-              onClick={() => navigate("/auth")}
-              className="hover:border-primary hover:text-primary transition-colors"
-            >
-              Or Create Your Free Account
-            </Button>
+
+            {/* Hero Illustration */}
+            <div className="relative max-w-5xl mx-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 blur-3xl -z-10 rounded-full" />
+              <img 
+                src={heroMockup} 
+                alt="Medical Marijuana Journal app interface showing calendar tracking, insights charts, and journal entries"
+                className="w-full h-auto rounded-lg shadow-2xl animate-fade-in"
+              />
+            </div>
           </div>
         </section>
 
