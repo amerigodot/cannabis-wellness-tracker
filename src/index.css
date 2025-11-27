@@ -24,10 +24,10 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 150 20% 94%;
-    --muted-foreground: 160 15% 30%;
+    --muted-foreground: 160 20% 25%;
 
-    --accent: 40 96% 60%;
-    --accent-foreground: 160 20% 15%;
+    --accent: 40 90% 50%;
+    --accent-foreground: 160 20% 10%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -42,8 +42,8 @@ All colors MUST be HSL.
     --side-effect-foreground: 0 0% 100%;
     --side-effect-light: 0 72% 90%;
 
-    --border: 150 20% 82%;
-    --input: 150 20% 82%;
+    --border: 150 20% 75%;
+    --input: 150 20% 75%;
     --ring: 158 64% 36%;
 
     --radius: 0.75rem;
@@ -102,10 +102,10 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 160 10% 22%;
-    --muted-foreground: 150 20% 75%;
+    --muted-foreground: 150 20% 80%;
 
-    --accent: 40 90% 55%;
-    --accent-foreground: 160 20% 15%;
+    --accent: 40 85% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
@@ -120,8 +120,8 @@ All colors MUST be HSL.
     --side-effect-foreground: 0 0% 100%;
     --side-effect-light: 0 70% 25%;
 
-    --border: 160 10% 30%;
-    --input: 160 10% 30%;
+    --border: 160 10% 35%;
+    --input: 160 10% 35%;
     --ring: 158 64% 52%;
     
     /* Vibrant strain colors - dark mode */

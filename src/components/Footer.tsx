@@ -25,31 +25,31 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row justify-center items-center gap-6 text-sm text-muted-foreground">
           <a 
             href="/blog" 
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors font-medium"
           >
             Blog
           </a>
           <a 
             href="/settings" 
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors font-medium"
           >
             Settings
           </a>
           <a 
             href="/privacy" 
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors font-medium"
           >
             Privacy Policy
           </a>
           <a 
             href="/terms" 
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors font-medium"
           >
             Terms of Service
           </a>
           <a 
             href="/donate" 
-            className="hover:text-foreground transition-colors flex items-center gap-2"
+            className="hover:text-foreground transition-colors flex items-center gap-2 font-medium"
           >
             Support Us
             <Badge 
