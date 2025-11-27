@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { ArrowLeft, Calendar, Clock, Tag, Share2 } from "lucide-react";
-import { getPostBySlug } from "@/data/blogPosts";
+import { getPostBySlug, getRelatedPosts } from "@/data/blogPosts";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +17,7 @@ export default function BlogPost() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const post = slug ? getPostBySlug(slug) : undefined;
+  const relatedPosts = slug ? getRelatedPosts(slug, 3) : [];
 
   useEffect(() => {
     if (!post) {
@@ -157,6 +158,46 @@ export default function BlogPost() {
                 ))}
               </div>
             </div>
+
+            {relatedPosts.length > 0 && (
+              <>
+                <Separator className="my-8" />
+                
+                <div className="mb-8">
+                  <h3 className="text-2xl font-semibold mb-6">Related Articles</h3>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {relatedPosts.map(relatedPost => (
+                      <Card 
+                        key={relatedPost.id} 
+                        className="cursor-pointer hover:shadow-lg transition-shadow"
+                        onClick={() => navigate(`/blog/${relatedPost.slug}`)}
+                      >
+                        <img
+                          src={relatedPost.imageUrl}
+                          alt={relatedPost.title}
+                          className="w-full h-48 object-cover rounded-t-lg"
+                        />
+                        <CardContent className="pt-4">
+                          <Badge variant="secondary" className="mb-2">
+                            {relatedPost.category}
+                          </Badge>
+                          <h4 className="font-semibold mb-2 line-clamp-2">
+                            {relatedPost.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {relatedPost.excerpt}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            {relatedPost.readTime}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
             <Card className="bg-muted/50">
               <CardContent className="pt-6">
