@@ -12,6 +12,8 @@ interface JournalEntry {
   dosage: string;
   strain: string;
   strain_2?: string | null;
+  thc_percentage?: number | null;
+  cbd_percentage?: number | null;
   observations?: string[];
   activities?: string[];
   negative_side_effects?: string[];

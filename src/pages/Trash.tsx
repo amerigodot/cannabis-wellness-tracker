@@ -14,6 +14,8 @@ interface DeletedEntry {
   consumption_time: string;
   strain: string;
   strain_2?: string | null;
+  thc_percentage?: number | null;
+  cbd_percentage?: number | null;
   dosage: string;
   method: string;
   observations: string[];

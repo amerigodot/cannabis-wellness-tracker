@@ -35,6 +35,8 @@ interface JournalEntry {
   consumption_time: string;
   strain: string;
   strain_2?: string | null;
+  thc_percentage?: number | null;
+  cbd_percentage?: number | null;
   dosage: string;
   method: string;
   observations: string[];
@@ -630,6 +632,8 @@ const Index = () => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [strain, setStrain] = useState("");
   const [strain2, setStrain2] = useState("");
+  const [thcPercentage, setThcPercentage] = useState("");
+  const [cbdPercentage, setCbdPercentage] = useState("");
   const [dosageAmount, setDosageAmount] = useState("");
   const [dosageUnit, setDosageUnit] = useState("g");
   const [method, setMethod] = useState("");
@@ -781,6 +785,8 @@ const Index = () => {
         const lastEntry = data[0];
         setStrain(lastEntry.strain);
         setStrain2(lastEntry.strain_2 || "");
+        setThcPercentage(lastEntry.thc_percentage?.toString() || "");
+        setCbdPercentage(lastEntry.cbd_percentage?.toString() || "");
         setMethod(lastEntry.method);
         
         // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
@@ -896,6 +902,8 @@ const Index = () => {
       user_id: user.id,
       strain,
       strain_2: strain2 || null,
+      thc_percentage: thcPercentage ? parseFloat(thcPercentage) : null,
+      cbd_percentage: cbdPercentage ? parseFloat(cbdPercentage) : null,
       dosage,
       method,
       observations: selectedObservations,
@@ -1232,8 +1240,8 @@ const Index = () => {
           </div>
 
           <div className="grid gap-6">
-            {/* Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Basic Info - Strains */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="strain">Strain Name</Label>
                 <Input
@@ -1254,6 +1262,42 @@ const Index = () => {
                   className="mt-1.5"
                 />
               </div>
+            </div>
+
+            {/* Cannabinoid Content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="thc">THC % (Optional)</Label>
+                <Input
+                  id="thc"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={thcPercentage}
+                  onChange={(e) => setThcPercentage(e.target.value)}
+                  placeholder="e.g., 24.5"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cbd">CBD % (Optional)</Label>
+                <Input
+                  id="cbd"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={cbdPercentage}
+                  onChange={(e) => setCbdPercentage(e.target.value)}
+                  placeholder="e.g., 0.5"
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+
+            {/* Dosage and Method */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="dosage">Dosage</Label>
                 <div className="flex gap-2 mt-1.5">
@@ -1278,10 +1322,6 @@ const Index = () => {
                   </Select>
                 </div>
               </div>
-            </div>
-
-            {/* Method - separate row */}
-            <div>
               <div>
                 <Label htmlFor="method">Method</Label>
                 <Select value={method} onValueChange={setMethod}>
@@ -1930,7 +1970,7 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div>
                             <Label className="text-xs text-muted-foreground">Dosage</Label>
                             <p className="font-medium">{entry.dosage}</p>
@@ -1954,6 +1994,18 @@ const Index = () => {
                               {entry.method}
                             </p>
                           </div>
+                          {entry.thc_percentage != null && (
+                            <div>
+                              <Label className="text-xs text-muted-foreground">THC %</Label>
+                              <p className="font-medium text-green-600 dark:text-green-400">{entry.thc_percentage}%</p>
+                            </div>
+                          )}
+                          {entry.cbd_percentage != null && (
+                            <div>
+                              <Label className="text-xs text-muted-foreground">CBD %</Label>
+                              <p className="font-medium text-blue-600 dark:text-blue-400">{entry.cbd_percentage}%</p>
+                            </div>
+                          )}
                         </div>
 
                         {entry.observations.length > 0 && (
