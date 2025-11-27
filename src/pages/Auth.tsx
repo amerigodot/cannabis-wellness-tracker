@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SEO } from "@/components/SEO";
 import { ArrowLeft, Target, TrendingUp, Sparkles, Award, Calendar, BarChart3, Bell, Shield, Lock, ChevronRight, ChevronLeft } from "lucide-react";
 
 export default function Auth() {
@@ -123,15 +124,22 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="absolute top-4 left-4">
-        <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-      </div>
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
+    <>
+      <SEO 
+        title="Sign Up - Medical Marijuana Journal"
+        description="Join thousands tracking their wellness journey. Private, encrypted journal to monitor THC/CBD levels and discover patterns that work for you. Try demo mode first!"
+        keywords="medical marijuana signup, cannabis journal signup, wellness tracker, private health journal"
+        canonicalUrl="https://medical-marijuana-journal.lovable.app/auth"
+      />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="absolute top-4 left-4">
+          <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+        </div>
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
       </div>
       
       <main className="w-full max-w-md space-y-6">
@@ -415,6 +423,7 @@ export default function Auth() {
           </DialogContent>
         </Dialog>
       </main>
-    </div>
+      </div>
+    </>
   );
 }

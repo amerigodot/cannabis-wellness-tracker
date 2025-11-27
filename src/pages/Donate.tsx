@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -100,7 +101,14 @@ export default function Donate() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <>
+      <SEO 
+        title="Support the Project - Medical Marijuana Journal"
+        description="Support Medical Marijuana Journal development. Your contribution helps keep the app free, private, and ad-free for the wellness community. Donate via PayPal or crypto."
+        keywords="donate medical marijuana journal, support wellness app, contribute to cannabis tracker"
+        canonicalUrl="https://medical-marijuana-journal.lovable.app/donate"
+      />
+      <div className="min-h-screen flex flex-col bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -342,6 +350,7 @@ export default function Donate() {
       </div>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
