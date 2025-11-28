@@ -74,10 +74,23 @@ export type Database = {
       journal_entries: {
         Row: {
           activities: string[]
+          after_anxiety: number | null
+          after_energy: number | null
+          after_focus: number | null
+          after_mood: number | null
+          after_pain: number | null
+          before_anxiety: number | null
+          before_energy: number | null
+          before_focus: number | null
+          before_mood: number | null
+          before_notes: string | null
+          before_pain: number | null
           cbd_percentage: number | null
           consumption_time: string | null
           created_at: string
           dosage: string
+          effects_duration_minutes: number | null
+          entry_status: string | null
           icon: string | null
           id: string
           is_deleted: boolean
@@ -92,10 +105,23 @@ export type Database = {
         }
         Insert: {
           activities?: string[]
+          after_anxiety?: number | null
+          after_energy?: number | null
+          after_focus?: number | null
+          after_mood?: number | null
+          after_pain?: number | null
+          before_anxiety?: number | null
+          before_energy?: number | null
+          before_focus?: number | null
+          before_mood?: number | null
+          before_notes?: string | null
+          before_pain?: number | null
           cbd_percentage?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage: string
+          effects_duration_minutes?: number | null
+          entry_status?: string | null
           icon?: string | null
           id?: string
           is_deleted?: boolean
@@ -110,10 +136,23 @@ export type Database = {
         }
         Update: {
           activities?: string[]
+          after_anxiety?: number | null
+          after_energy?: number | null
+          after_focus?: number | null
+          after_mood?: number | null
+          after_pain?: number | null
+          before_anxiety?: number | null
+          before_energy?: number | null
+          before_focus?: number | null
+          before_mood?: number | null
+          before_notes?: string | null
+          before_pain?: number | null
           cbd_percentage?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage?: string
+          effects_duration_minutes?: number | null
+          entry_status?: string | null
           icon?: string | null
           id?: string
           is_deleted?: boolean
