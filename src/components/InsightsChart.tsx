@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
-import { TrendingUp, Check, Pill } from "lucide-react";
+import { TrendingUp, Check, Pill, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,18 @@ interface JournalEntry {
   observations?: string[];
   activities?: string[];
   negative_side_effects?: string[];
+  entry_status?: string | null;
+  before_mood?: number | null;
+  before_pain?: number | null;
+  before_anxiety?: number | null;
+  before_energy?: number | null;
+  before_focus?: number | null;
+  after_mood?: number | null;
+  after_pain?: number | null;
+  after_anxiety?: number | null;
+  after_energy?: number | null;
+  after_focus?: number | null;
+  effects_duration_minutes?: number | null;
 }
 
 interface InsightsChartProps {
@@ -40,7 +52,7 @@ export const InsightsChart = ({
   setFilterSideEffects
 }: InsightsChartProps) => {
   const [topCount, setTopCount] = useState<3 | 5 | 10>(5);
-  const [activeTab, setActiveTab] = useState<'trends' | 'cannabinoids'>('trends');
+  const [activeTab, setActiveTab] = useState<'trends' | 'cannabinoids' | 'effectiveness'>('trends');
   
   // Combine all filters into a single set for backward compatibility
   const selectedBadges = new Set([...filterObservations, ...filterActivities, ...filterSideEffects]);
@@ -376,10 +388,118 @@ export const InsightsChart = ({
     e.thc_percentage != null || e.cbd_percentage != null
   );
 
+  // Calculate effectiveness score for an entry
+  const calculateEffectiveness = (entry: JournalEntry): number => {
+    if (!entry.before_mood || !entry.after_mood || entry.entry_status === 'pending_after') {
+      return 0;
+    }
+
+    const moodDelta = entry.after_mood - entry.before_mood;
+    const painDelta = entry.before_pain! - entry.after_pain!;
+    const anxietyDelta = entry.before_anxiety! - entry.after_anxiety!;
+    const energyDelta = entry.after_energy! - entry.before_energy!;
+    const focusDelta = entry.after_focus! - entry.before_focus!;
+
+    const totalDelta = (moodDelta * 1.2 + painDelta * 1.5 + anxietyDelta * 1.5 + energyDelta + focusDelta) / 6.2;
+    return Math.round(((totalDelta + 9) / 18) * 100);
+  };
+
+  // Get entries with effectiveness data
+  const effectivenessEntries = entries.filter(e => 
+    e.before_mood && e.after_mood && e.entry_status !== 'pending_after'
+  );
+
+  // Calculate before/after comparison data
+  const getBeforeAfterComparison = () => {
+    if (effectivenessEntries.length === 0) return [];
+
+    const metrics = ['Mood', 'Pain', 'Anxiety', 'Energy', 'Focus'];
+    return metrics.map(metric => {
+      const beforeKey = `before_${metric.toLowerCase()}` as keyof JournalEntry;
+      const afterKey = `after_${metric.toLowerCase()}` as keyof JournalEntry;
+
+      const beforeAvg = effectivenessEntries.reduce((sum, e) => sum + (e[beforeKey] as number || 0), 0) / effectivenessEntries.length;
+      const afterAvg = effectivenessEntries.reduce((sum, e) => sum + (e[afterKey] as number || 0), 0) / effectivenessEntries.length;
+
+      return {
+        metric,
+        before: parseFloat(beforeAvg.toFixed(1)),
+        after: parseFloat(afterAvg.toFixed(1)),
+        improvement: parseFloat((afterAvg - beforeAvg).toFixed(1))
+      };
+    });
+  };
+
+  // Get best strains by effectiveness
+  const getBestStrainsByEffectiveness = () => {
+    const strainScores: Record<string, { total: number; count: number; entries: JournalEntry[] }> = {};
+
+    effectivenessEntries.forEach(entry => {
+      const score = calculateEffectiveness(entry);
+      if (!strainScores[entry.strain]) {
+        strainScores[entry.strain] = { total: 0, count: 0, entries: [] };
+      }
+      strainScores[entry.strain].total += score;
+      strainScores[entry.strain].count += 1;
+      strainScores[entry.strain].entries.push(entry);
+    });
+
+    return Object.entries(strainScores)
+      .map(([strain, data]) => ({
+        strain,
+        avgScore: Math.round(data.total / data.count),
+        count: data.count,
+        entries: data.entries
+      }))
+      .sort((a, b) => b.avgScore - a.avgScore)
+      .slice(0, 10);
+  };
+
+  // Get best strains for specific goals
+  const getBestStrainsForGoal = (goal: 'pain' | 'mood' | 'anxiety' | 'energy' | 'focus') => {
+    const beforeKey = `before_${goal}` as keyof JournalEntry;
+    const afterKey = `after_${goal}` as keyof JournalEntry;
+
+    const strainImpact: Record<string, { totalDelta: number; count: number }> = {};
+
+    effectivenessEntries.forEach(entry => {
+      const before = entry[beforeKey] as number;
+      const after = entry[afterKey] as number;
+      
+      if (before && after) {
+        let delta = after - before;
+        // For pain and anxiety, improvement is a decrease
+        if (goal === 'pain' || goal === 'anxiety') {
+          delta = before - after;
+        }
+
+        if (!strainImpact[entry.strain]) {
+          strainImpact[entry.strain] = { totalDelta: 0, count: 0 };
+        }
+        strainImpact[entry.strain].totalDelta += delta;
+        strainImpact[entry.strain].count += 1;
+      }
+    });
+
+    return Object.entries(strainImpact)
+      .map(([strain, data]) => ({
+        strain,
+        avgImprovement: parseFloat((data.totalDelta / data.count).toFixed(1)),
+        count: data.count
+      }))
+      .filter(item => item.avgImprovement > 0)
+      .sort((a, b) => b.avgImprovement - a.avgImprovement)
+      .slice(0, 5);
+  };
+
+  const beforeAfterData = getBeforeAfterComparison();
+  const topStrainsByEffectiveness = getBestStrainsByEffectiveness();
+  const hasEffectivenessData = effectivenessEntries.length > 0;
+
   return (
     <TooltipProvider>
       <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'trends' | 'cannabinoids')} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'trends' | 'cannabinoids' | 'effectiveness')} className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-6 h-6 text-primary" />
@@ -390,7 +510,13 @@ export const InsightsChart = ({
             {hasEntriesWithCannabinoids && (
               <TabsTrigger value="cannabinoids" className="flex items-center gap-1.5">
                 <Pill className="w-3.5 h-3.5" />
-                THC/CBD Analysis
+                THC/CBD
+              </TabsTrigger>
+            )}
+            {hasEffectivenessData && (
+              <TabsTrigger value="effectiveness" className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5" />
+                Effectiveness
               </TabsTrigger>
             )}
           </TabsList>
@@ -840,6 +966,246 @@ export const InsightsChart = ({
                 <Pill className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
                 <p className="text-sm text-muted-foreground">
                   No cannabinoid data available yet. Start tracking THC and CBD percentages in your entries to see correlations with effects.
+                </p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="effectiveness" className="mt-0">
+          <div className="space-y-6">
+            <div className="p-4 bg-muted/50 rounded-lg border border-border">
+              <p className="text-sm font-semibold mb-2 text-foreground">Effectiveness Analysis</p>
+              <p className="text-xs text-muted-foreground">
+                Compare before and after states to understand how different strains impact your wellness metrics.
+                Based on {effectivenessEntries.length} entries with complete before/after tracking.
+              </p>
+            </div>
+
+            {hasEffectivenessData ? (
+              <>
+                {/* Before vs After Comparison Chart */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Before vs After Comparison</h3>
+                  <div className="h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={beforeAfterData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                        <XAxis 
+                          dataKey="metric" 
+                          tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+                        />
+                        <YAxis 
+                          domain={[0, 10]}
+                          label={{ value: 'Score (1-10)', angle: -90, position: 'insideLeft', style: { fill: 'hsl(var(--foreground))' } }}
+                          tick={{ fill: 'hsl(var(--foreground))' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'hsl(var(--background))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px',
+                            color: 'hsl(var(--foreground))'
+                          }}
+                          formatter={(value: number) => [value.toFixed(1), '']}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '20px' }}
+                          iconType="circle"
+                        />
+                        <Bar 
+                          dataKey="before" 
+                          fill="hsl(var(--muted-foreground))" 
+                          name="Before"
+                          radius={[8, 8, 0, 0]}
+                        />
+                        <Bar 
+                          dataKey="after" 
+                          fill="hsl(var(--primary))" 
+                          name="After"
+                          radius={[8, 8, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
+                    {beforeAfterData.map(data => (
+                      <div key={data.metric} className={`p-3 rounded-lg border ${
+                        data.improvement > 0 ? 'bg-green-500/10 border-green-500/30' : 
+                        data.improvement < 0 ? 'bg-red-500/10 border-red-500/30' : 
+                        'bg-muted/30 border-border'
+                      }`}>
+                        <p className="text-xs font-semibold mb-1">{data.metric}</p>
+                        <div className="flex items-center gap-1">
+                          <span className={`text-lg font-bold ${
+                            data.improvement > 0 ? 'text-green-500' : 
+                            data.improvement < 0 ? 'text-red-500' : 
+                            'text-muted-foreground'
+                          }`}>
+                            {data.improvement > 0 ? '↑' : data.improvement < 0 ? '↓' : '→'}
+                            {Math.abs(data.improvement).toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Performing Strains */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Best Performing Strains by Effectiveness</h3>
+                  <div className="space-y-2">
+                    {topStrainsByEffectiveness.map((strain, index) => (
+                      <div 
+                        key={strain.strain}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
+                            index === 0 ? 'bg-yellow-500/20 text-yellow-600' :
+                            index === 1 ? 'bg-gray-400/20 text-gray-600' :
+                            index === 2 ? 'bg-orange-500/20 text-orange-600' :
+                            'bg-muted text-muted-foreground'
+                          }`}>
+                            #{index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">{strain.strain}</p>
+                            <p className="text-xs text-muted-foreground">{strain.count} entries</p>
+                          </div>
+                        </div>
+                        <Badge className={`
+                          ${strain.avgScore >= 75 ? 'bg-green-500' :
+                            strain.avgScore >= 60 ? 'bg-green-400' :
+                            strain.avgScore >= 45 ? 'bg-yellow-500' :
+                            strain.avgScore >= 30 ? 'bg-orange-500' :
+                            'bg-red-500'
+                          } text-white
+                        `}>
+                          {strain.avgScore}% Effective
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Goal-Based Analysis */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Goal-Based Analysis</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Pain Relief */}
+                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        💊 Best for Pain Relief
+                      </p>
+                      <div className="space-y-2">
+                        {getBestStrainsForGoal('pain').slice(0, 3).map(item => (
+                          <div key={item.strain} className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{item.strain}</span>
+                            <Badge variant="outline" className="text-xs">
+                              ↓{item.avgImprovement} avg
+                            </Badge>
+                          </div>
+                        ))}
+                        {getBestStrainsForGoal('pain').length === 0 && (
+                          <p className="text-xs text-muted-foreground">No data yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Mood Boost */}
+                    <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        😊 Best for Mood Boost
+                      </p>
+                      <div className="space-y-2">
+                        {getBestStrainsForGoal('mood').slice(0, 3).map(item => (
+                          <div key={item.strain} className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{item.strain}</span>
+                            <Badge variant="outline" className="text-xs">
+                              ↑{item.avgImprovement} avg
+                            </Badge>
+                          </div>
+                        ))}
+                        {getBestStrainsForGoal('mood').length === 0 && (
+                          <p className="text-xs text-muted-foreground">No data yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Anxiety Reduction */}
+                    <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        🧘 Best for Anxiety Reduction
+                      </p>
+                      <div className="space-y-2">
+                        {getBestStrainsForGoal('anxiety').slice(0, 3).map(item => (
+                          <div key={item.strain} className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{item.strain}</span>
+                            <Badge variant="outline" className="text-xs">
+                              ↓{item.avgImprovement} avg
+                            </Badge>
+                          </div>
+                        ))}
+                        {getBestStrainsForGoal('anxiety').length === 0 && (
+                          <p className="text-xs text-muted-foreground">No data yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Energy Boost */}
+                    <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                      <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        ⚡ Best for Energy Boost
+                      </p>
+                      <div className="space-y-2">
+                        {getBestStrainsForGoal('energy').slice(0, 3).map(item => (
+                          <div key={item.strain} className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{item.strain}</span>
+                            <Badge variant="outline" className="text-xs">
+                              ↑{item.avgImprovement} avg
+                            </Badge>
+                          </div>
+                        ))}
+                        {getBestStrainsForGoal('energy').length === 0 && (
+                          <p className="text-xs text-muted-foreground">No data yet</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+                    <p className="text-3xl font-bold text-primary mb-1">{effectivenessEntries.length}</p>
+                    <p className="text-xs text-muted-foreground text-center">Complete Entries</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+                    <p className="text-3xl font-bold text-primary mb-1">
+                      {topStrainsByEffectiveness.length > 0 ? topStrainsByEffectiveness[0].avgScore : 0}%
+                    </p>
+                    <p className="text-xs text-muted-foreground text-center">Top Score</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+                    <p className="text-3xl font-bold text-primary mb-1">
+                      {beforeAfterData.reduce((sum, d) => sum + d.improvement, 0).toFixed(1)}
+                    </p>
+                    <p className="text-xs text-muted-foreground text-center">Total Improvement</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/30 flex flex-col items-center justify-center">
+                    <p className="text-3xl font-bold text-primary mb-1">
+                      {topStrainsByEffectiveness.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground text-center">Tested Strains</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center">
+                <TrendingUp className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                <p className="text-sm text-muted-foreground">
+                  No effectiveness data available yet. Use Full Tracking mode and complete before/after states to see effectiveness analysis.
                 </p>
               </div>
             )}
