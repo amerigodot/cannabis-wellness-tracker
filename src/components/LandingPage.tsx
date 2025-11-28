@@ -224,9 +224,9 @@ export function LandingPage() {
             
             {/* Demo Mode - Primary CTA */}
             <div className="mb-6">
-              <Button 
+            <Button 
                 size="lg"
-                className="text-lg px-8 py-6 h-auto relative animate-scale-in hover:scale-105 transition-transform shadow-lg"
+                className="text-lg px-8 py-6 h-auto relative animate-scale-in animate-glow-pulse hover:scale-105 hover:animate-none transition-all duration-300"
                 onClick={handleDemoMode}
               >
                 <Sparkles className="w-6 h-6 mr-2 text-accent-foreground" />
