@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile, ChevronDown, Settings, Target } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
@@ -699,6 +700,7 @@ const Index = () => {
   const [afterFocus, setAfterFocus] = useState<number>(5);
   const [entryStatus, setEntryStatus] = useState<'pending_after' | 'complete'>('complete');
   const [effectsDurationMinutes, setEffectsDurationMinutes] = useState<number | null>(null);
+  const [isQuickEntry, setIsQuickEntry] = useState(false);
 
   // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
   const sliderValueToMinutes = (sliderValue: number) => {
@@ -1255,7 +1257,464 @@ const Index = () => {
             </DropdownMenu>
           </div>
 
-          <Tabs value={entryFormTab} onValueChange={(value) => setEntryFormTab(value as 'before' | 'consumption' | 'after')} className="w-full">
+          {/* Entry Mode Toggle */}
+          <div className="flex items-center justify-between p-4 mb-6 bg-muted/30 rounded-lg border border-border/50">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="entry-mode" className="text-sm font-semibold cursor-pointer">
+                {isQuickEntry ? "Quick Entry Mode" : "Full Tracking Mode"}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {isQuickEntry 
+                  ? "Fast logging with consumption details and observations only" 
+                  : "Track before/after states with detailed effectiveness metrics"}
+              </p>
+            </div>
+            <Switch
+              id="entry-mode"
+              checked={!isQuickEntry}
+              onCheckedChange={(checked) => setIsQuickEntry(!checked)}
+            />
+          </div>
+
+          {isQuickEntry ? (
+            // Quick Entry Mode - Single simplified form
+            <div className="space-y-6">
+              {/* Basic Info - Strains */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="strain">Strain Name</Label>
+                  <Input
+                    id="strain"
+                    value={strain}
+                    onChange={(e) => setStrain(e.target.value)}
+                    placeholder="e.g., Blue Dream"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="strain2">Second Strain (Optional)</Label>
+                  <Input
+                    id="strain2"
+                    value={strain2}
+                    onChange={(e) => setStrain2(e.target.value)}
+                    placeholder="e.g., OG Kush"
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+
+              {/* Cannabinoid Content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="thc">THC % (Optional)</Label>
+                  <Input
+                    id="thc"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={thcPercentage}
+                    onChange={(e) => setThcPercentage(e.target.value)}
+                    placeholder="e.g., 24.5"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cbd">CBD % (Optional)</Label>
+                  <Input
+                    id="cbd"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={cbdPercentage}
+                    onChange={(e) => setCbdPercentage(e.target.value)}
+                    placeholder="e.g., 0.5"
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+
+              {/* Dosage and Method */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="dosage">Dosage</Label>
+                  <div className="flex gap-2 mt-1.5">
+                    <Input
+                      id="dosage"
+                      type="number"
+                      step="0.1"
+                      value={dosageAmount}
+                      onChange={(e) => setDosageAmount(e.target.value)}
+                      placeholder="e.g., 0.5"
+                      className="flex-1"
+                    />
+                    <Select value={dosageUnit} onValueChange={setDosageUnit}>
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="g">g</SelectItem>
+                        <SelectItem value="ml">ml</SelectItem>
+                        <SelectItem value="mg">mg</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="method">Method</Label>
+                  <Select value={method} onValueChange={setMethod}>
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue placeholder="Select method">
+                        {method && (
+                          <div className="flex items-center gap-2">
+                            {method === "Vape" && <Wind className="h-4 w-4" />}
+                            {method === "Smoke" && <Cigarette className="h-4 w-4" />}
+                            {method === "Oil" && <Droplet className="h-4 w-4" />}
+                            {method === "Tincture" && <Beaker className="h-4 w-4" />}
+                            {method === "Topical" && <Pipette className="h-4 w-4" />}
+                            {method === "Edible" && <Cookie className="h-4 w-4" />}
+                            <span>{method}</span>
+                          </div>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Vape">
+                        <div className="flex items-center gap-2">
+                          <Wind className="h-4 w-4" />
+                          <span>Vape</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Smoke">
+                        <div className="flex items-center gap-2">
+                          <Cigarette className="h-4 w-4" />
+                          <span>Smoke</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Oil">
+                        <div className="flex items-center gap-2">
+                          <Droplet className="h-4 w-4" />
+                          <span>Oil</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Tincture">
+                        <div className="flex items-center gap-2">
+                          <Beaker className="h-4 w-4" />
+                          <span>Tincture</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Topical">
+                        <div className="flex items-center gap-2">
+                          <Pipette className="h-4 w-4" />
+                          <span>Topical</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Edible">
+                        <div className="flex items-center gap-2">
+                          <Cookie className="h-4 w-4" />
+                          <span>Edible</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Time Since Consumption */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Time Since Consumption</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {sliderValueToMinutes(minutesAgo) === 0 ? 'Now' : 
+                     sliderValueToMinutes(minutesAgo) < 60 ? `${Math.round(sliderValueToMinutes(minutesAgo))} min ago` :
+                     sliderValueToMinutes(minutesAgo) < 1440 ? `${Math.floor(sliderValueToMinutes(minutesAgo) / 60)}h ${Math.round(sliderValueToMinutes(minutesAgo) % 60)}m ago` :
+                     `${Math.floor(sliderValueToMinutes(minutesAgo) / 1440)} days ago`}
+                  </span>
+                </div>
+                <div className="relative">
+                  <Slider
+                    value={[minutesAgo]}
+                    onValueChange={(value) => setMinutesAgo(value[0])}
+                    max={1440}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="relative text-xs text-muted-foreground h-4 mt-1">
+                  <span className="absolute left-0">Now</span>
+                  <span className="absolute left-[25%] -translate-x-1/2">1h</span>
+                  <span className="absolute left-[50%] -translate-x-1/2 font-medium">2h</span>
+                  <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
+                  <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
+                  <span className="absolute right-0">24h</span>
+                </div>
+              </div>
+
+              {/* Mood Card with Presets and Experience Categories */}
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="w-5 h-5 text-primary" />
+                    Experience Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Quick Presets */}
+                  <div className="border border-primary/20 rounded-lg p-4 bg-primary/5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap className="w-4 h-4 text-primary" />
+                      <Label className="text-base font-semibold">Quick Presets</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Apply common combinations for your session type
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                      {ENTRY_PRESETS.map((preset) => {
+                        const PresetIcon = preset.icon;
+                        return (
+                          <Button
+                            key={preset.name}
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/30 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-200"
+                            onClick={() => applyPreset(preset)}
+                          >
+                            <PresetIcon className="w-5 h-5" />
+                            <span className="text-xs font-medium text-center leading-tight">
+                              {preset.name}
+                            </span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Experience Categories */}
+                  <div className="space-y-4">
+                    {/* Clear All Button */}
+                    {(selectedObservations.length > 0 || selectedActivities.length > 0 || selectedNegativeSideEffects.length > 0) && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearAllSelections}
+                          className="text-muted-foreground hover:text-foreground gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Clear All Selections
+                        </Button>
+                      </div>
+                    )}
+                    {/* Observations - Collapsible */}
+                    <Collapsible open={observationsOpen} onOpenChange={setObservationsOpen}>
+                      <div className={`border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-all duration-300 ${
+                        highlightObservations ? 'ring-2 ring-observation shadow-lg scale-[1.02]' : ''
+                      }`}>
+                        <CollapsibleTrigger asChild>
+                          <button className="w-full p-4 text-left">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-md bg-observation/20">
+                                  <Smile className="w-4 h-4 text-observation" />
+                                </div>
+                                <Label className="text-base font-semibold text-foreground cursor-pointer">Positive Observations</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {selectedObservations.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {selectedObservations.length} selected
+                                  </Badge>
+                                )}
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${observationsOpen ? 'rotate-180' : ''}`} />
+                              </div>
+                            </div>
+                          </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 pb-4">
+                            <p className="text-xs text-muted-foreground mb-3">What positive effects are you experiencing?</p>
+                            <div className="flex flex-wrap gap-2">
+                              {COMMON_OBSERVATIONS.map((obs) => (
+                                <Badge
+                                  key={obs}
+                                  variant="outline"
+                                  className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation ${
+                                    selectedObservations.includes(obs) 
+                                      ? "bg-observation text-observation-foreground border-observation scale-105" 
+                                      : "bg-background hover:bg-observation/10"
+                                  }`}
+                                  onClick={() => toggleObservation(obs)}
+                                >
+                                  {obs}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+
+                    {/* Activities - Collapsible */}
+                    <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen}>
+                      <div className={`border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-all duration-300 ${
+                        highlightActivities ? 'ring-2 ring-activity shadow-lg scale-[1.02]' : ''
+                      }`}>
+                        <CollapsibleTrigger asChild>
+                          <button className="w-full p-4 text-left">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-md bg-activity/20">
+                                  <Activity className="w-4 h-4 text-activity" />
+                                </div>
+                                <Label className="text-base font-semibold text-foreground cursor-pointer">Activities</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {selectedActivities.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {selectedActivities.length} selected
+                                  </Badge>
+                                )}
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activitiesOpen ? 'rotate-180' : ''}`} />
+                              </div>
+                            </div>
+                          </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 pb-4">
+                            <p className="text-xs text-muted-foreground mb-3">What are you doing during or after use?</p>
+                            <div className="flex flex-wrap gap-2">
+                              {COMMON_ACTIVITIES.map((activity) => (
+                                <Badge
+                                  key={activity}
+                                  variant="outline"
+                                  className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity ${
+                                    selectedActivities.includes(activity) 
+                                      ? "bg-activity text-activity-foreground border-activity scale-105" 
+                                      : "bg-background hover:bg-activity/10"
+                                  }`}
+                                  onClick={() => toggleActivity(activity)}
+                                >
+                                  {activity}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+
+                    {/* Negative Side Effects - Collapsible */}
+                    <Collapsible open={sideEffectsOpen} onOpenChange={setSideEffectsOpen}>
+                      <div className="border border-side-effect/30 rounded-lg bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
+                        <CollapsibleTrigger asChild>
+                          <button className="w-full p-4 text-left">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-md bg-side-effect/20">
+                                  <AlertCircle className="w-4 h-4 text-side-effect" />
+                                </div>
+                                <Label className="text-base font-semibold text-foreground cursor-pointer">Negative Side Effects</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {selectedNegativeSideEffects.length > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {selectedNegativeSideEffects.length} selected
+                                  </Badge>
+                                )}
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sideEffectsOpen ? 'rotate-180' : ''}`} />
+                              </div>
+                            </div>
+                          </button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="px-4 pb-4">
+                            <p className="text-xs text-muted-foreground mb-3">Any unwanted effects?</p>
+                            <div className="flex flex-wrap gap-2">
+                              {NEGATIVE_SIDE_EFFECTS.map((effect) => (
+                                <Badge
+                                  key={effect}
+                                  variant="outline"
+                                  className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect ${
+                                    selectedNegativeSideEffects.includes(effect) 
+                                      ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
+                                      : "bg-background hover:bg-side-effect/10"
+                                  }`}
+                                  onClick={() => toggleNegativeSideEffect(effect)}
+                                >
+                                  {effect}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personal Notes */}
+              <div>
+                <Sheet open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-2"
+                      onClick={() => openNotesDialog()}
+                      disabled={isDemoMode}
+                    >
+                      <FileText className="h-4 w-4" />
+                      {notes ? "Edit Notes" : "Add Notes"}
+                      {notes && <Badge variant="secondary" className="ml-auto">{notes.length} chars</Badge>}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <SheetHeader>
+                      <SheetTitle>Personal Notes</SheetTitle>
+                      <SheetDescription>
+                        Add any additional observations, feelings, or context about this entry.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <Textarea
+                        value={tempNotes}
+                        onChange={(e) => setTempNotes(e.target.value)}
+                        placeholder="How are you feeling? Any additional observations or context..."
+                        className="min-h-[300px] resize-none"
+                      />
+                      <Button
+                        onClick={saveNotes}
+                        className="w-full mt-4"
+                      >
+                        Save Notes
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              <Button
+                onClick={handleSubmit}
+                className={`w-full transition-all duration-300 ${
+                  showSuccessAnimation ? 'animate-in zoom-in-95 bg-green-500 hover:bg-green-600' : ''
+                }`}
+                size="lg"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Entry'
+                )}
+              </Button>
+            </div>
+          ) : (
+            // Full Tracking Mode - Tabbed interface with Before/After
+            <Tabs value={entryFormTab} onValueChange={(value) => setEntryFormTab(value as 'before' | 'consumption' | 'after')} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="before">Before</TabsTrigger>
               <TabsTrigger value="consumption">Consumption</TabsTrigger>
@@ -2055,6 +2514,7 @@ const Index = () => {
               </div>
             </TabsContent>
           </Tabs>
+          )}
         </Card>
 
         {/* Reminders - Removed from main flow, now accessible via floating button */}
