@@ -29,6 +29,19 @@ interface JournalEntry {
   negative_side_effects: string[];
   notes: string | null;
   icon: string;
+  entry_status?: string | null;
+  effects_duration_minutes?: number | null;
+  before_mood?: number | null;
+  before_pain?: number | null;
+  before_anxiety?: number | null;
+  before_energy?: number | null;
+  before_focus?: number | null;
+  before_notes?: string | null;
+  after_mood?: number | null;
+  after_pain?: number | null;
+  after_anxiety?: number | null;
+  after_energy?: number | null;
+  after_focus?: number | null;
 }
 
 interface Reminder {
@@ -101,6 +114,32 @@ export const CalendarView = ({
       "Edible": Cookie,
     };
     return methodIconMap[method] || Leaf;
+  };
+
+  // Calculate effectiveness score from before/after metrics
+  const calculateEffectiveness = (entry: JournalEntry): { score: number; label: string; color: string } => {
+    if (!entry.before_mood || !entry.after_mood || entry.entry_status === 'pending_after') {
+      return { score: 0, label: 'No Data', color: 'bg-muted' };
+    }
+
+    // Calculate deltas (positive = improvement)
+    const moodDelta = entry.after_mood - entry.before_mood;
+    const painDelta = entry.before_pain! - entry.after_pain!; // Lower pain is better
+    const anxietyDelta = entry.before_anxiety! - entry.after_anxiety!; // Lower anxiety is better
+    const energyDelta = entry.after_energy! - entry.before_energy!;
+    const focusDelta = entry.after_focus! - entry.before_focus!;
+
+    // Weighted average (pain and anxiety reduction weighted higher)
+    const totalDelta = (moodDelta * 1.2 + painDelta * 1.5 + anxietyDelta * 1.5 + energyDelta + focusDelta) / 6.2;
+    
+    // Convert to 0-100 scale (max possible improvement is 9 points per metric)
+    const score = Math.round(((totalDelta + 9) / 18) * 100);
+
+    if (score >= 75) return { score, label: 'Highly Effective', color: 'bg-green-500' };
+    if (score >= 60) return { score, label: 'Effective', color: 'bg-green-400' };
+    if (score >= 45) return { score, label: 'Moderate', color: 'bg-yellow-500' };
+    if (score >= 30) return { score, label: 'Mild', color: 'bg-orange-500' };
+    return { score, label: 'Limited Effect', color: 'bg-red-500' };
   };
 
   const isEntryInTimeRange = (entry: JournalEntry) => {
@@ -609,6 +648,91 @@ export const CalendarView = ({
                             </Badge>
                           )}
                         </div>
+                        
+                        {/* Before/After Metrics & Effectiveness */}
+                        {entry.before_mood && entry.after_mood && entry.entry_status !== 'pending_after' && (
+                          <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border/50">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold">Effectiveness</span>
+                              {(() => {
+                                const effectiveness = calculateEffectiveness(entry);
+                                return (
+                                  <Badge className={`${effectiveness.color} text-white text-xs`}>
+                                    {effectiveness.label} ({effectiveness.score}%)
+                                  </Badge>
+                                );
+                              })()}
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Mood:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">{entry.before_mood}</span>
+                                  <span>→</span>
+                                  <span className="font-semibold">{entry.after_mood}</span>
+                                  {entry.after_mood !== entry.before_mood && (
+                                    <span className={`text-xs font-bold ${entry.after_mood > entry.before_mood ? 'text-green-500' : 'text-red-500'}`}>
+                                      {entry.after_mood > entry.before_mood ? '↑' : '↓'}{Math.abs(entry.after_mood - entry.before_mood)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Pain:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">{entry.before_pain}</span>
+                                  <span>→</span>
+                                  <span className="font-semibold">{entry.after_pain}</span>
+                                  {entry.after_pain !== entry.before_pain && (
+                                    <span className={`text-xs font-bold ${entry.after_pain! < entry.before_pain! ? 'text-green-500' : 'text-red-500'}`}>
+                                      {entry.after_pain! < entry.before_pain! ? '↓' : '↑'}{Math.abs(entry.after_pain! - entry.before_pain!)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Anxiety:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">{entry.before_anxiety}</span>
+                                  <span>→</span>
+                                  <span className="font-semibold">{entry.after_anxiety}</span>
+                                  {entry.after_anxiety !== entry.before_anxiety && (
+                                    <span className={`text-xs font-bold ${entry.after_anxiety! < entry.before_anxiety! ? 'text-green-500' : 'text-red-500'}`}>
+                                      {entry.after_anxiety! < entry.before_anxiety! ? '↓' : '↑'}{Math.abs(entry.after_anxiety! - entry.before_anxiety!)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Energy:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">{entry.before_energy}</span>
+                                  <span>→</span>
+                                  <span className="font-semibold">{entry.after_energy}</span>
+                                  {entry.after_energy !== entry.before_energy && (
+                                    <span className={`text-xs font-bold ${entry.after_energy! > entry.before_energy! ? 'text-green-500' : 'text-red-500'}`}>
+                                      {entry.after_energy! > entry.before_energy! ? '↑' : '↓'}{Math.abs(entry.after_energy! - entry.before_energy!)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between col-span-2">
+                                <span className="text-muted-foreground">Focus:</span>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">{entry.before_focus}</span>
+                                  <span>→</span>
+                                  <span className="font-semibold">{entry.after_focus}</span>
+                                  {entry.after_focus !== entry.before_focus && (
+                                    <span className={`text-xs font-bold ${entry.after_focus! > entry.before_focus! ? 'text-green-500' : 'text-red-500'}`}>
+                                      {entry.after_focus! > entry.before_focus! ? '↑' : '↓'}{Math.abs(entry.after_focus! - entry.before_focus!)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {entry.observations.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {entry.observations.map((obs, idx) => (
