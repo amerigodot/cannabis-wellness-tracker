@@ -45,6 +45,19 @@ interface JournalEntry {
   negative_side_effects: string[];
   notes: string | null;
   icon: string;
+  entry_status?: string | null;
+  effects_duration_minutes?: number | null;
+  before_mood?: number | null;
+  before_pain?: number | null;
+  before_anxiety?: number | null;
+  before_energy?: number | null;
+  before_focus?: number | null;
+  before_notes?: string | null;
+  after_mood?: number | null;
+  after_pain?: number | null;
+  after_anxiety?: number | null;
+  after_energy?: number | null;
+  after_focus?: number | null;
 }
 
 const COMMON_OBSERVATIONS = [
@@ -916,6 +929,14 @@ const Index = () => {
     const consumptionTime = new Date();
     consumptionTime.setMinutes(consumptionTime.getMinutes() - sliderValueToMinutes(minutesAgo));
 
+    // Determine entry status based on mode and form tab
+    let status: 'pending_after' | 'complete' = 'complete';
+    
+    if (!isQuickEntry && entryFormTab !== 'after') {
+      // Full Tracking mode but not on "After" tab = save as pending
+      status = 'pending_after';
+    }
+
     const { error } = await supabase.from("journal_entries").insert({
       user_id: user.id,
       strain,
@@ -930,6 +951,19 @@ const Index = () => {
       notes: notes || null,
       icon: selectedIcon,
       consumption_time: consumptionTime.toISOString(),
+      entry_status: status,
+      before_mood: !isQuickEntry ? beforeMood : null,
+      before_pain: !isQuickEntry ? beforePain : null,
+      before_anxiety: !isQuickEntry ? beforeAnxiety : null,
+      before_energy: !isQuickEntry ? beforeEnergy : null,
+      before_focus: !isQuickEntry ? beforeFocus : null,
+      before_notes: !isQuickEntry ? beforeNotes : null,
+      after_mood: !isQuickEntry && entryFormTab === 'after' ? afterMood : null,
+      after_pain: !isQuickEntry && entryFormTab === 'after' ? afterPain : null,
+      after_anxiety: !isQuickEntry && entryFormTab === 'after' ? afterAnxiety : null,
+      after_energy: !isQuickEntry && entryFormTab === 'after' ? afterEnergy : null,
+      after_focus: !isQuickEntry && entryFormTab === 'after' ? afterFocus : null,
+      effects_duration_minutes: !isQuickEntry && entryFormTab === 'after' ? effectsDurationMinutes : null,
     });
 
     setIsSubmitting(false);
@@ -939,25 +973,32 @@ const Index = () => {
     } else {
       setShowSuccessAnimation(true);
       
-      // Check if a milestone was reached
-      const newEntryCount = previousEntryCount + 1;
-      const milestoneReached = MILESTONES.find(
-        (milestone) => milestone === newEntryCount
-      );
-
-      if (milestoneReached) {
-        const details = MILESTONE_DETAILS[milestoneReached as keyof typeof MILESTONE_DETAILS];
-        
-        // Trigger confetti celebration
-        triggerMilestoneCelebration(milestoneReached);
-        
-        // Show special milestone toast
-        toast.success(details.message, {
-          description: `${details.icon} You've logged ${milestoneReached} entries! Keep going!`,
-          duration: 6000,
+      if (status === 'pending_after') {
+        toast.success("Entry saved! Complete the 'After' state when ready.", {
+          description: "You'll be reminded to complete it soon.",
+          duration: 5000,
         });
       } else {
-        toast.success("Entry saved successfully! 🎉");
+        // Check if a milestone was reached
+        const newEntryCount = previousEntryCount + 1;
+        const milestoneReached = MILESTONES.find(
+          (milestone) => milestone === newEntryCount
+        );
+
+        if (milestoneReached) {
+          const details = MILESTONE_DETAILS[milestoneReached as keyof typeof MILESTONE_DETAILS];
+          
+          // Trigger confetti celebration
+          triggerMilestoneCelebration(milestoneReached);
+          
+          // Show special milestone toast
+          toast.success(details.message, {
+            description: `${details.icon} You've logged ${milestoneReached} entries! Keep going!`,
+            duration: 6000,
+          });
+        } else {
+          toast.success("Entry saved successfully! 🎉");
+        }
       }
       
       // Clear form fields
@@ -966,6 +1007,19 @@ const Index = () => {
       setSelectedObservations([]);
       setSelectedNegativeSideEffects([]);
       setMinutesAgo(0);
+      setBeforeMood(5);
+      setBeforePain(5);
+      setBeforeAnxiety(5);
+      setBeforeEnergy(5);
+      setBeforeFocus(5);
+      setBeforeNotes("");
+      setAfterMood(5);
+      setAfterPain(5);
+      setAfterAnxiety(5);
+      setAfterEnergy(5);
+      setAfterFocus(5);
+      setEffectsDurationMinutes(null);
+      setEntryFormTab('before');
       
       // Refresh entries
       fetchEntries();
@@ -973,6 +1027,49 @@ const Index = () => {
       // Hide success animation after 500ms
       setTimeout(() => setShowSuccessAnimation(false), 500);
     }
+  };
+
+  const handleCompletePendingEntry = async (entryId: string) => {
+    if (isDemoMode) {
+      toast.error("Demo mode is read-only. Sign up to complete entries!");
+      return;
+    }
+
+    // Load the pending entry data
+    const entry = entries.find(e => e.id === entryId);
+    if (!entry) return;
+
+    // Set form to Full Tracking mode and populate with entry data
+    setIsQuickEntry(false);
+    setStrain(entry.strain);
+    setStrain2(entry.strain_2 || "");
+    setThcPercentage(entry.thc_percentage?.toString() || "");
+    setCbdPercentage(entry.cbd_percentage?.toString() || "");
+    setMethod(entry.method);
+    setSelectedObservations(entry.observations);
+    setSelectedActivities(entry.activities);
+    setSelectedNegativeSideEffects(entry.negative_side_effects);
+    setNotes(entry.notes || "");
+    setSelectedIcon(entry.icon);
+    
+    // Set before state from entry
+    setBeforeMood(entry.before_mood || 5);
+    setBeforePain(entry.before_pain || 5);
+    setBeforeAnxiety(entry.before_anxiety || 5);
+    setBeforeEnergy(entry.before_energy || 5);
+    setBeforeFocus(entry.before_focus || 5);
+    setBeforeNotes(entry.before_notes || "");
+
+    // Navigate to "After" tab
+    setEntryFormTab('after');
+
+    // Delete the pending entry
+    await supabase.from("journal_entries").delete().eq("id", entryId);
+
+    // Scroll to form
+    document.getElementById('new-entry-card')?.scrollIntoView({ behavior: 'smooth' });
+    
+    toast.info("Complete the 'After' state to finish this entry");
   };
 
   const handleDelete = (entryId: string) => {
@@ -2081,13 +2178,34 @@ const Index = () => {
             </div>
             </div>
               
-              <Button 
-                onClick={() => setEntryFormTab('after')} 
-                className="w-full"
-                size="lg"
-              >
-                Continue to After State
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => setEntryFormTab('after')} 
+                  className="flex-1"
+                  size="lg"
+                  variant="outline"
+                >
+                  Continue to After State
+                </Button>
+                <Button 
+                  onClick={handleSubmit} 
+                  className="flex-1"
+                  size="lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="mr-2 h-4 w-4" />
+                      Save as Pending
+                    </>
+                  )}
+                </Button>
+              </div>
             </TabsContent>
 
             {/* After Tab */}
@@ -2771,6 +2889,47 @@ const Index = () => {
                       className="overflow-hidden hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
                     >
                       <div className="p-6">
+                        {/* Pending Status Banner */}
+                        {entry.entry_status === 'pending_after' && (
+                          <div className="mb-4 p-3 bg-accent/20 border border-accent rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-accent" />
+                                <span className="text-sm font-medium text-accent">Pending Completion</span>
+                                <Badge variant="outline" className="ml-2">
+                                  {(() => {
+                                    const consumptionTime = new Date(entry.consumption_time || entry.created_at);
+                                    const now = new Date();
+                                    const minutesElapsed = Math.floor((now.getTime() - consumptionTime.getTime()) / (1000 * 60));
+                                    
+                                    // Suggest completion time based on method
+                                    const suggestedMinutes = entry.method === 'Edible' ? 120 : 
+                                                           entry.method === 'Oil' || entry.method === 'Tincture' ? 60 : 30;
+                                    
+                                    if (minutesElapsed >= suggestedMinutes) {
+                                      return 'Ready to complete';
+                                    } else {
+                                      const remaining = suggestedMinutes - minutesElapsed;
+                                      return `${remaining} min remaining`;
+                                    }
+                                  })()}
+                                </Badge>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleCompletePendingEntry(entry.id)}
+                                className="gap-2"
+                              >
+                                <Activity className="h-4 w-4" />
+                                Complete Entry
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Log your "After" state to see effectiveness metrics
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-primary/10">
