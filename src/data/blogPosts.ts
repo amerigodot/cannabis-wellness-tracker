@@ -3002,7 +3002,7 @@ A side-by-side bar chart displaying average scores across all five wellness metr
 
 **Example Reading**:
 
-\`\`\`
+\`\`\`text
 Mood:    Before [■■■■□□□□□□] 4.2  →  After [■■■■■■■■□□] 7.8  (+3.6)
 Pain:    Before [■■■■■■■■□□] 7.8  →  After [■■■■□□□□□□] 3.4  (-4.4)
 Anxiety: Before [■■■■■■□□□□] 6.2  →  After [■■■■□□□□□□] 3.8  (-2.4)
@@ -3030,7 +3030,7 @@ Your dashboard automatically ranks strains by overall effectiveness:
 
 **Effectiveness Score (0-100%)** is a weighted calculation based on improvements across all metrics:
 
-\`\`\`
+\`\`\`text
 Weighted improvements:
 - Pain relief: 25% of score
 - Mood boost: 20% of score
@@ -3499,7 +3499,7 @@ If you miss the optimal window, pending entries remain visible:
 
 You can have multiple pending entries simultaneously:
 
-\`\`\`
+\`\`\`text
 ⏱ Blue Dream (Vaped at 3:15 PM) - Complete in 30 min
 ⏱ Girl Scout Cookies (Edible at 2:30 PM) - Complete in 45 min
 \`\`\`
