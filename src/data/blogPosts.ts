@@ -3208,7 +3208,7 @@ Use goal-based analysis to curate a condition-specific strain collection:
 
 Compare two strains side-by-side across all metrics:
 
-\`\`\`
+\`\`\`text
                  Blue Dream    vs.    Granddaddy Purple
 Effectiveness:      87%               68%
 Pain Relief:       -4.9               -6.2  ← Winner
@@ -3224,7 +3224,7 @@ Focus:             +1.5               -0.9  ← Winner
 
 See how effectiveness changes as you optimize:
 
-\`\`\`
+\`\`\`text
 Month 1 Average Effectiveness: 52%
 Month 2 Average Effectiveness: 64%  
 Month 3 Average Effectiveness: 78%
@@ -3374,7 +3374,7 @@ When you're about to consume, open your journal and record:
 
 **Click "Save as Pending"**
 
-Your entry is now saved with `status: pending_after` in your journal.
+Your entry is now saved with \`status: pending_after\` in your journal.
 
 ### Step 2: Get Automatic Reminder
 
@@ -3455,7 +3455,7 @@ Modern medical marijuana journals support two modes:
 
 **What it skips**: Before/after metrics, pending workflow
 
-**Entry status**: Automatically marked `complete`
+**Entry status**: Automatically marked \`complete\`
 
 **Use case**: "I know Blue Dream works for me, just want to log that I used it"
 
@@ -3467,7 +3467,7 @@ Modern medical marijuana journals support two modes:
 
 **Workflow**: Two-phase pending entry system
 
-**Entry status**: `pending_after` until after state is completed
+**Entry status**: \`pending_after\` until after state is completed
 
 **Use case**: "Testing this new strain and want to measure effectiveness"
 
