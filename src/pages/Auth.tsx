@@ -24,21 +24,21 @@ export default function Auth() {
   const features = [
     {
       icon: Calendar,
-      title: "Calendar Tracking",
-      description: "Visualize your wellness journey over time",
-      details: "Track every session with detailed notes about strain, dosage, method, and effects. See your entries on an interactive calendar view that helps you identify patterns and trends. Never lose track of what works best for you."
+      title: "Before & After Tracking",
+      description: "Measure actual wellness improvements",
+      details: "Track wellness metrics (mood, pain, anxiety, energy, focus) before and after each session on a 1-10 scale. See real deltas (+3 mood, -5 pain) and effectiveness scores (87% Highly Effective) that quantify how well each strain works for your specific needs."
     },
     {
       icon: BarChart3,
-      title: "Insights & Trends",
-      description: "Discover patterns in your wellness data",
-      details: "Advanced analytics reveal correlations between strains, activities, and effects. Filter by observations, activities, or side effects to understand what combinations work best. Unlock AI-powered tools at milestones for deeper insights."
+      title: "Effectiveness Dashboard",
+      description: "Data-driven strain optimization",
+      details: "Visualize before vs. after comparisons across all wellness metrics. Automatically ranks strains by measured effectiveness and provides goal-based analysis showing which strains excel for pain relief, mood enhancement, anxiety reduction, energy boost, and focus improvement."
     },
     {
       icon: Bell,
-      title: "Smart Reminders",
-      description: "Never miss an entry with customizable reminders",
-      details: "Set up recurring reminders (daily, weekly, monthly) to maintain consistency in your journaling. Get timely notifications to help you track your wellness journey without forgetting important details."
+      title: "Pending Entry Workflow",
+      description: "Never miss the after-state",
+      details: "Log before metrics and consumption details now, complete after-state later with automatic reminders based on consumption method (30-120 minutes). Ensures accurate effectiveness data captured at optimal timing without relying on memory."
     }
   ];
 
