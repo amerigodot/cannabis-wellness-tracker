@@ -1,3 +1,4 @@
+// Blog posts data
 export interface BlogPost {
   id: string;
   slug: string;
