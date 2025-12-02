@@ -18,1023 +18,29 @@ import { Reminders } from "@/components/Reminders";
 import { CalendarView } from "@/components/CalendarView";
 import { LandingPage } from "@/components/LandingPage";
 import { AchievementBadges } from "@/components/AchievementBadges";
+import { EntryList } from "@/components/dashboard/EntryList";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
-import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Pill, Droplet, Cigarette, Cookie, Coffee, Sparkles, Heart, Brain, Zap, Rocket, Flame, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile, ChevronDown, Settings, Target } from "lucide-react";
+import { Leaf, Calendar, Clock, LogOut, Trash2, List, FileText, Droplet, Cigarette, Cookie, Sparkles, Heart, Brain, Zap, Loader2, Wind, Beaker, Pipette, Bell, Activity, AlertCircle, Smile, ChevronDown, Settings, Target } from "lucide-react";
 import { toast } from "sonner";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
 
-interface JournalEntry {
-  id: string;
-  user_id: string;
-  created_at: string;
-  consumption_time: string;
-  strain: string;
-  strain_2?: string | null;
-  thc_percentage?: number | null;
-  cbd_percentage?: number | null;
-  dosage: string;
-  method: string;
-  observations: string[];
-  activities: string[];
-  negative_side_effects: string[];
-  notes: string | null;
-  icon: string;
-  entry_status?: string | null;
-  effects_duration_minutes?: number | null;
-  before_mood?: number | null;
-  before_pain?: number | null;
-  before_anxiety?: number | null;
-  before_energy?: number | null;
-  before_focus?: number | null;
-  before_notes?: string | null;
-  after_mood?: number | null;
-  after_pain?: number | null;
-  after_anxiety?: number | null;
-  after_energy?: number | null;
-  after_focus?: number | null;
-}
-
-const COMMON_OBSERVATIONS = [
-  "Pain Relief",
-  "Relaxation",
-  "Better Sleep",
-  "Reduced Anxiety",
-  "Improved Focus",
-  "Appetite Increase",
-  "Mood Lift",
-  "Reduced Inflammation",
-  "Muscle Relaxation",
-  "Creativity Boost",
-  "Nausea Relief",
-  "Energy Increase",
-  "Euphoria",
-  "Increased Sociability",
-  "Time Distortion",
-  "Body Tingling",
-  "Increased Sensation",
-  "Giggly/Happy",
-  "Calm/Peaceful",
-  "Mind Clarity",
-];
-
-const COMMON_ACTIVITIES = [
-  "Social",
-  "Music",
-  "Painting",
-  "Gaming",
-  "Exercise",
-  "Cooking",
-  "Reading",
-  "Writing",
-  "Meditation",
-  "Movies",
-  "TV Shows",
-  "Learning",
-  "Studying",
-  "Work",
-  "Relaxing",
-  "Photography",
-  "Crafts",
-  "Gardening",
-  "Shopping",
-  "Cleaning",
-  "Nature/Outdoors",
-  "Yoga",
-  "Dancing",
-  "Sports",
-];
-
-const NEGATIVE_SIDE_EFFECTS = [
-  "Dry Mouth",
-  "Dry Eyes",
-  "Red Eyes",
-  "Dizziness",
-  "Paranoia",
-  "Anxiety",
-  "Headache",
-  "Fatigue",
-  "Increased Heart Rate",
-  "Coughing",
-  "Throat Irritation",
-  "Nausea",
-  "Memory Issues",
-  "Confusion",
-  "Restlessness",
-  "Impaired Coordination",
-  "Hunger/Munchies",
-];
-
-const AVAILABLE_ICONS = [
-  { name: "Leaf", value: "leaf" },
-  { name: "Pill", value: "pill" },
-  { name: "Droplet", value: "droplet" },
-  { name: "Cigarette", value: "cigarette" },
-  { name: "Cookie", value: "cookie" },
-  { name: "Coffee", value: "coffee" },
-  { name: "Sparkles", value: "sparkles" },
-  { name: "Heart", value: "heart" },
-  { name: "Brain", value: "brain" },
-  { name: "Zap", value: "zap" },
-  { name: "Space", value: "rocket" },
-  { name: "Fire", value: "flame" },
-];
-
-const ENTRY_PRESETS = [
-  {
-    name: "Morning Session",
-    icon: Coffee,
-    observations: ["Energy Increase", "Mood Lift", "Improved Focus", "Mind Clarity"],
-    activities: ["Work", "Exercise", "Studying", "Learning"],
-  },
-  {
-    name: "Evening Relaxation",
-    icon: Heart,
-    observations: ["Relaxation", "Better Sleep", "Reduced Anxiety", "Calm/Peaceful"],
-    activities: ["Reading", "TV Shows", "Meditation", "Nature/Outdoors"],
-  },
-  {
-    name: "Social Gathering",
-    icon: Sparkles,
-    observations: ["Mood Lift", "Increased Sociability", "Giggly/Happy", "Euphoria"],
-    activities: ["Social", "Music", "Dancing", "Gaming"],
-  },
-  {
-    name: "Creative Work",
-    icon: Brain,
-    observations: ["Creativity Boost", "Improved Focus", "Increased Sensation", "Mood Lift"],
-    activities: ["Writing", "Painting", "Music", "Photography", "Crafts"],
-  },
-  {
-    name: "Pain Relief",
-    icon: Heart,
-    observations: ["Pain Relief", "Reduced Inflammation", "Muscle Relaxation", "Body Tingling"],
-    activities: ["Relaxing", "Yoga", "Meditation", "Nature/Outdoors"],
-  },
-];
-
-const getMethodIcon = (method: string) => {
-  const methodIconMap: Record<string, any> = {
-    "Vape": Wind,
-    "Smoke": Cigarette,
-    "Oil": Droplet,
-    "Tincture": Beaker,
-    "Topical": Pipette,
-    "Edible": Cookie,
-  };
-  return methodIconMap[method] || Leaf;
-};
-
-// Calculate effectiveness score from before/after metrics
-const calculateEffectiveness = (entry: JournalEntry): { score: number; label: string; color: string } => {
-  if (!entry.before_mood || !entry.after_mood || entry.entry_status === 'pending_after') {
-    return { score: 0, label: 'No Data', color: 'bg-muted' };
-  }
-
-  // Calculate deltas (positive = improvement)
-  const moodDelta = entry.after_mood - entry.before_mood;
-  const painDelta = entry.before_pain! - entry.after_pain!; // Lower pain is better
-  const anxietyDelta = entry.before_anxiety! - entry.after_anxiety!; // Lower anxiety is better
-  const energyDelta = entry.after_energy! - entry.before_energy!;
-  const focusDelta = entry.after_focus! - entry.before_focus!;
-
-  // Weighted average (pain and anxiety reduction weighted higher)
-  const totalDelta = (moodDelta * 1.2 + painDelta * 1.5 + anxietyDelta * 1.5 + energyDelta + focusDelta) / 6.2;
-  
-  // Convert to 0-100 scale (max possible improvement is 9 points per metric)
-  const score = Math.round(((totalDelta + 9) / 18) * 100);
-
-  if (score >= 75) return { score, label: 'Highly Effective', color: 'bg-green-500' };
-  if (score >= 60) return { score, label: 'Effective', color: 'bg-green-400' };
-  if (score >= 45) return { score, label: 'Moderate', color: 'bg-yellow-500' };
-  if (score >= 30) return { score, label: 'Mild', color: 'bg-orange-500' };
-  return { score, label: 'Limited Effect', color: 'bg-red-500' };
-};
-
-const SAMPLE_ENTRIES: JournalEntry[] = [
-  // Day 1-3: Starting period with varied effects
-  {
-    id: "demo-1",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Blue Dream",
-    dosage: "0.5g",
-    method: "Vape",
-    observations: ["Relaxation", "Mood Lift"],
-    activities: ["Reading", "Music"],
-    negative_side_effects: ["Dry Mouth"],
-    notes: "Great for evening relaxation.",
-    icon: "leaf",
-    before_mood: 5,
-    before_pain: 7,
-    before_anxiety: 6,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 3,
-    after_anxiety: 3,
-    after_energy: 5,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 120,
-  },
-  {
-    id: "demo-2",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 33 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 33 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Sour Diesel",
-    dosage: "0.3g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Reduced Anxiety"],
-    activities: ["Work", "Exercise"],
-    negative_side_effects: [],
-    notes: "Morning boost, felt productive.",
-    icon: "zap",
-    before_mood: 4,
-    before_pain: 3,
-    before_anxiety: 7,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 7,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 8,
-    entry_status: "complete",
-    effects_duration_minutes: 90,
-  },
-  {
-    id: "demo-3",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Jack Herer",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Relaxation", "Appetite Increase", "Energy Increase"],
-    activities: ["Social", "Cooking"],
-    negative_side_effects: [],
-    notes: "Balanced effects, good for daytime.",
-    icon: "heart",
-    before_mood: 6,
-    before_pain: 4,
-    before_anxiety: 5,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 105,
-  },
-  
-  // Week 2: Increasing Relaxation and Reduced Anxiety
-  {
-    id: "demo-4",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Granddaddy Purple",
-    dosage: "0.6g",
-    method: "Vape",
-    observations: ["Relaxation", "Reduced Anxiety", "Mood Lift"],
-    activities: ["Meditation", "Movies"],
-    negative_side_effects: [],
-    notes: "Very calming evening session.",
-    icon: "sparkles",
-    before_mood: 4,
-    before_pain: 5,
-    before_anxiety: 8,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 3,
-    after_anxiety: 2,
-    after_energy: 4,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 135,
-  },
-  {
-    id: "demo-5",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Pineapple Express",
-    dosage: "0.5g",
-    method: "Smoke",
-    observations: ["Reduced Anxiety", "Mood Lift", "Energy Increase"],
-    activities: ["Gaming", "Social"],
-    negative_side_effects: ["Dry Eyes"],
-    notes: "Great for social activities.",
-    icon: "flame",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 7,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 95,
-  },
-  {
-    id: "demo-6",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 27 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 27 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Northern Lights",
-    dosage: "0.7g",
-    method: "Edible",
-    observations: ["Relaxation", "Appetite Increase"],
-    activities: ["Cooking", "Relaxing"],
-    negative_side_effects: ["Fatigue"],
-    notes: "Strong body effects.",
-    icon: "cookie",
-    before_mood: 6,
-    before_pain: 6,
-    before_anxiety: 5,
-    before_energy: 6,
-    before_focus: 6,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 3,
-    after_focus: 4,
-    entry_status: "complete",
-    effects_duration_minutes: 240,
-  },
-  {
-    id: "demo-7",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Green Crack",
-    dosage: "0.3g",
-    method: "Vape",
-    observations: ["Energy Increase", "Mood Lift", "Reduced Anxiety"],
-    activities: ["Work", "Exercise"],
-    negative_side_effects: [],
-    notes: "Perfect morning strain.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 8,
-    after_focus: 8,
-    entry_status: "complete",
-    effects_duration_minutes: 85,
-  },
-  
-  // Week 3: Peak Relaxation period
-  {
-    id: "demo-8",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Bubba Kush",
-    dosage: "0.8g",
-    method: "Vape",
-    observations: ["Relaxation", "Relaxation", "Reduced Anxiety", "Mood Lift"],
-    activities: ["Meditation", "Music"],
-    negative_side_effects: [],
-    notes: "Deeply relaxing experience.",
-    icon: "brain",
-    before_mood: 5,
-    before_pain: 4,
-    before_anxiety: 8,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 9,
-    after_pain: 2,
-    after_anxiety: 2,
-    after_energy: 4,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 150,
-  },
-  {
-    id: "demo-9",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 23 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "OG Kush",
-    dosage: "0.6g",
-    method: "Smoke",
-    observations: ["Relaxation", "Mood Lift", "Appetite Increase"],
-    activities: ["Social", "Cooking"],
-    negative_side_effects: ["Dry Mouth"],
-    notes: "Classic effects.",
-    icon: "leaf",
-    before_mood: 6,
-    before_pain: 4,
-    before_anxiety: 6,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 5,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 110,
-  },
-  {
-    id: "demo-10",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Purple Haze",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Relaxation", "Reduced Anxiety", "Energy Increase"],
-    activities: ["Painting", "Music"],
-    negative_side_effects: [],
-    notes: "Creative and relaxed.",
-    icon: "sparkles",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 7,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 8,
-    entry_status: "complete",
-    effects_duration_minutes: 100,
-  },
-  {
-    id: "demo-11",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "White Widow",
-    dosage: "0.5g",
-    method: "Vape",
-    observations: ["Relaxation", "Mood Lift", "Reduced Anxiety", "Mood Lift"],
-    activities: ["Reading", "Relaxing"],
-    negative_side_effects: [],
-    notes: "Mellow evening.",
-    icon: "heart",
-    before_mood: 5,
-    before_pain: 4,
-    before_anxiety: 7,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 4,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 115,
-  },
-  {
-    id: "demo-12",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Durban Poison",
-    dosage: "0.3g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Reduced Anxiety"],
-    activities: ["Work", "Writing"],
-    negative_side_effects: [],
-    notes: "Focus and energy.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 2,
-    before_anxiety: 6,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 7,
-    after_pain: 1,
-    after_anxiety: 3,
-    after_energy: 8,
-    after_focus: 9,
-    entry_status: "complete",
-    effects_duration_minutes: 80,
-  },
-  
-  // Week 4: Balanced period with variety
-  {
-    id: "demo-13",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 19 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 19 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Girl Scout Cookies",
-    dosage: "0.6g",
-    method: "Edible",
-    observations: ["Mood Lift", "Relaxation", "Appetite Increase"],
-    activities: ["Social", "Movies"],
-    negative_side_effects: ["Dry Mouth"],
-    notes: "Sweet effects, lasted hours.",
-    icon: "cookie",
-    before_mood: 6,
-    before_pain: 4,
-    before_anxiety: 5,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 9,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 5,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 210,
-  },
-  {
-    id: "demo-14",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Lemon Haze",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Energy Increase", "Mood Lift", "Reduced Anxiety"],
-    activities: ["Exercise", "Gaming"],
-    negative_side_effects: [],
-    notes: "Uplifting citrus effects.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 8,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 95,
-  },
-  {
-    id: "demo-15",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "LA Confidential",
-    dosage: "0.7g",
-    method: "Vape",
-    observations: ["Relaxation", "Appetite Increase", "Reduced Anxiety"],
-    activities: ["Cooking", "Relaxing"],
-    negative_side_effects: ["Fatigue"],
-    notes: "Heavy relaxation.",
-    icon: "brain",
-    before_mood: 5,
-    before_pain: 5,
-    before_anxiety: 7,
-    before_energy: 6,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 2,
-    after_energy: 3,
-    after_focus: 4,
-    entry_status: "complete",
-    effects_duration_minutes: 140,
-  },
-  {
-    id: "demo-16",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "AK-47",
-    dosage: "0.5g",
-    method: "Smoke",
-    observations: ["Mood Lift", "Energy Increase", "Reduced Anxiety"],
-    activities: ["Social", "Music"],
-    negative_side_effects: [],
-    notes: "Balanced hybrid effects.",
-    icon: "flame",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 105,
-  },
-  {
-    id: "demo-17",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Skywalker OG",
-    dosage: "0.6g",
-    method: "Vape",
-    observations: ["Relaxation", "Mood Lift"],
-    activities: ["Meditation", "Reading"],
-    negative_side_effects: [],
-    notes: "Peaceful evening.",
-    icon: "rocket",
-    before_mood: 6,
-    before_pain: 4,
-    before_anxiety: 6,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 4,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 125,
-  },
-  
-  // Week 5: Diverse effects
-  {
-    id: "demo-18",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Trainwreck",
-    dosage: "0.4g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Mood Lift", "Appetite Increase"],
-    activities: ["Work", "Cooking"],
-    negative_side_effects: ["Dry Eyes"],
-    notes: "Energetic and hungry.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 5,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 4,
-    after_energy: 8,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 90,
-  },
-  {
-    id: "demo-19",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Gelato",
-    dosage: "0.5g",
-    method: "Vape",
-    observations: ["Mood Lift", "Relaxation", "Reduced Anxiety"],
-    activities: ["Movies", "Social"],
-    negative_side_effects: [],
-    notes: "Sweet and smooth.",
-    icon: "heart",
-    before_mood: 6,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 9,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 5,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 120,
-  },
-  {
-    id: "demo-20",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Chemdawg",
-    dosage: "0.6g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Reduced Anxiety"],
-    activities: ["Exercise", "Gaming"],
-    negative_side_effects: [],
-    notes: "Strong diesel aroma.",
-    icon: "flame",
-    before_mood: 6,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 7,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 8,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 100,
-  },
-  {
-    id: "demo-21",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Amnesia Haze",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Mood Lift", "Energy Increase", "Appetite Increase"],
-    activities: ["Writing", "Music"],
-    negative_side_effects: [],
-    notes: "Uplifting cerebral high.",
-    icon: "brain",
-    before_mood: 5,
-    before_pain: 2,
-    before_anxiety: 5,
-    before_energy: 4,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 1,
-    after_anxiety: 4,
-    after_energy: 7,
-    after_focus: 8,
-    entry_status: "complete",
-    effects_duration_minutes: 110,
-  },
-  {
-    id: "demo-22",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Blue Cheese",
-    dosage: "0.7g",
-    method: "Edible",
-    observations: ["Relaxation", "Appetite Increase", "Mood Lift"],
-    activities: ["Cooking", "Relaxing"],
-    negative_side_effects: ["Fatigue"],
-    notes: "Unique flavor profile.",
-    icon: "cookie",
-    before_mood: 6,
-    before_pain: 5,
-    before_anxiety: 5,
-    before_energy: 6,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 3,
-    after_focus: 4,
-    entry_status: "complete",
-    effects_duration_minutes: 220,
-  },
-  
-  // Recent days: Current usage patterns
-  {
-    id: "demo-23",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Strawberry Cough",
-    dosage: "0.3g",
-    method: "Vape",
-    observations: ["Energy Increase", "Mood Lift"],
-    activities: ["Social", "Exercise"],
-    negative_side_effects: [],
-    notes: "Sweet berry taste.",
-    icon: "heart",
-    before_mood: 6,
-    before_pain: 2,
-    before_anxiety: 5,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 1,
-    after_anxiety: 4,
-    after_energy: 7,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 85,
-  },
-  {
-    id: "demo-24",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Master Kush",
-    dosage: "0.6g",
-    method: "Vape",
-    observations: ["Relaxation", "Reduced Anxiety"],
-    activities: ["Meditation", "Reading"],
-    negative_side_effects: [],
-    notes: "Classic indica effects.",
-    icon: "leaf",
-    before_mood: 5,
-    before_pain: 4,
-    before_anxiety: 7,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 2,
-    after_energy: 4,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 130,
-  },
-  {
-    id: "demo-25",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Tangie",
-    dosage: "0.4g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Mood Lift", "Reduced Anxiety"],
-    activities: ["Work", "Music"],
-    negative_side_effects: [],
-    notes: "Citrus explosion.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 6,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 7,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 90,
-  },
-  {
-    id: "demo-26",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Wedding Cake",
-    dosage: "0.5g",
-    method: "Vape",
-    observations: ["Mood Lift", "Relaxation", "Appetite Increase"],
-    activities: ["Movies", "Cooking"],
-    negative_side_effects: ["Dry Mouth"],
-    notes: "Delicious and relaxing.",
-    icon: "sparkles",
-    before_mood: 6,
-    before_pain: 4,
-    before_anxiety: 5,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 9,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 5,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 115,
-  },
-  {
-    id: "demo-27",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Super Silver Haze",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Energy Increase", "Mood Lift", "Reduced Anxiety"],
-    activities: ["Gaming", "Social"],
-    negative_side_effects: [],
-    notes: "Long-lasting energy.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 2,
-    before_anxiety: 6,
-    before_energy: 4,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 1,
-    after_anxiety: 3,
-    after_energy: 8,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 105,
-  },
-  {
-    id: "demo-28",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Purple Kush",
-    dosage: "0.7g",
-    method: "Edible",
-    observations: ["Relaxation", "Appetite Increase", "Mood Lift"],
-    activities: ["Relaxing", "Cooking"],
-    negative_side_effects: ["Fatigue"],
-    notes: "Heavy body high.",
-    icon: "cookie",
-    before_mood: 5,
-    before_pain: 6,
-    before_anxiety: 6,
-    before_energy: 6,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 3,
-    after_energy: 3,
-    after_focus: 4,
-    entry_status: "complete",
-    effects_duration_minutes: 230,
-  },
-  {
-    id: "demo-29",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Maui Wowie",
-    dosage: "0.5g",
-    method: "Smoke",
-    observations: ["Energy Increase", "Mood Lift", "Appetite Increase"],
-    activities: ["Exercise", "Music"],
-    negative_side_effects: [],
-    notes: "Tropical vibes.",
-    icon: "flame",
-    before_mood: 5,
-    before_pain: 3,
-    before_anxiety: 5,
-    before_energy: 4,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 4,
-    after_energy: 7,
-    after_focus: 6,
-    entry_status: "complete",
-    effects_duration_minutes: 95,
-  },
-  {
-    id: "demo-30",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Gorilla Glue",
-    dosage: "0.6g",
-    method: "Vape",
-    observations: ["Relaxation", "Mood Lift", "Reduced Anxiety"],
-    activities: ["Movies", "Relaxing"],
-    negative_side_effects: [],
-    notes: "Sticky and potent.",
-    icon: "brain",
-    before_mood: 5,
-    before_pain: 4,
-    before_anxiety: 7,
-    before_energy: 5,
-    before_focus: 5,
-    after_mood: 8,
-    after_pain: 2,
-    after_anxiety: 2,
-    after_energy: 4,
-    after_focus: 5,
-    entry_status: "complete",
-    effects_duration_minutes: 135,
-  },
-  {
-    id: "demo-31",
-    user_id: "demo",
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    consumption_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    strain: "Pineapple Express",
-    dosage: "0.4g",
-    method: "Vape",
-    observations: ["Energy Increase", "Mood Lift"],
-    activities: ["Work", "Social"],
-    negative_side_effects: [],
-    notes: "Great daytime strain.",
-    icon: "zap",
-    before_mood: 5,
-    before_pain: 2,
-    before_anxiety: 5,
-    before_energy: 3,
-    before_focus: 4,
-    after_mood: 8,
-    after_pain: 1,
-    after_anxiety: 4,
-    after_energy: 7,
-    after_focus: 7,
-    entry_status: "complete",
-    effects_duration_minutes: 90,
-  },
-];
+import { JournalEntry } from "@/types/journal";
+import { sliderValueToMinutes, formatTimeAgo } from "@/utils/wellness";
+import { 
+  COMMON_OBSERVATIONS, 
+  COMMON_ACTIVITIES, 
+  NEGATIVE_SIDE_EFFECTS, 
+  AVAILABLE_ICONS, 
+  ENTRY_PRESETS,
+  getIconComponent 
+} from "@/constants/journal";
+import { SAMPLE_ENTRIES } from "@/data/sampleEntries";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -1067,18 +73,16 @@ const Index = () => {
   const [filterMethods, setFilterMethods] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [minutesAgo, setMinutesAgo] = useState<number>(720); // Default to 2 hours (720 slider value = 120 minutes)
+  const [minutesAgo, setMinutesAgo] = useState<number>(720);
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
   const [timeRangeFilter, setTimeRangeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
   const [activeTab, setActiveTab] = useState<'list' | 'calendar'>('list');
   
-  // Swipe detection state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
   
-  // Collapsible sections state - initialize from localStorage
   const [observationsOpen, setObservationsOpen] = useState(() => {
     const saved = localStorage.getItem('observationsOpen');
     return saved !== null ? JSON.parse(saved) : false;
@@ -1092,11 +96,9 @@ const Index = () => {
     return saved !== null ? JSON.parse(saved) : false;
   });
   
-  // Highlight animation states for preset feedback
   const [highlightObservations, setHighlightObservations] = useState(false);
   const [highlightActivities, setHighlightActivities] = useState(false);
   
-  // Before/After state tracking
   const [entryFormTab, setEntryFormTab] = useState<'before' | 'consumption' | 'after'>('before');
   const [beforeMood, setBeforeMood] = useState<number>(5);
   const [beforePain, setBeforePain] = useState<number>(5);
@@ -1113,23 +115,7 @@ const Index = () => {
   const [effectsDurationMinutes, setEffectsDurationMinutes] = useState<number | null>(null);
   const [isQuickEntry, setIsQuickEntry] = useState(false);
 
-  // Non-linear slider: first half (0-720) = 0-2h, second half (720-1440) = 2-24h
-  const sliderValueToMinutes = (sliderValue: number) => {
-    if (sliderValue <= 720) {
-      return sliderValue / 6; // 0-2 hours (0-120 minutes)
-    }
-    return 120 + (sliderValue - 720) * 1.8333; // 2-24 hours (120-1440 minutes)
-  };
-
-  const minutesToSliderValue = (minutes: number) => {
-    if (minutes <= 120) {
-      return minutes * 6; // 0-2 hours
-    }
-    return 720 + (minutes - 120) / 1.8333; // 2-24 hours
-  };
-
   useEffect(() => {
-    // Check for demo mode
     const demoMode = localStorage.getItem("demoMode") === "true";
     setIsDemoMode(demoMode);
     
@@ -1139,7 +125,6 @@ const Index = () => {
       return;
     }
 
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -1147,7 +132,6 @@ const Index = () => {
     }
   );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -1161,14 +145,13 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Real-time subscription for all entry changes
   useEffect(() => {
     const channel = supabase
       .channel('journal-entries-changes')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events: INSERT, UPDATE, DELETE
+          event: '*',
           schema: 'public',
           table: 'journal_entries'
         },
@@ -1184,7 +167,6 @@ const Index = () => {
     };
   }, []);
 
-  // Save collapsible section states to localStorage
   useEffect(() => {
     localStorage.setItem('observationsOpen', JSON.stringify(observationsOpen));
   }, [observationsOpen]);
@@ -1209,7 +191,6 @@ const Index = () => {
     } else {
       setEntries(data || []);
       
-      // Set form defaults from last entry (strain, dosage, method only)
       if (data && data.length > 0) {
         const lastEntry = data[0];
         setStrain(lastEntry.strain);
@@ -1218,7 +199,6 @@ const Index = () => {
         setCbdPercentage(lastEntry.cbd_percentage?.toString() || "");
         setMethod(lastEntry.method);
         
-        // Parse dosage (e.g., "0.5g" -> amount: "0.5", unit: "g")
         const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
         if (dosageMatch) {
           setDosageAmount(dosageMatch[1]);
@@ -1250,19 +230,16 @@ const Index = () => {
     setSelectedObservations(preset.observations);
     setSelectedActivities(preset.activities);
     
-    // Clear all active filters
     setFilterObservations([]);
     setFilterActivities([]);
     setFilterSideEffects([]);
     setFilterMethods([]);
     
-    // Expand sections and trigger highlight animation
     setObservationsOpen(true);
     setActivitiesOpen(true);
     setHighlightObservations(true);
     setHighlightActivities(true);
     
-    // Remove highlight after animation
     setTimeout(() => {
       setHighlightObservations(false);
       setHighlightActivities(false);
@@ -1317,21 +294,17 @@ const Index = () => {
 
     if (!user) return;
 
-    // Store current entry count before submission
     const previousEntryCount = entries.length;
 
     setIsSubmitting(true);
     const dosage = `${dosageAmount}${dosageUnit}`;
     
-    // Calculate consumption time based on minutes ago (convert slider value to actual minutes)
     const consumptionTime = new Date();
     consumptionTime.setMinutes(consumptionTime.getMinutes() - sliderValueToMinutes(minutesAgo));
 
-    // Determine entry status based on mode and form tab
     let status: 'pending_after' | 'complete' = 'complete';
     
     if (!isQuickEntry && entryFormTab !== 'after') {
-      // Full Tracking mode but not on "After" tab = save as pending
       status = 'pending_after';
     }
 
@@ -1377,7 +350,6 @@ const Index = () => {
           duration: 5000,
         });
       } else {
-        // Check if a milestone was reached
         const newEntryCount = previousEntryCount + 1;
         const milestoneReached = MILESTONES.find(
           (milestone) => milestone === newEntryCount
@@ -1386,10 +358,8 @@ const Index = () => {
         if (milestoneReached) {
           const details = MILESTONE_DETAILS[milestoneReached as keyof typeof MILESTONE_DETAILS];
           
-          // Trigger confetti celebration
           triggerMilestoneCelebration(milestoneReached);
           
-          // Show special milestone toast
           toast.success(details.message, {
             description: `${details.icon} You've logged ${milestoneReached} entries! Keep going!`,
             duration: 6000,
@@ -1399,7 +369,6 @@ const Index = () => {
         }
       }
       
-      // Clear form fields
       setNotes("");
       setSelectedActivities([]);
       setSelectedObservations([]);
@@ -1419,10 +388,8 @@ const Index = () => {
       setEffectsDurationMinutes(null);
       setEntryFormTab('before');
       
-      // Refresh entries
       fetchEntries();
 
-      // Hide success animation after 500ms
       setTimeout(() => setShowSuccessAnimation(false), 500);
     }
   };
@@ -1433,11 +400,9 @@ const Index = () => {
       return;
     }
 
-    // Load the pending entry data
     const entry = entries.find(e => e.id === entryId);
     if (!entry) return;
 
-    // Set form to Full Tracking mode and populate with entry data
     setIsQuickEntry(false);
     setStrain(entry.strain);
     setStrain2(entry.strain_2 || "");
@@ -1450,7 +415,6 @@ const Index = () => {
     setNotes(entry.notes || "");
     setSelectedIcon(entry.icon);
     
-    // Set before state from entry
     setBeforeMood(entry.before_mood || 5);
     setBeforePain(entry.before_pain || 5);
     setBeforeAnxiety(entry.before_anxiety || 5);
@@ -1458,13 +422,10 @@ const Index = () => {
     setBeforeFocus(entry.before_focus || 5);
     setBeforeNotes(entry.before_notes || "");
 
-    // Navigate to "After" tab
     setEntryFormTab('after');
 
-    // Delete the pending entry
     await supabase.from("journal_entries").delete().eq("id", entryId);
 
-    // Scroll to form
     document.getElementById('new-entry-card')?.scrollIntoView({ behavior: 'smooth' });
     
     toast.info("Complete the 'After' state to finish this entry");
@@ -1479,24 +440,23 @@ const Index = () => {
     if (isDemoMode) {
       toast.error("Demo mode is read-only. Sign up to make changes!");
       setShowDeleteDialog(false);
-      setDeleteEntryId(null);
       return;
     }
 
     if (!deleteEntryId) return;
-    
+
     const { error } = await supabase
       .from("journal_entries")
-      .delete()
+      .update({ is_deleted: true })
       .eq("id", deleteEntryId);
 
     if (error) {
       toast.error("Error deleting entry: " + error.message);
     } else {
-      toast.success("Entry permanently deleted");
+      toast.success("Entry moved to trash");
       fetchEntries();
     }
-    
+
     setShowDeleteDialog(false);
     setDeleteEntryId(null);
   };
@@ -1536,7 +496,6 @@ const Index = () => {
     }
 
     if (editingEntryId) {
-      // Update existing entry
       const { error } = await supabase
         .from("journal_entries")
         .update({ notes: tempNotes })
@@ -1549,7 +508,6 @@ const Index = () => {
         fetchEntries();
       }
     } else {
-      // Update new entry notes
       setNotes(tempNotes);
     }
     setNotesDialogOpen(false);
@@ -1585,7 +543,6 @@ const Index = () => {
     }
   };
   
-  // Swipe detection - minimum distance for swipe (50px)
   const minSwipeDistance = 50;
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -1612,23 +569,35 @@ const Index = () => {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, typeof Leaf> = {
-      leaf: Leaf,
-      pill: Pill,
-      droplet: Droplet,
-      cigarette: Cigarette,
-      cookie: Cookie,
-      coffee: Coffee,
-      sparkles: Sparkles,
-      heart: Heart,
-      brain: Brain,
-      zap: Zap,
-      rocket: Rocket,
-      flame: Flame,
-    };
-    return iconMap[iconName] || Leaf;
-  };
+  const filteredEntries = entries.filter(entry => {
+    if (!isEntryInTimeRange(entry)) return false;
+    
+    if (filterObservations.length > 0) {
+      if (!filterObservations.some(obs => entry.observations.includes(obs))) {
+        return false;
+      }
+    }
+    
+    if (filterActivities.length > 0) {
+      if (!filterActivities.some(act => entry.activities.includes(act))) {
+        return false;
+      }
+    }
+    
+    if (filterSideEffects.length > 0) {
+      if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
+        return false;
+      }
+    }
+    
+    if (filterMethods.length > 0) {
+      if (!filterMethods.includes(entry.method)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   if (loading) {
     return (
@@ -1638,7 +607,6 @@ const Index = () => {
     );
   }
   
-  // Show landing page if not logged in and not in demo mode
   if (!user && !isDemoMode) {
     return <LandingPage />;
   }
@@ -1921,10 +889,7 @@ const Index = () => {
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium">Time Since Consumption</Label>
                   <span className="text-sm text-muted-foreground">
-                    {sliderValueToMinutes(minutesAgo) === 0 ? 'Now' : 
-                     sliderValueToMinutes(minutesAgo) < 60 ? `${Math.round(sliderValueToMinutes(minutesAgo))} min ago` :
-                     sliderValueToMinutes(minutesAgo) < 1440 ? `${Math.floor(sliderValueToMinutes(minutesAgo) / 60)}h ${Math.round(sliderValueToMinutes(minutesAgo) % 60)}m ago` :
-                     `${Math.floor(sliderValueToMinutes(minutesAgo) / 1440)} days ago`}
+                    {formatTimeAgo(minutesAgo)}
                   </span>
                 </div>
                 <div className="relative">
@@ -1946,11 +911,11 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Mood Card with Presets and Experience Categories */}
-              <Card className="border-primary/20">
+              {/* Mood Card */}
+              <Card className="border-2">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Target className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-primary" />
                     Experience Details
                   </CardTitle>
                 </CardHeader>
@@ -1987,7 +952,6 @@ const Index = () => {
 
                   {/* Experience Categories */}
                   <div className="space-y-4">
-                    {/* Clear All Button */}
                     {(selectedObservations.length > 0 || selectedActivities.length > 0 || selectedNegativeSideEffects.length > 0) && (
                       <div className="flex justify-end">
                         <Button
@@ -2001,7 +965,7 @@ const Index = () => {
                         </Button>
                       </div>
                     )}
-                    {/* Observations - Collapsible */}
+                    {/* Observations */}
                     <Collapsible open={observationsOpen} onOpenChange={setObservationsOpen}>
                       <div className={`border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-all duration-300 ${
                         highlightObservations ? 'ring-2 ring-observation shadow-lg scale-[1.02]' : ''
@@ -2050,7 +1014,7 @@ const Index = () => {
                       </div>
                     </Collapsible>
 
-                    {/* Activities - Collapsible */}
+                    {/* Activities */}
                     <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen}>
                       <div className={`border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-all duration-300 ${
                         highlightActivities ? 'ring-2 ring-activity shadow-lg scale-[1.02]' : ''
@@ -2099,7 +1063,7 @@ const Index = () => {
                       </div>
                     </Collapsible>
 
-                    {/* Negative Side Effects - Collapsible */}
+                    {/* Negative Side Effects */}
                     <Collapsible open={sideEffectsOpen} onOpenChange={setSideEffectsOpen}>
                       <div className="border border-side-effect/30 rounded-lg bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
                         <CollapsibleTrigger asChild>
@@ -2345,237 +1309,228 @@ const Index = () => {
                     id="before-notes"
                     value={beforeNotes}
                     onChange={(e) => setBeforeNotes(e.target.value)}
-                    placeholder="Any additional context about how you're feeling before..."
-                    className="min-h-[80px]"
+                    placeholder="How are you feeling right now? Any symptoms or context..."
+                    className="min-h-[100px] resize-none"
                   />
                 </div>
-
-                <Button 
-                  onClick={() => setEntryFormTab('consumption')} 
-                  className="w-full"
-                  size="lg"
-                >
-                  Continue to Consumption Details
-                </Button>
               </div>
+
+              <Button onClick={() => setEntryFormTab('consumption')} className="w-full" size="lg">
+                Continue to Consumption Details
+              </Button>
             </TabsContent>
 
             {/* Consumption Tab */}
             <TabsContent value="consumption" className="space-y-6">
-              <div className="grid gap-6">
-            {/* Basic Info - Strains */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="strain">Strain Name</Label>
-                <Input
-                  id="strain"
-                  value={strain}
-                  onChange={(e) => setStrain(e.target.value)}
-                  placeholder="e.g., Blue Dream"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label htmlFor="strain2">Second Strain (Optional)</Label>
-                <Input
-                  id="strain2"
-                  value={strain2}
-                  onChange={(e) => setStrain2(e.target.value)}
-                  placeholder="e.g., OG Kush"
-                  className="mt-1.5"
-                />
-              </div>
-            </div>
-
-            {/* Cannabinoid Content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="thc">THC % (Optional)</Label>
-                <Input
-                  id="thc"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  value={thcPercentage}
-                  onChange={(e) => setThcPercentage(e.target.value)}
-                  placeholder="e.g., 24.5"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label htmlFor="cbd">CBD % (Optional)</Label>
-                <Input
-                  id="cbd"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  value={cbdPercentage}
-                  onChange={(e) => setCbdPercentage(e.target.value)}
-                  placeholder="e.g., 0.5"
-                  className="mt-1.5"
-                />
-              </div>
-            </div>
-
-            {/* Dosage and Method */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="dosage">Dosage</Label>
-                <div className="flex gap-2 mt-1.5">
+              {/* Basic Info - Strains */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="strain-full">Strain Name</Label>
                   <Input
-                    id="dosage"
+                    id="strain-full"
+                    value={strain}
+                    onChange={(e) => setStrain(e.target.value)}
+                    placeholder="e.g., Blue Dream"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="strain2-full">Second Strain (Optional)</Label>
+                  <Input
+                    id="strain2-full"
+                    value={strain2}
+                    onChange={(e) => setStrain2(e.target.value)}
+                    placeholder="e.g., OG Kush"
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+
+              {/* Cannabinoid Content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="thc-full">THC % (Optional)</Label>
+                  <Input
+                    id="thc-full"
                     type="number"
                     step="0.1"
-                    value={dosageAmount}
-                    onChange={(e) => setDosageAmount(e.target.value)}
-                    placeholder="e.g., 0.5"
-                    className="flex-1"
+                    min="0"
+                    max="100"
+                    value={thcPercentage}
+                    onChange={(e) => setThcPercentage(e.target.value)}
+                    placeholder="e.g., 24.5"
+                    className="mt-1.5"
                   />
-                  <Select value={dosageUnit} onValueChange={setDosageUnit}>
-                    <SelectTrigger className="w-[100px]">
-                      <SelectValue />
+                </div>
+                <div>
+                  <Label htmlFor="cbd-full">CBD % (Optional)</Label>
+                  <Input
+                    id="cbd-full"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={cbdPercentage}
+                    onChange={(e) => setCbdPercentage(e.target.value)}
+                    placeholder="e.g., 0.5"
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+
+              {/* Dosage and Method */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="dosage-full">Dosage</Label>
+                  <div className="flex gap-2 mt-1.5">
+                    <Input
+                      id="dosage-full"
+                      type="number"
+                      step="0.1"
+                      value={dosageAmount}
+                      onChange={(e) => setDosageAmount(e.target.value)}
+                      placeholder="e.g., 0.5"
+                      className="flex-1"
+                    />
+                    <Select value={dosageUnit} onValueChange={setDosageUnit}>
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="g">g</SelectItem>
+                        <SelectItem value="ml">ml</SelectItem>
+                        <SelectItem value="mg">mg</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="method-full">Method</Label>
+                  <Select value={method} onValueChange={setMethod}>
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue placeholder="Select method">
+                        {method && (
+                          <div className="flex items-center gap-2">
+                            {method === "Vape" && <Wind className="h-4 w-4" />}
+                            {method === "Smoke" && <Cigarette className="h-4 w-4" />}
+                            {method === "Oil" && <Droplet className="h-4 w-4" />}
+                            {method === "Tincture" && <Beaker className="h-4 w-4" />}
+                            {method === "Topical" && <Pipette className="h-4 w-4" />}
+                            {method === "Edible" && <Cookie className="h-4 w-4" />}
+                            <span>{method}</span>
+                          </div>
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="g">g</SelectItem>
-                      <SelectItem value="ml">ml</SelectItem>
-                      <SelectItem value="mg">mg</SelectItem>
+                      <SelectItem value="Vape">
+                        <div className="flex items-center gap-2">
+                          <Wind className="h-4 w-4" />
+                          <span>Vape</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Smoke">
+                        <div className="flex items-center gap-2">
+                          <Cigarette className="h-4 w-4" />
+                          <span>Smoke</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Oil">
+                        <div className="flex items-center gap-2">
+                          <Droplet className="h-4 w-4" />
+                          <span>Oil</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Tincture">
+                        <div className="flex items-center gap-2">
+                          <Beaker className="h-4 w-4" />
+                          <span>Tincture</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Topical">
+                        <div className="flex items-center gap-2">
+                          <Pipette className="h-4 w-4" />
+                          <span>Topical</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Edible">
+                        <div className="flex items-center gap-2">
+                          <Cookie className="h-4 w-4" />
+                          <span>Edible</span>
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Time Since Consumption */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Time Since Consumption</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {formatTimeAgo(minutesAgo)}
+                  </span>
+                </div>
+                <div className="relative">
+                  <Slider
+                    value={[minutesAgo]}
+                    onValueChange={(value) => setMinutesAgo(value[0])}
+                    max={1440}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <div className="relative text-xs text-muted-foreground h-4 mt-1">
+                  <span className="absolute left-0">Now</span>
+                  <span className="absolute left-[25%] -translate-x-1/2">1h</span>
+                  <span className="absolute left-[50%] -translate-x-1/2 font-medium">2h</span>
+                  <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
+                  <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
+                  <span className="absolute right-0">24h</span>
+                </div>
+              </div>
+
+              {/* Personal Notes */}
               <div>
-                <Label htmlFor="method">Method</Label>
-                <Select value={method} onValueChange={setMethod}>
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Select method">
-                      {method && (
-                        <div className="flex items-center gap-2">
-                          {method === "Vape" && <Wind className="h-4 w-4" />}
-                          {method === "Smoke" && <Cigarette className="h-4 w-4" />}
-                          {method === "Oil" && <Droplet className="h-4 w-4" />}
-                          {method === "Tincture" && <Beaker className="h-4 w-4" />}
-                          {method === "Topical" && <Pipette className="h-4 w-4" />}
-                          {method === "Edible" && <Cookie className="h-4 w-4" />}
-                          <span>{method}</span>
-                        </div>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Vape">
-                      <div className="flex items-center gap-2">
-                        <Wind className="h-4 w-4" />
-                        <span>Vape</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Smoke">
-                      <div className="flex items-center gap-2">
-                        <Cigarette className="h-4 w-4" />
-                        <span>Smoke</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Oil">
-                      <div className="flex items-center gap-2">
-                        <Droplet className="h-4 w-4" />
-                        <span>Oil</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Tincture">
-                      <div className="flex items-center gap-2">
-                        <Beaker className="h-4 w-4" />
-                        <span>Tincture</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Topical">
-                      <div className="flex items-center gap-2">
-                        <Pipette className="h-4 w-4" />
-                        <span>Topical</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="Edible">
-                      <div className="flex items-center gap-2">
-                        <Cookie className="h-4 w-4" />
-                        <span>Edible</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Time Since Consumption */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Time Since Consumption</Label>
-                <span className="text-sm text-muted-foreground">
-                  {sliderValueToMinutes(minutesAgo) === 0 ? 'Now' : 
-                   sliderValueToMinutes(minutesAgo) < 60 ? `${Math.round(sliderValueToMinutes(minutesAgo))} min ago` :
-                   sliderValueToMinutes(minutesAgo) < 1440 ? `${Math.floor(sliderValueToMinutes(minutesAgo) / 60)}h ${Math.round(sliderValueToMinutes(minutesAgo) % 60)}m ago` :
-                   `${Math.floor(sliderValueToMinutes(minutesAgo) / 1440)} days ago`}
-                </span>
-              </div>
-              <div className="relative">
-                <Slider
-                  value={[minutesAgo]}
-                  onValueChange={(value) => setMinutesAgo(value[0])}
-                  max={1440}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-              <div className="relative text-xs text-muted-foreground h-4 mt-1">
-                <span className="absolute left-0">Now</span>
-                <span className="absolute left-[25%] -translate-x-1/2">1h</span>
-                <span className="absolute left-[50%] -translate-x-1/2 font-medium">2h</span>
-                <span className="absolute left-[59.09%] -translate-x-1/2 hidden sm:inline">6h</span>
-                <span className="absolute left-[72.73%] -translate-x-1/2">12h</span>
-                <span className="absolute right-0">24h</span>
-              </div>
-            </div>
-
-            {/* Personal Notes */}
-            <div>
-              <Sheet open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2"
-                    onClick={() => openNotesDialog()}
-                    disabled={isDemoMode}
-                  >
-                    <FileText className="h-4 w-4" />
-                    {notes ? "Edit Notes" : "Add Notes"}
-                    {notes && <Badge variant="secondary" className="ml-auto">{notes.length} chars</Badge>}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent onCloseAutoFocus={(e) => e.preventDefault()}>
-                  <SheetHeader>
-                    <SheetTitle>Personal Notes</SheetTitle>
-                    <SheetDescription>
-                      Add any additional observations, feelings, or context about this entry.
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <Textarea
-                      value={tempNotes}
-                      onChange={(e) => setTempNotes(e.target.value)}
-                      placeholder="How are you feeling? Any additional observations or context..."
-                      className="min-h-[300px] resize-none"
-                    />
+                <Sheet open={notesDialogOpen} onOpenChange={setNotesDialogOpen}>
+                  <SheetTrigger asChild>
                     <Button
-                      onClick={saveNotes}
-                      className="w-full mt-4"
+                      variant="outline"
+                      className="w-full justify-start gap-2"
+                      onClick={() => openNotesDialog()}
+                      disabled={isDemoMode}
                     >
-                      Save Notes
+                      <FileText className="h-4 w-4" />
+                      {notes ? "Edit Notes" : "Add Notes"}
+                      {notes && <Badge variant="secondary" className="ml-auto">{notes.length} chars</Badge>}
                     </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-            </div>
-              
+                  </SheetTrigger>
+                  <SheetContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <SheetHeader>
+                      <SheetTitle>Personal Notes</SheetTitle>
+                      <SheetDescription>
+                        Add any additional observations, feelings, or context about this entry.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <Textarea
+                        value={tempNotes}
+                        onChange={(e) => setTempNotes(e.target.value)}
+                        placeholder="How are you feeling? Any additional observations or context..."
+                        className="min-h-[300px] resize-none"
+                      />
+                      <Button
+                        onClick={saveNotes}
+                        className="w-full mt-4"
+                      >
+                        Save Notes
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+                
               <div className="flex gap-3">
                 <Button 
                   onClick={() => setEntryFormTab('after')} 
@@ -2767,7 +1722,7 @@ const Index = () => {
                   </Select>
                 </div>
 
-                {/* Mood Card - containing presets and experience categories */}
+                {/* Mood Card */}
                 <Card className="border-2">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -2806,9 +1761,8 @@ const Index = () => {
                       </div>
                     </div>
 
-                    {/* Experience Categories - Framed Sections */}
+                    {/* Experience Categories */}
                     <div className="space-y-4">
-                      {/* Clear All Button */}
                       {(selectedObservations.length > 0 || selectedActivities.length > 0 || selectedNegativeSideEffects.length > 0) && (
                         <div className="flex justify-end">
                           <Button
@@ -2822,7 +1776,7 @@ const Index = () => {
                           </Button>
                         </div>
                       )}
-                      {/* Observations - Collapsible */}
+                      {/* Observations */}
                       <Collapsible open={observationsOpen} onOpenChange={setObservationsOpen}>
                         <div className={`border border-observation/30 rounded-lg bg-observation/5 hover:bg-observation/10 transition-all duration-300 ${
                           highlightObservations ? 'ring-2 ring-observation shadow-lg scale-[1.02]' : ''
@@ -2871,7 +1825,7 @@ const Index = () => {
                         </div>
                       </Collapsible>
 
-                      {/* Activities - Collapsible */}
+                      {/* Activities */}
                       <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen}>
                         <div className={`border border-activity/30 rounded-lg bg-activity/5 hover:bg-activity/10 transition-all duration-300 ${
                           highlightActivities ? 'ring-2 ring-activity shadow-lg scale-[1.02]' : ''
@@ -2920,7 +1874,7 @@ const Index = () => {
                         </div>
                       </Collapsible>
 
-                      {/* Negative Side Effects - Collapsible */}
+                      {/* Negative Side Effects */}
                       <Collapsible open={sideEffectsOpen} onOpenChange={setSideEffectsOpen}>
                         <div className="border border-side-effect/30 rounded-lg bg-side-effect/5 hover:bg-side-effect/10 transition-colors duration-200">
                           <CollapsibleTrigger asChild>
@@ -2945,7 +1899,7 @@ const Index = () => {
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <div className="px-4 pb-4">
-                              <p className="text-xs text-muted-foreground mb-3">Any unwanted effects you're noticing?</p>
+                              <p className="text-xs text-muted-foreground mb-3">Any unwanted effects?</p>
                               <div className="flex flex-wrap gap-2">
                                 {NEGATIVE_SIDE_EFFECTS.map((effect) => (
                                   <Badge
@@ -3033,39 +1987,11 @@ const Index = () => {
           )}
         </Card>
 
-        {/* Reminders - Removed from main flow, now accessible via floating button */}
-
         {/* Insights Chart */}
         {entries.length > 0 && (
           <div id="insights-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <InsightsChart 
-              entries={entries.filter(entry => {
-                // Filter by time range
-                if (!isEntryInTimeRange(entry)) return false;
-                
-                // Filter by observations
-                if (filterObservations.length > 0) {
-                  if (!filterObservations.some(obs => entry.observations.includes(obs))) {
-                    return false;
-                  }
-                }
-                
-                // Filter by activities
-                if (filterActivities.length > 0) {
-                  if (!filterActivities.some(act => entry.activities.includes(act))) {
-                    return false;
-                  }
-                }
-                
-                // Filter by side effects
-                if (filterSideEffects.length > 0) {
-                  if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
-                    return false;
-                  }
-                }
-                
-                return true;
-              })}
+              entries={filteredEntries}
               filterObservations={filterObservations}
               setFilterObservations={setFilterObservations}
               filterActivities={filterActivities}
@@ -3097,507 +2023,26 @@ const Index = () => {
               </TabsList>
 
               <TabsContent value="list" className="space-y-4">
-                {/* Active Filters */}
-                {(filterObservations.length > 0 || filterActivities.length > 0 || filterSideEffects.length > 0 || filterMethods.length > 0) && (
-                  <Card className="p-4 mb-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <Label className="text-sm font-semibold mb-2 block">Active Filters:</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {filterObservations.map(obs => (
-                            <Badge 
-                              key={obs} 
-                              className="bg-observation text-observation-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
-                              onClick={() => setFilterObservations(prev => prev.filter(o => o !== obs))}
-                              title="Click to remove filter"
-                            >
-                              {obs} ×
-                            </Badge>
-                          ))}
-                          {filterActivities.map(act => (
-                            <Badge 
-                              key={act} 
-                              className="bg-activity text-activity-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
-                              onClick={() => setFilterActivities(prev => prev.filter(a => a !== act))}
-                              title="Click to remove filter"
-                            >
-                              {act} ×
-                            </Badge>
-                          ))}
-                          {filterSideEffects.map(eff => (
-                            <Badge 
-                              key={eff} 
-                              className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
-                              onClick={() => setFilterSideEffects(prev => prev.filter(e => e !== eff))}
-                              title="Click to remove filter"
-                            >
-                              {eff} ×
-                            </Badge>
-                          ))}
-                          {filterMethods.map(method => (
-                            <Badge 
-                              key={method} 
-                              variant="default"
-                              className="flex items-center gap-1 cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
-                              onClick={() => setFilterMethods(prev => prev.filter(m => m !== method))}
-                              title="Click to remove filter"
-                            >
-                              {(() => {
-                                const MethodIcon = getMethodIcon(method);
-                                return <MethodIcon className="h-3 w-3" />;
-                              })()}
-                              {method} ×
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setFilterObservations([]);
-                          setFilterActivities([]);
-                          setFilterSideEffects([]);
-                          setFilterMethods([]);
-                        }}
-                      >
-                        Clear All
-                      </Button>
-                    </div>
-                  </Card>
-                )}
-                
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-semibold">Recent Entries</h2>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="sort" className="text-sm text-muted-foreground">Sort by:</Label>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger id="sort" className="w-[180px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="date-desc">Newest First</SelectItem>
-                        <SelectItem value="date-asc">Oldest First</SelectItem>
-                        <SelectItem value="strain-asc">Strain (A-Z)</SelectItem>
-                        <SelectItem value="strain-desc">Strain (Z-A)</SelectItem>
-                        <SelectItem value="dosage-asc">Dosage (Low-High)</SelectItem>
-                        <SelectItem value="dosage-desc">Dosage (High-Low)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                {/* Time Range Filter */}
-                <Card className="p-4 mb-6">
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-semibold">Filter by Time:</Label>
-                    <div className="grid grid-cols-2 sm:flex gap-2">
-                      <Button
-                        variant={timeRangeFilter === 'all' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setTimeRangeFilter('all')}
-                        className="sm:flex-1"
-                      >
-                        All Time
-                      </Button>
-                      <Button
-                        variant={timeRangeFilter === 'today' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setTimeRangeFilter('today')}
-                        className="sm:flex-1"
-                      >
-                        Today
-                      </Button>
-                      <Button
-                        variant={timeRangeFilter === 'week' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setTimeRangeFilter('week')}
-                        className="sm:flex-1"
-                      >
-                        This Week
-                      </Button>
-                      <Button
-                        variant={timeRangeFilter === 'month' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setTimeRangeFilter('month')}
-                        className="sm:flex-1"
-                      >
-                        This Month
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-                
-                <div className="space-y-4">
-                  {[...entries]
-                    .filter(entry => {
-                      // Filter by time range first
-                      if (!isEntryInTimeRange(entry)) {
-                        return false;
-                      }
-                      // Filter by observations
-                      if (filterObservations.length > 0) {
-                        if (!filterObservations.some(obs => entry.observations.includes(obs))) {
-                          return false;
-                        }
-                      }
-                      // Filter by activities
-                      if (filterActivities.length > 0) {
-                        if (!filterActivities.some(act => entry.activities.includes(act))) {
-                          return false;
-                        }
-                      }
-                      // Filter by side effects
-                      if (filterSideEffects.length > 0) {
-                        if (!filterSideEffects.some(eff => entry.negative_side_effects.includes(eff))) {
-                          return false;
-                        }
-                      }
-                      // Filter by method
-                      if (filterMethods.length > 0) {
-                        if (!filterMethods.includes(entry.method)) {
-                          return false;
-                        }
-                      }
-                      return true;
-                    })
-                    .sort((a, b) => {
-                    switch (sortBy) {
-                      case "date-asc":
-                        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                      case "date-desc":
-                        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                      case "strain-asc":
-                        return a.strain.localeCompare(b.strain);
-                      case "strain-desc":
-                        return b.strain.localeCompare(a.strain);
-                      case "dosage-asc":
-                        return parseFloat(a.dosage) - parseFloat(b.dosage);
-                      case "dosage-desc":
-                        return parseFloat(b.dosage) - parseFloat(a.dosage);
-                      default:
-                        return 0;
-                    }
-                  }).map((entry, index) => {
-                    const IconComponent = getIconComponent(entry.icon || 'leaf');
-                    
-                    return (
-                    <Card 
-                      key={entry.id} 
-                      className="overflow-hidden hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
-                    >
-                      <div className="p-6">
-                        {/* Pending Status Banner */}
-                        {entry.entry_status === 'pending_after' && (
-                          <div className="mb-4 p-3 bg-accent/20 border border-accent rounded-lg">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-accent" />
-                                <span className="text-sm font-medium text-accent">Pending Completion</span>
-                                <Badge variant="outline" className="ml-2">
-                                  {(() => {
-                                    const consumptionTime = new Date(entry.consumption_time || entry.created_at);
-                                    const now = new Date();
-                                    const minutesElapsed = Math.floor((now.getTime() - consumptionTime.getTime()) / (1000 * 60));
-                                    
-                                    // Suggest completion time based on method
-                                    const suggestedMinutes = entry.method === 'Edible' ? 120 : 
-                                                           entry.method === 'Oil' || entry.method === 'Tincture' ? 60 : 30;
-                                    
-                                    if (minutesElapsed >= suggestedMinutes) {
-                                      return 'Ready to complete';
-                                    } else {
-                                      const remaining = suggestedMinutes - minutesElapsed;
-                                      return `${remaining} min remaining`;
-                                    }
-                                  })()}
-                                </Badge>
-                              </div>
-                              <Button
-                                size="sm"
-                                onClick={() => handleCompletePendingEntry(entry.id)}
-                                className="gap-2"
-                              >
-                                <Activity className="h-4 w-4" />
-                                Complete Entry
-                              </Button>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Log your "After" state to see effectiveness metrics
-                            </p>
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-full bg-primary/10">
-                              <IconComponent className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-lg">
-                                {entry.strain}
-                                {entry.strain_2 && <span className="text-muted-foreground"> + {entry.strain_2}</span>}
-                              </h3>
-                              <button
-                                onClick={() => openTimeEditDialog(entry.id, entry.consumption_time || entry.created_at)}
-                                className="flex items-center gap-2 text-sm text-muted-foreground mt-1 hover:text-primary transition-colors cursor-pointer"
-                              >
-                                <Clock className="h-3 w-3" />
-                                <span className="hover:underline">{new Date(entry.consumption_time || entry.created_at).toLocaleString()}</span>
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openNotesDialog(entry.id, entry.notes || "")}
-                              className="text-muted-foreground hover:text-primary rounded-full"
-                            >
-                              <FileText className="h-4 w-4" />
-                              <span className="sr-only">Add/Edit notes</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(entry.id)}
-                              className="text-muted-foreground hover:text-destructive rounded-full"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete entry</span>
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Dosage</Label>
-                            <p className="font-medium">{entry.dosage}</p>
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Method</Label>
-                            <p 
-                              className="font-medium flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
-                              onClick={() => {
-                                setFilterMethods(prev => 
-                                  prev.includes(entry.method) 
-                                    ? prev.filter(m => m !== entry.method)
-                                    : [...prev, entry.method]
-                                );
-                              }}
-                            >
-                              {(() => {
-                                const MethodIcon = getMethodIcon(entry.method);
-                                return <MethodIcon className="h-4 w-4" />;
-                              })()}
-                              {entry.method}
-                            </p>
-                          </div>
-                          {entry.thc_percentage != null && (
-                            <div>
-                              <Label className="text-xs text-muted-foreground">THC %</Label>
-                              <p className="font-medium text-green-600 dark:text-green-400">{entry.thc_percentage}%</p>
-                            </div>
-                          )}
-                          {entry.cbd_percentage != null && (
-                            <div>
-                              <Label className="text-xs text-muted-foreground">CBD %</Label>
-                              <p className="font-medium text-blue-600 dark:text-blue-400">{entry.cbd_percentage}%</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Before/After Metrics & Effectiveness */}
-                        {entry.before_mood && entry.after_mood && entry.entry_status !== 'pending_after' && (
-                          <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border/50">
-                            <div className="flex items-center justify-between mb-3">
-                              <Label className="text-sm font-semibold">Effectiveness Metrics</Label>
-                              {(() => {
-                                const effectiveness = calculateEffectiveness(entry);
-                                return (
-                                  <Badge className={`${effectiveness.color} text-white`}>
-                                    {effectiveness.label} ({effectiveness.score}%)
-                                  </Badge>
-                                );
-                              })()}
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
-                              {/* Mood */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground mb-1">Mood</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{entry.before_mood}</span>
-                                  <span className="text-lg">→</span>
-                                  <span className="font-semibold">{entry.after_mood}</span>
-                                  {entry.after_mood !== entry.before_mood && (
-                                    <span className={`text-xs font-bold ${entry.after_mood > entry.before_mood ? 'text-green-500' : 'text-red-500'}`}>
-                                      {entry.after_mood > entry.before_mood ? '↑' : '↓'}{Math.abs(entry.after_mood - entry.before_mood)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {/* Pain */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground mb-1">Pain</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{entry.before_pain}</span>
-                                  <span className="text-lg">→</span>
-                                  <span className="font-semibold">{entry.after_pain}</span>
-                                  {entry.after_pain !== entry.before_pain && (
-                                    <span className={`text-xs font-bold ${entry.after_pain! < entry.before_pain! ? 'text-green-500' : 'text-red-500'}`}>
-                                      {entry.after_pain! < entry.before_pain! ? '↓' : '↑'}{Math.abs(entry.after_pain! - entry.before_pain!)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {/* Anxiety */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground mb-1">Anxiety</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{entry.before_anxiety}</span>
-                                  <span className="text-lg">→</span>
-                                  <span className="font-semibold">{entry.after_anxiety}</span>
-                                  {entry.after_anxiety !== entry.before_anxiety && (
-                                    <span className={`text-xs font-bold ${entry.after_anxiety! < entry.before_anxiety! ? 'text-green-500' : 'text-red-500'}`}>
-                                      {entry.after_anxiety! < entry.before_anxiety! ? '↓' : '↑'}{Math.abs(entry.after_anxiety! - entry.before_anxiety!)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {/* Energy */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground mb-1">Energy</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{entry.before_energy}</span>
-                                  <span className="text-lg">→</span>
-                                  <span className="font-semibold">{entry.after_energy}</span>
-                                  {entry.after_energy !== entry.before_energy && (
-                                    <span className={`text-xs font-bold ${entry.after_energy! > entry.before_energy! ? 'text-green-500' : 'text-red-500'}`}>
-                                      {entry.after_energy! > entry.before_energy! ? '↑' : '↓'}{Math.abs(entry.after_energy! - entry.before_energy!)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              {/* Focus */}
-                              <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground mb-1">Focus</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">{entry.before_focus}</span>
-                                  <span className="text-lg">→</span>
-                                  <span className="font-semibold">{entry.after_focus}</span>
-                                  {entry.after_focus !== entry.before_focus && (
-                                    <span className={`text-xs font-bold ${entry.after_focus! > entry.before_focus! ? 'text-green-500' : 'text-red-500'}`}>
-                                      {entry.after_focus! > entry.before_focus! ? '↑' : '↓'}{Math.abs(entry.after_focus! - entry.before_focus!)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            {entry.effects_duration_minutes && (
-                              <div className="mt-3 pt-3 border-t border-border/50">
-                                <span className="text-xs text-muted-foreground">
-                                  Effects Duration: <span className="font-semibold text-foreground">{entry.effects_duration_minutes} minutes</span>
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {entry.observations.length > 0 && (
-                          <div className="mb-4">
-                            <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
-                            <div className="flex flex-wrap gap-2">
-                              {entry.observations.map((obs) => (
-                              <Badge 
-                                key={obs} 
-                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
-                                  filterObservations.includes(obs)
-                                    ? "bg-observation text-observation-foreground"
-                                    : "bg-observation-light text-observation-foreground"
-                                }`}
-                                onClick={() => {
-                                  setFilterObservations(prev => 
-                                    prev.includes(obs) 
-                                      ? prev.filter(o => o !== obs)
-                                      : [...prev, obs]
-                                  );
-                                }}
-                                title={filterObservations.includes(obs) ? "Click to remove filter" : "Click to add filter"}
-                              >
-                                  {obs}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.activities.length > 0 && (
-                          <div className="mb-4">
-                            <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
-                            <div className="flex flex-wrap gap-2">
-                              {entry.activities.map((activity) => (
-                              <Badge 
-                                key={activity} 
-                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
-                                  filterActivities.includes(activity)
-                                    ? "bg-activity text-activity-foreground"
-                                    : "bg-activity-light text-activity-foreground"
-                                }`}
-                                onClick={() => {
-                                  setFilterActivities(prev => 
-                                    prev.includes(activity) 
-                                      ? prev.filter(a => a !== activity)
-                                      : [...prev, activity]
-                                  );
-                                }}
-                                title={filterActivities.includes(activity) ? "Click to remove filter" : "Click to add filter"}
-                              >
-                                  {activity}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.negative_side_effects.length > 0 && (
-                          <div className="mb-4">
-                            <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
-                            <div className="flex flex-wrap gap-2">
-                              {entry.negative_side_effects.map((effect) => (
-                              <Badge 
-                                key={effect} 
-                                className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
-                                  filterSideEffects.includes(effect)
-                                    ? "bg-side-effect text-side-effect-foreground"
-                                    : "bg-side-effect-light text-side-effect-foreground"
-                                }`}
-                                onClick={() => {
-                                  setFilterSideEffects(prev => 
-                                    prev.includes(effect) 
-                                      ? prev.filter(e => e !== effect)
-                                      : [...prev, effect]
-                                  );
-                                }}
-                                title={filterSideEffects.includes(effect) ? "Click to remove filter" : "Click to add filter"}
-                              >
-                                  {effect}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {entry.notes && (
-                          <div>
-                            <Label className="text-xs text-muted-foreground mb-2 block">Notes</Label>
-                            <p className="text-sm text-muted-foreground leading-relaxed">{entry.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    </Card>
-                    );
-                  })}
-                </div>
+                <EntryList
+                  entries={filteredEntries}
+                  isDemoMode={isDemoMode}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  timeRangeFilter={timeRangeFilter}
+                  setTimeRangeFilter={setTimeRangeFilter}
+                  filterObservations={filterObservations}
+                  filterActivities={filterActivities}
+                  filterSideEffects={filterSideEffects}
+                  filterMethods={filterMethods}
+                  setFilterObservations={setFilterObservations}
+                  setFilterActivities={setFilterActivities}
+                  setFilterSideEffects={setFilterSideEffects}
+                  setFilterMethods={setFilterMethods}
+                  onOpenNotesDialog={openNotesDialog}
+                  onDelete={handleDelete}
+                  onOpenTimeEditDialog={openTimeEditDialog}
+                  onCompletePendingEntry={handleCompletePendingEntry}
+                />
               </TabsContent>
 
               <TabsContent value="calendar">
