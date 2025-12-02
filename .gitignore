@@ -17,8 +17,12 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+GEMINI.md
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+.gemini/
+gha-creds-*.json

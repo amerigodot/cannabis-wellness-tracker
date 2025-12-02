@@ -1,7 +1,7 @@
 # Cannabis Wellness Tracker
 
 <div align="center">
-  <img src="public/placeholder.svg" alt="Cannabis Wellness Tracker Logo" width="120" height="120" />
+  <img src="public/favicon.ico" alt="Cannabis Wellness Tracker Logo" width="120" height="120" />
   <h3>Track Your Wellness Journey, Optimize Your Experience</h3>
   <p>
     A private, intelligent journal to track medical, recreational, and wellness cannabis use. 
