@@ -247,7 +247,7 @@ export function LandingPage() {
               onClick={() => navigate("/auth")}
               className="hover:border-primary hover:text-foreground hover:bg-primary/5 transition-colors font-medium"
             >
-              Or Create Your Free Account
+              Sign Up or Log In
             </Button>
           </div>
         </section>
