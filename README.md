@@ -1,73 +1,124 @@
-# Welcome to your Lovable project
+# Cannabis Wellness Tracker
 
-## Project info
+<div align="center">
+  <img src="public/placeholder.svg" alt="Cannabis Wellness Tracker Logo" width="120" height="120" />
+  <h3>Track Your Wellness Journey, Optimize Your Experience</h3>
+  <p>
+    A private, intelligent journal to track medical, recreational, and wellness cannabis use. 
+    Monitor effects, discover patterns, and leverage AI-powered insights to find what works best for you.
+  </p>
+  <a href="https://cannabis-wellness-tracker.lovable.app">View Live Demo</a>
+</div>
 
-**URL**: https://lovable.dev/projects/71a51820-93cb-44f1-8bb9-105d41643cf2
+---
 
-## How can I edit this code?
+## 📋 Project Overview
 
-There are several ways of editing your application.
+The **Cannabis Wellness Tracker** is a comprehensive web application designed to help users maintain a detailed log of their cannabis consumption. whether for medical symptom management, recreational enjoyment, or general wellness. By recording detailed metrics before and after consumption, the app helps users correlate specific strains, dosages, and methods with desired outcomes (e.g., pain relief, anxiety reduction, focus).
 
-**Use Lovable**
+It goes beyond simple logging by offering **AI-driven tools** that analyze your data to provide personalized wellness reports, correlation analysis, and optimization strategies.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/71a51820-93cb-44f1-8bb9-105d41643cf2) and start prompting.
+## ✨ Key Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📓 Advanced Journaling
+*   **Flexible Tracking Modes:**
+    *   **Quick Entry:** Log consumption details and observations in seconds.
+    *   **Full Tracking:** Record "Before" and "After" states (Mood, Pain, Anxiety, Energy, Focus) to calculate an **Effectiveness Score**.
+*   **Detailed Metrics:**
+    *   **Consumption:** Strain names (primary & secondary), Dosage (g, mg, ml), Method (Vape, Smoke, Edible, Oil, Tincture, Topical), and Cannabinoid profile (THC%, CBD%).
+    *   **Context:** Log Activities (Music, Social, Gaming, Work) and Observations (Relaxation, Creativity, Sleep).
+    *   **Side Effects:** Track negative effects like Dry Mouth or Dizziness to avoid them in the future.
+*   **Retroactive Logging:** Easily log past sessions with an intuitive "Time Since Consumption" slider.
 
-**Use your preferred IDE**
+### 📊 Insights & Visualization
+*   **Unified Calendar View:** Visualize your consumption habits over time.
+*   **Effectiveness Scoring:** Automatically calculates how effective a session was based on the improvement in your tracked symptoms.
+*   **Trend Analysis:** (Coming Soon) Visualize correlations between strains and positive outcomes.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🤖 AI-Powered Wellness Tools
+Unlock powerful insights as you build your journal:
+1.  **Comprehensive Wellness Report** (Unlocks at 10 entries): Generates an in-depth analysis of your usage patterns and effectiveness.
+2.  **Correlation & Timing Analysis** (Unlocks at 50 entries): Discovers temporal patterns and optimal timing strategies.
+3.  **Goal-Based Optimization Strategy** (Unlocks at 100 entries): Creates a personalized plan tailored to specific goals like "Better Sleep" or "Chronic Pain Management".
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🏆 Gamification & Habits
+*   **Achievement Badges:** Earn badges like "Awareness Builder" and "Wellness Master" as you log more entries.
+*   **Smart Reminders:** Set custom recurring reminders to maintain a consistent tracking habit.
 
-Follow these steps:
+### 🔒 Privacy & Security
+*   **Private & Encrypted:** Your health data is sensitive. This app relies on Supabase's robust security model.
+*   **Demo Mode:** Explore the full functionality with sample data before creating an account.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🛠️ Tech Stack
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+This project is built with a modern, performance-oriented stack:
 
-# Step 3: Install the necessary dependencies.
-npm i
+*   **Frontend:** [React](https://react.dev/) (v18), [Vite](https://vitejs.dev/)
+*   **Language:** [TypeScript](https://www.typescriptlang.org/)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+*   **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (based on Radix UI)
+*   **Icons:** [Lucide React](https://lucide.dev/)
+*   **Charts:** [Recharts](https://recharts.org/)
+*   **Backend & Auth:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Edge Functions)
+*   **State Management:** [TanStack Query](https://tanstack.com/query/latest)
+*   **Forms:** React Hook Form + Zod
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🚀 Getting Started
 
-**Edit a file directly in GitHub**
+### Prerequisites
+*   Node.js (v18+)
+*   npm or bun
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Installation
 
-**Use GitHub Codespaces**
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd cannabis-wellness-tracker
+    ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-## What technologies are used for this project?
+3.  **Environment Setup:**
+    Create a `.env` file in the root directory and add your Supabase credentials (required for the backend connection):
+    ```env
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
 
-This project is built with:
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The app will be available at `http://localhost:8080`.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## ❤️ Support the Project
 
-## How can I deploy this project?
+If you find this project useful, please consider supporting its development. Your contribution helps keep the app free, private, and ad-free for everyone.
 
-Simply open [Lovable](https://lovable.dev/projects/71a51820-93cb-44f1-8bb9-105d41643cf2) and click on Share -> Publish.
+### PayPal
+*   [☕ **Supporter ($5)**](https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=5&no_recurring=0&item_name=Cannabis+Wellness+Tracker)
+*   [❤️ **Contributor ($15)**](https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=15&no_recurring=0&item_name=Cannabis+Wellness+Tracker)
+*   [👑 **Champion ($50)**](https://www.paypal.com/donate/?business=3N6GXCZYQH6U6&amount=50&no_recurring=0&item_name=Cannabis+Wellness+Tracker)
 
-## Can I connect a custom domain to my Lovable project?
+### Cryptocurrency
+*   **Bitcoin (BTC):** `3F5zzXzgu4CZo1ioVUvTabhKoj6BuEWzmz`
+*   **Ethereum (ETH):** `0xC55Bf0f3dc882E6FF4Dc2e25B4b95a135A38C38b`
+*   **Monero (XMR):** `86xExcT5MESGR9X2bQ7NwAheWUZK8bmu7KjBCTxo1Msm5s9UeufjbsHAQmhmsbuyXHg7PtNyhXMakgty4noFwQ7ULAx1RSe`
 
-Yes, you can!
+## 🛡️ Disclaimer
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+This application is for informational and educational purposes only. It does not provide medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1.  Fork the project
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
