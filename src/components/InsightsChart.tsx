@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
@@ -58,7 +58,7 @@ export const InsightsChart = ({
   const selectedBadges = new Set([...filterObservations, ...filterActivities, ...filterSideEffects]);
 
   // Calculate top N most used badges by type
-  const getTopBadgesByType = () => {
+  const topBadges = useMemo(() => {
     const observationCounts: Record<string, number> = {};
     const activityCounts: Record<string, number> = {};
     const sideEffectCounts: Record<string, number> = {};
@@ -87,12 +87,10 @@ export const InsightsChart = ({
       activities: sortAndLimit(activityCounts),
       sideEffects: sortAndLimit(sideEffectCounts)
     };
-  };
-
-  const topBadges = getTopBadgesByType();
+  }, [entries, topCount]);
 
   // Calculate badge trends over time
-  const getBadgeTrends = () => {
+  const trendData = useMemo(() => {
     if (entries.length === 0) return [];
     
     // Find date range of entries
@@ -143,26 +141,29 @@ export const InsightsChart = ({
         const dateB = new Date(b.period);
         return dateA.getTime() - dateB.getTime();
       });
-  };
-
-  const trendData = getBadgeTrends();
+  }, [entries]);
   
   // Get all unique badges that appear in trends
-  const allTrendBadges = new Set<string>();
-  trendData.forEach(dataPoint => {
-    Object.keys(dataPoint).forEach(key => {
-      if (key !== 'period') allTrendBadges.add(key);
+  const allTrendBadges = useMemo(() => {
+    const badges = new Set<string>();
+    trendData.forEach(dataPoint => {
+      Object.keys(dataPoint).forEach(key => {
+        if (key !== 'period') badges.add(key);
+      });
     });
-  });
+    return badges;
+  }, [trendData]);
   
   // Filter to show only selected badges or top badges based on topCount if none selected
-  const badgesToShow = selectedBadges.size > 0 
-    ? Array.from(selectedBadges)
-    : [
-        ...topBadges.observations.map(([badge]) => badge),
-        ...topBadges.activities.map(([badge]) => badge),
-        ...topBadges.sideEffects.map(([badge]) => badge)
-      ].slice(0, topCount);
+  const badgesToShow = useMemo(() => {
+    return selectedBadges.size > 0 
+      ? Array.from(selectedBadges)
+      : [
+          ...topBadges.observations.map(([badge]) => badge),
+          ...topBadges.activities.map(([badge]) => badge),
+          ...topBadges.sideEffects.map(([badge]) => badge)
+        ].slice(0, topCount);
+  }, [selectedBadges, topBadges, topCount]);
   
   // Get badge type for coloring
   const getBadgeType = (badge: string): 'observation' | 'activity' | 'side-effect' => {
@@ -185,17 +186,19 @@ export const InsightsChart = ({
   };
 
   // Group entries by date for stats
-  const entriesByDate = entries.reduce((acc, entry) => {
-    const date = new Date(entry.created_at).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const entriesByDate = useMemo(() => {
+    return entries.reduce((acc, entry) => {
+      const date = new Date(entry.created_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [entries]);
 
   // Calculate average consumption
-  const calculateAverageConsumption = () => {
+  const avgConsumption = useMemo(() => {
     let totalGrams = 0;
     let count = 0;
 
@@ -218,9 +221,7 @@ export const InsightsChart = ({
     });
 
     return count > 0 ? (totalGrams / count).toFixed(2) : '0';
-  };
-
-  const avgConsumption = calculateAverageConsumption();
+  }, [entries]);
 
   // Toggle badge filter
   const toggleBadge = (badge: string) => {
@@ -335,23 +336,22 @@ export const InsightsChart = ({
   };
 
   // Get top strains from filtered entries
-  const getTopStrains = (limit: number = 5) => {
-    const strainCounts: Record<string, number> = {};
+  const hasActiveFilters = selectedBadges.size > 0;
+  const topStrains = useMemo(() => {
+    if (!hasActiveFilters) return [];
     
+    const strainCounts: Record<string, number> = {};
     entries.forEach(entry => {
       strainCounts[entry.strain] = (strainCounts[entry.strain] || 0) + 1;
     });
     
     return Object.entries(strainCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, limit);
-  };
-
-  const hasActiveFilters = selectedBadges.size > 0;
-  const topStrains = hasActiveFilters ? getTopStrains(5) : [];
+      .slice(0, 5);
+  }, [entries, hasActiveFilters]);
 
   // Calculate cannabinoid correlations
-  const getCannabinoidCorrelations = () => {
+  const cannabinoidData = useMemo(() => {
     // Filter entries that have cannabinoid data
     const entriesWithCannabinoids = entries.filter(e => 
       e.thc_percentage != null || e.cbd_percentage != null
@@ -381,11 +381,11 @@ export const InsightsChart = ({
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
-  };
+  }, [entries]);
 
-  const cannabinoidData = getCannabinoidCorrelations();
-  const hasEntriesWithCannabinoids = entries.some(e => 
-    e.thc_percentage != null || e.cbd_percentage != null
+  const hasEntriesWithCannabinoids = useMemo(() => 
+    entries.some(e => e.thc_percentage != null || e.cbd_percentage != null),
+    [entries]
   );
 
   // Calculate effectiveness score for an entry
@@ -405,12 +405,13 @@ export const InsightsChart = ({
   };
 
   // Get entries with effectiveness data
-  const effectivenessEntries = entries.filter(e => 
-    e.before_mood && e.after_mood && e.entry_status !== 'pending_after'
+  const effectivenessEntries = useMemo(() => 
+    entries.filter(e => e.before_mood && e.after_mood && e.entry_status !== 'pending_after'),
+    [entries]
   );
 
   // Calculate before/after comparison data
-  const getBeforeAfterComparison = () => {
+  const beforeAfterData = useMemo(() => {
     if (effectivenessEntries.length === 0) return [];
 
     const metrics = ['Mood', 'Pain', 'Anxiety', 'Energy', 'Focus'];
@@ -428,10 +429,10 @@ export const InsightsChart = ({
         improvement: parseFloat((afterAvg - beforeAvg).toFixed(1))
       };
     });
-  };
+  }, [effectivenessEntries]);
 
   // Get best strains by effectiveness
-  const getBestStrainsByEffectiveness = () => {
+  const topStrainsByEffectiveness = useMemo(() => {
     const strainScores: Record<string, { total: number; count: number; entries: JournalEntry[] }> = {};
 
     effectivenessEntries.forEach(entry => {
@@ -453,10 +454,10 @@ export const InsightsChart = ({
       }))
       .sort((a, b) => b.avgScore - a.avgScore)
       .slice(0, 10);
-  };
+  }, [effectivenessEntries]);
 
   // Get best strains for specific goals
-  const getBestStrainsForGoal = (goal: 'pain' | 'mood' | 'anxiety' | 'energy' | 'focus') => {
+  const getBestStrainsForGoal = useMemo(() => (goal: 'pain' | 'mood' | 'anxiety' | 'energy' | 'focus') => {
     const beforeKey = `before_${goal}` as keyof JournalEntry;
     const afterKey = `after_${goal}` as keyof JournalEntry;
 
@@ -490,10 +491,8 @@ export const InsightsChart = ({
       .filter(item => item.avgImprovement > 0)
       .sort((a, b) => b.avgImprovement - a.avgImprovement)
       .slice(0, 5);
-  };
+  }, [effectivenessEntries]);
 
-  const beforeAfterData = getBeforeAfterComparison();
-  const topStrainsByEffectiveness = getBestStrainsByEffectiveness();
   const hasEffectivenessData = effectivenessEntries.length > 0;
 
   return (
