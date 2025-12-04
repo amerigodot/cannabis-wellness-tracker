@@ -81,6 +81,10 @@ const Index = () => {
     loading: entriesLoading,
     isDemoMode,
     filteredEntries,
+    totalCount,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     createEntry,
     updateEntry,
     deleteEntry,
@@ -344,6 +348,10 @@ const Index = () => {
                   onOpenNotesDialog={openNotesDialog}
                   onOpenTimeEditDialog={openTimeEditDialog}
                   onCompletePendingEntry={handleCompletePendingEntry}
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  fetchNextPage={fetchNextPage}
+                  totalCount={totalCount}
                 />
               </TabsContent>
 

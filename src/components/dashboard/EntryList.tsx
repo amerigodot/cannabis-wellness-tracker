@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { JournalEntry } from "@/types/journal";
 import { getMethodIcon } from "@/constants/journal";
 import { EntryCard } from "./EntryCard";
+import { Loader2 } from "lucide-react";
 
 interface EntryListProps {
   entries: JournalEntry[];
@@ -26,6 +27,11 @@ interface EntryListProps {
   onDelete: (entryId: string) => void;
   onOpenTimeEditDialog: (entryId: string, currentTime: string) => void;
   onCompletePendingEntry: (entryId: string) => void;
+  // Pagination props
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  fetchNextPage?: () => void;
+  totalCount?: number;
 }
 
 export const EntryList = ({
@@ -47,6 +53,10 @@ export const EntryList = ({
   onDelete,
   onOpenTimeEditDialog,
   onCompletePendingEntry,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  fetchNextPage,
+  totalCount = 0,
 }: EntryListProps) => {
   const sortedEntries = [...entries].sort((a, b) => {
     switch (sortBy) {
@@ -79,7 +89,7 @@ export const EntryList = ({
                 {filterObservations.map(obs => (
                   <Badge 
                     key={obs} 
-                    className="bg-observation text-observation-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
+                    className="bg-observation text-observation-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all min-h-[36px] px-3 touch-manipulation"
                     onClick={() => setFilterObservations(prev => prev.filter(o => o !== obs))}
                     title="Click to remove filter"
                   >
@@ -89,7 +99,7 @@ export const EntryList = ({
                 {filterActivities.map(act => (
                   <Badge 
                     key={act} 
-                    className="bg-activity text-activity-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
+                    className="bg-activity text-activity-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all min-h-[36px] px-3 touch-manipulation"
                     onClick={() => setFilterActivities(prev => prev.filter(a => a !== act))}
                     title="Click to remove filter"
                   >
@@ -99,7 +109,7 @@ export const EntryList = ({
                 {filterSideEffects.map(eff => (
                   <Badge 
                     key={eff} 
-                    className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
+                    className="bg-side-effect text-side-effect-foreground cursor-pointer hover:opacity-70 hover:scale-95 transition-all min-h-[36px] px-3 touch-manipulation"
                     onClick={() => setFilterSideEffects(prev => prev.filter(e => e !== eff))}
                     title="Click to remove filter"
                   >
@@ -110,7 +120,7 @@ export const EntryList = ({
                   <Badge 
                     key={method} 
                     variant="default"
-                    className="flex items-center gap-1 cursor-pointer hover:opacity-70 hover:scale-95 transition-all"
+                    className="flex items-center gap-1 cursor-pointer hover:opacity-70 hover:scale-95 transition-all min-h-[36px] px-3 touch-manipulation"
                     onClick={() => setFilterMethods(prev => prev.filter(m => m !== method))}
                     title="Click to remove filter"
                   >
@@ -126,6 +136,7 @@ export const EntryList = ({
             <Button 
               variant="outline" 
               size="sm"
+              className="min-h-[40px] touch-manipulation"
               onClick={() => {
                 setFilterObservations([]);
                 setFilterActivities([]);
@@ -139,12 +150,19 @@ export const EntryList = ({
         </Card>
       )}
       
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Recent Entries</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <div className="flex items-center gap-2">
-          <Label htmlFor="sort" className="text-sm text-muted-foreground">Sort by:</Label>
+          <h2 className="text-xl sm:text-2xl font-semibold">Recent Entries</h2>
+          {totalCount > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {entries.length} of {totalCount}
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="sort" className="text-sm text-muted-foreground whitespace-nowrap">Sort by:</Label>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger id="sort" className="w-[180px]">
+            <SelectTrigger id="sort" className="w-[160px] sm:w-[180px] min-h-[40px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -168,7 +186,7 @@ export const EntryList = ({
               variant={timeRangeFilter === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeRangeFilter('all')}
-              className="sm:flex-1"
+              className="sm:flex-1 min-h-[40px] touch-manipulation"
             >
               All Time
             </Button>
@@ -176,7 +194,7 @@ export const EntryList = ({
               variant={timeRangeFilter === 'today' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeRangeFilter('today')}
-              className="sm:flex-1"
+              className="sm:flex-1 min-h-[40px] touch-manipulation"
             >
               Today
             </Button>
@@ -184,7 +202,7 @@ export const EntryList = ({
               variant={timeRangeFilter === 'week' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeRangeFilter('week')}
-              className="sm:flex-1"
+              className="sm:flex-1 min-h-[40px] touch-manipulation"
             >
               This Week
             </Button>
@@ -192,7 +210,7 @@ export const EntryList = ({
               variant={timeRangeFilter === 'month' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeRangeFilter('month')}
-              className="sm:flex-1"
+              className="sm:flex-1 min-h-[40px] touch-manipulation"
             >
               This Month
             </Button>
@@ -219,6 +237,35 @@ export const EntryList = ({
           />
         ))}
       </div>
+
+      {/* Load More Button */}
+      {hasNextPage && fetchNextPage && (
+        <div className="flex justify-center pt-6">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={fetchNextPage}
+            disabled={isFetchingNextPage}
+            className="min-h-[48px] min-w-[200px] touch-manipulation"
+          >
+            {isFetchingNextPage ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Loading more...
+              </>
+            ) : (
+              `Load More Entries`
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* No more entries message */}
+      {!hasNextPage && entries.length > 0 && totalCount > 20 && (
+        <p className="text-center text-sm text-muted-foreground pt-4">
+          All {totalCount} entries loaded
+        </p>
+      )}
     </div>
   );
 };
