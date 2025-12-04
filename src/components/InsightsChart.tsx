@@ -497,25 +497,27 @@ export const InsightsChart = ({
 
   return (
     <TooltipProvider>
-      <Card className="p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
+      <Card className="p-4 sm:p-6 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'trends' | 'cannabinoids' | 'effectiveness')} className="w-full">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-semibold">Insights</h2>
+            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <h2 className="text-xl sm:text-2xl font-semibold">Insights</h2>
           </div>
-          <TabsList>
-            <TabsTrigger value="trends">Badge Trends</TabsTrigger>
+          <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:flex h-auto p-1">
+            <TabsTrigger value="trends" className="min-h-[40px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation">
+              <span className="hidden sm:inline">Badge </span>Trends
+            </TabsTrigger>
             {hasEntriesWithCannabinoids && (
-              <TabsTrigger value="cannabinoids" className="flex items-center gap-1.5">
-                <Pill className="w-3.5 h-3.5" />
-                THC/CBD
+              <TabsTrigger value="cannabinoids" className="flex items-center gap-1 sm:gap-1.5 min-h-[40px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation">
+                <Pill className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">THC/</span>CBD
               </TabsTrigger>
             )}
             {hasEffectivenessData && (
-              <TabsTrigger value="effectiveness" className="flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5" />
-                Effectiveness
+              <TabsTrigger value="effectiveness" className="flex items-center gap-1 sm:gap-1.5 min-h-[40px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation">
+                <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Effect</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -523,7 +525,7 @@ export const InsightsChart = ({
 
         <TabsContent value="trends" className="mt-0">
       {/* Filter Presets */}
-      <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-border">
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-muted/50 rounded-lg border border-border">
         <p className="text-sm font-semibold mb-3 text-foreground">Quick Filter Presets</p>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(filterPresets) as Array<keyof typeof filterPresets>).map(presetKey => (
@@ -532,7 +534,7 @@ export const InsightsChart = ({
               variant={isPresetActive(presetKey) ? "default" : "outline"}
               size="sm"
               onClick={() => applyPreset(presetKey)}
-              className="text-xs"
+              className="text-xs sm:text-sm min-h-[40px] px-3 touch-manipulation"
             >
               {filterPresets[presetKey].name}
             </Button>
@@ -542,7 +544,7 @@ export const InsightsChart = ({
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="text-xs sm:text-sm min-h-[40px] px-3 text-muted-foreground hover:text-foreground touch-manipulation"
             >
               Clear All
             </Button>
@@ -576,15 +578,15 @@ export const InsightsChart = ({
 
       {/* Trends Chart - Main Chart */}
       {trendData.length > 1 && badgesToShow.length > 0 && (
-        <div className="mb-6">
-          <p className="text-xs text-muted-foreground mb-4">
+        <div className="mb-4 sm:mb-6">
+          <p className="text-xs text-muted-foreground mb-3 sm:mb-4">
             {selectedBadges.size > 0 
               ? "Showing trends for selected badges" 
               : `Showing trends for top ${topCount} most common badges`}
           </p>
-          <div className="h-[350px]">
+          <div className="h-[280px] sm:h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
+              <LineChart data={trendData} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
                   dataKey="period" 
@@ -655,8 +657,8 @@ export const InsightsChart = ({
       )}
 
       {/* Badge Filters */}
-      <div className="mt-6 border-t border-border pt-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mt-4 sm:mt-6 border-t border-border pt-4 sm:pt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-4">
           <p className="text-sm font-semibold text-foreground">Filter by Most Common</p>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Show top:</span>
@@ -665,7 +667,7 @@ export const InsightsChart = ({
                 <button
                   key={count}
                   onClick={() => setTopCount(count)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                  className={`min-w-[36px] min-h-[36px] px-2 py-1 text-sm rounded transition-colors touch-manipulation ${
                     topCount === count
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -705,7 +707,7 @@ export const InsightsChart = ({
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    className="cursor-pointer hover:scale-105 transition-transform min-h-[40px] px-3 py-2 text-xs sm:text-sm touch-manipulation"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--observation))' : 'transparent',
                       borderColor: 'hsl(var(--observation))',
@@ -750,7 +752,7 @@ export const InsightsChart = ({
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    className="cursor-pointer hover:scale-105 transition-transform min-h-[40px] px-3 py-2 text-xs sm:text-sm touch-manipulation"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--activity))' : 'transparent',
                       borderColor: 'hsl(var(--activity))',
@@ -795,7 +797,7 @@ export const InsightsChart = ({
                 return (
                   <Badge
                     key={badge}
-                    className="cursor-pointer hover:scale-105 transition-transform px-3 py-1.5 text-xs"
+                    className="cursor-pointer hover:scale-105 transition-transform min-h-[40px] px-3 py-2 text-xs sm:text-sm touch-manipulation"
                     style={{
                       backgroundColor: isSelected ? 'hsl(var(--side-effect))' : 'transparent',
                       borderColor: 'hsl(var(--side-effect))',
