@@ -412,7 +412,7 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
           <p className="text-xs text-muted-foreground mb-3">
             Apply common combinations for your session type
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
             {ENTRY_PRESETS.map((preset) => {
               const PresetIcon = preset.icon;
               return (
@@ -421,11 +421,11 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
                   variant="outline"
                   size="sm"
                   type="button"
-                  className="flex flex-col gap-1 h-auto py-3 hover:bg-primary/30 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-200"
+                  className="flex flex-col gap-1.5 h-auto min-h-[56px] py-3 px-2 hover:bg-primary/30 hover:border-primary hover:text-primary hover:shadow-lg transition-all duration-200 touch-manipulation"
                   onClick={() => applyPreset(preset)}
                 >
-                  <PresetIcon className="w-5 h-5" />
-                  <span className="text-xs font-medium text-center leading-tight">
+                  <PresetIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <span className="text-[11px] sm:text-xs font-medium text-center leading-tight">
                     {preset.name}
                   </span>
                 </Button>
@@ -476,12 +476,12 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
             <CollapsibleContent>
               <div className="px-4 pb-4">
                 <p className="text-xs text-muted-foreground mb-3">What positive effects are you experiencing?</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
                   {COMMON_OBSERVATIONS.map((obs) => (
                     <Badge
                       key={obs}
                       variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation ${
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-observation min-h-[44px] px-3 py-2 text-sm touch-manipulation ${
                         observations.includes(obs) 
                           ? "bg-observation text-observation-foreground border-observation scale-105" 
                           : "bg-background hover:bg-observation/10"
@@ -523,12 +523,12 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
             <CollapsibleContent>
               <div className="px-4 pb-4">
                 <p className="text-xs text-muted-foreground mb-3">What are you doing during or after use?</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
                   {COMMON_ACTIVITIES.map((activity) => (
                     <Badge
                       key={activity}
                       variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity ${
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-activity min-h-[44px] px-3 py-2 text-sm touch-manipulation ${
                         activities.includes(activity) 
                           ? "bg-activity text-activity-foreground border-activity scale-105" 
                           : "bg-background hover:bg-activity/10"
@@ -568,12 +568,12 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
             <CollapsibleContent>
               <div className="px-4 pb-4">
                 <p className="text-xs text-muted-foreground mb-3">Any unwanted effects?</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
                   {NEGATIVE_SIDE_EFFECTS.map((effect) => (
                     <Badge
                       key={effect}
                       variant="outline"
-                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect ${
+                      className={`cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-side-effect min-h-[44px] px-3 py-2 text-sm touch-manipulation ${
                         negativeSideEffects.includes(effect) 
                           ? "bg-side-effect text-side-effect-foreground border-side-effect scale-105" 
                           : "bg-background hover:bg-side-effect/10"

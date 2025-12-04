@@ -292,23 +292,24 @@ export default function Tools() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
-        <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
+        <div className="mb-6 sm:mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <Button variant="ghost" onClick={() => navigate("/")} className="gap-2 min-h-[44px] touch-manipulation">
               <ArrowLeft className="w-4 h-4" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
             <ThemeToggle />
           </div>
 
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center mb-4">
-              <Sparkles className="w-12 h-12 text-primary" />
+          <div className="text-center px-2">
+            <div className="inline-flex items-center justify-center mb-3 sm:mb-4">
+              <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2 sm:mb-3">
               Wellness Tools
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base sm:text-lg">
               AI-powered insights unlock as you progress
             </p>
           </div>
@@ -332,29 +333,29 @@ export default function Tools() {
                     : "opacity-60"
                 }`}
               >
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1">
                       <div
-                        className={`p-3 rounded-full ${
+                        className={`p-2.5 sm:p-3 rounded-full shrink-0 ${
                           isUnlocked
                             ? `bg-gradient-to-br ${tool.color} text-white shadow-lg`
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {isUnlocked ? <IconComponent className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
+                        {isUnlocked ? <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" /> : <Lock className="w-5 h-5 sm:w-6 sm:h-6" />}
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-xl mb-1">{tool.title}</CardTitle>
-                        <CardDescription className="mb-2">{tool.description}</CardDescription>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg sm:text-xl mb-1">{tool.title}</CardTitle>
+                        <CardDescription className="mb-2 text-sm">{tool.description}</CardDescription>
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
                           <span>Unlocks with {tool.badge} badge</span>
                           <span className="text-xs">
                             ({tool.requiredEntries} entries)
                           </span>
                         </div>
                         {isUnlocked && isOnCooldown && (
-                          <div className="mt-2 px-3 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+                          <div className="mt-2 px-3 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20 inline-block">
                             <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
                               ⏱️ Available in {availability.daysRemaining} day{availability.daysRemaining !== 1 ? 's' : ''}
                             </p>
@@ -366,7 +367,7 @@ export default function Tools() {
                       <Button
                         onClick={() => handleToolAction(tool.id)}
                         disabled={generating || isOnCooldown}
-                        className={`bg-gradient-to-r ${tool.color} hover:opacity-90 ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full sm:w-auto min-h-[44px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {generating && isActive ? (
                           <>
@@ -384,7 +385,7 @@ export default function Tools() {
                 </CardHeader>
 
                 {isActive && tool.id === "optimize" && !result && (
-                  <CardContent>
+                  <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium mb-2 block">
@@ -394,13 +395,13 @@ export default function Tools() {
                           value={goals}
                           onChange={(e) => setGoals(e.target.value)}
                           placeholder="E.g., Better sleep, reduced anxiety, improved focus, pain management, energy throughout the day..."
-                          className="min-h-[120px]"
+                          className="min-h-[120px] text-base"
                         />
                       </div>
                       <Button
                         onClick={handleOptimizeWellness}
                         disabled={generating || !goals.trim() || isOnCooldown}
-                        className={`w-full bg-gradient-to-r ${tool.color} hover:opacity-90 ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full min-h-[48px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {generating ? (
                           <>
