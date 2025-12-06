@@ -55,7 +55,7 @@ export const InsightsChart = ({
   const [activeTab, setActiveTab] = useState<'trends' | 'cannabinoids' | 'effectiveness'>('trends');
   
   // Combine all filters into a single set for backward compatibility
-  const selectedBadges = new Set([...filterObservations, ...filterActivities, ...filterSideEffects]);
+  const selectedBadges = useMemo(() => new Set([...filterObservations, ...filterActivities, ...filterSideEffects]), [filterObservations, filterActivities, filterSideEffects]);
 
   // Calculate top N most used badges by type
   const topBadges = useMemo(() => {

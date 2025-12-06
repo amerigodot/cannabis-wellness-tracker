@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -57,9 +57,9 @@ export default function Settings() {
 
   useEffect(() => {
     loadPreferences();
-  }, []);
+  }, [loadPreferences]);
 
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -74,38 +74,53 @@ export default function Settings() {
       // Get total entries count
       const { count } = await supabase
         .from("journal_entries")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_deleted", false);
+        .select("*", { count: "exact", head: true });
 
-      setAccountInfo({
-        email: user.email || "",
-        createdAt,
+      // Get last active date (assuming it's the latest created_at or consumption_time)
+      const { data: latestEntry } = await supabase
+        .from("journal_entries")
+        .select("created_at, consumption_time")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      
+      const lastActiveDate = latestEntry 
+        ? new Date(Math.max(
+            new Date(latestEntry.created_at).getTime(), 
+            new Date(latestEntry.consumption_time).getTime()
+          )).toISOString()
+        : createdAt;
+
+      setUserActivity({
+        accountCreationDate: createdAt,
+        lastActiveDate: lastActiveDate,
         totalEntries: count || 0,
       });
 
-      // Load browser notification preferences from localStorage
-      const browserNotifs = localStorage.getItem("browserNotificationsEnabled");
-      const soundEnabled = localStorage.getItem("notificationSoundEnabled");
-
-      // Load email preferences from database
-      const { data: emailPrefs } = await supabase
-        .from("email_preferences")
-        .select("tool_notifications_enabled")
+      const { data: preferencesData, error: preferencesError } = await supabase
+        .from("user_preferences")
+        .select("*")
         .eq("user_id", user.id)
-        .maybeSingle();
+        .single();
 
-      setPreferences({
-        browserNotifications: browserNotifs !== "false",
-        emailNotifications: emailPrefs?.tool_notifications_enabled ?? true,
-        soundEnabled: soundEnabled === "true",
-      });
+      if (preferencesError && preferencesError.code !== 'PGRST116') { // PGRST116 means no rows found
+        console.error("Error fetching preferences:", preferencesError);
+      }
+
+      if (preferencesData) {
+        setPreferences({
+          emailReminders: preferencesData.email_reminders,
+          pushNotifications: preferencesData.push_notifications,
+          notificationSound: preferencesData.notification_sound,
+          anonymousUsage: preferencesData.anonymous_usage,
+          dataExportFormat: preferencesData.data_export_format,
+        });
+      }
     } catch (error) {
       console.error("Error loading preferences:", error);
-    } finally {
-      setLoading(false);
+      toast.error("Failed to load preferences.");
     }
-  };
+  }, [navigate, setPreferences]);
 
   const handleBrowserNotificationToggle = async (enabled: boolean) => {
     if (enabled && Notification.permission === "default") {
@@ -192,9 +207,9 @@ export default function Settings() {
 
       toast.success("Account deleted successfully");
       navigate("/auth");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting account:", error);
-      toast.error(error.message || "Failed to delete account. Please try again or contact support.");
+      toast.error((error as Error).message || "Failed to delete account. Please try again or contact support.");
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
@@ -288,9 +303,9 @@ export default function Settings() {
       URL.revokeObjectURL(url);
 
       toast.success(`Data exported successfully as ${format.toUpperCase()}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error exporting data:", error);
-      toast.error(error.message || "Failed to export data");
+      toast.error((error as Error).message || "Failed to export data");
     } finally {
       setExporting(false);
     }

@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
@@ -46,7 +46,7 @@ function getClientIP(req: Request): string {
   return "unknown";
 }
 
-async function checkIPRateLimit(supabase: any, ipAddress: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+async function checkIPRateLimit(supabase: SupabaseClient, ipAddress: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
   if (ipAddress === "unknown") {
     return { allowed: true }; // Fail open if IP cannot be determined
   }
@@ -105,7 +105,7 @@ async function checkIPRateLimit(supabase: any, ipAddress: string, endpoint: stri
   }
 }
 
-async function checkUserRateLimit(supabase: any, userId: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
+async function checkUserRateLimit(supabase: SupabaseClient, userId: string, endpoint: string): Promise<{ allowed: boolean; error?: string }> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - USER_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000);
 

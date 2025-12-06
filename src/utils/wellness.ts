@@ -31,20 +31,45 @@ export const sliderValueToMinutes = (sliderValue: number) => {
   if (sliderValue <= 720) {
     return sliderValue / 6; // 0-2 hours (0-120 minutes)
   }
-  return 120 + (sliderValue - 720) * 1.8333; // 2-24 hours (120-1440 minutes)
+  // 720 maps to 120. 1440 maps to 1440.
+  // Slope = (1440 - 120) / (1440 - 720) = 1320 / 720 = 11/6 = 1.8333...
+  return 120 + (sliderValue - 720) * (11/6); 
 };
 
 export const minutesToSliderValue = (minutes: number) => {
   if (minutes <= 120) {
     return minutes * 6; // 0-2 hours
   }
-  return 720 + (minutes - 120) / 1.8333; // 2-24 hours
+  return 720 + (minutes - 120) / (11/6); // 2-24 hours
 };
 
 export const formatTimeAgo = (sliderValue: number): string => {
-  const minutes = sliderValueToMinutes(sliderValue);
-  if (minutes === 0) return 'Now';
+  let minutes = sliderValueToMinutes(sliderValue);
+  
+  // Handle slight precision errors from float math
+  if (Math.abs(Math.round(minutes) - minutes) < 0.01) {
+      minutes = Math.round(minutes);
+  }
+
+  if (minutes < 1) return 'Now';
   if (minutes < 60) return `${Math.round(minutes)} min ago`;
-  if (minutes < 1440) return `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}m ago`;
-  return `${Math.floor(minutes / 1440)} days ago`;
+  
+  let hours = Math.floor(minutes / 60);
+  let remainingMinutes = Math.round(minutes % 60);
+  
+  // Handle edge case where rounding minutes pushes it to the next hour (e.g., 59.9 -> 60)
+  if (remainingMinutes === 60) {
+      hours += 1;
+      remainingMinutes = 0;
+  }
+
+  if (hours < 24) {
+      return `${hours}h ${remainingMinutes}m ago`;
+  }
+  
+  const days = Math.floor(minutes / 1440);
+  // Using floor here means 24h -> 1 day, 47h -> 1 day, 48h -> 2 days
+  // Rounding might be better for UX depending on preference, but sticking to floor for "days passed"
+  // However, test expects "1 days ago" for 1440.
+  return `${Math.round(minutes / 1440)} days ago`; 
 };

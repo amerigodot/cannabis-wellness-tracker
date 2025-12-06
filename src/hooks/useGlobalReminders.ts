@@ -33,7 +33,7 @@ const playNotificationSound = () => {
   const soundEnabled = localStorage.getItem("notificationSoundEnabled") === "true";
   if (soundEnabled) {
     // Create a simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
@@ -133,7 +133,7 @@ export const useGlobalReminders = () => {
 
     const createNextRecurrence = async (reminder: Reminder) => {
       const currentTime = new Date(reminder.reminder_time);
-      let nextTime = new Date(currentTime);
+      const nextTime = new Date(currentTime);
 
       switch (reminder.recurrence) {
         case "daily":

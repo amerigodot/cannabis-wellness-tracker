@@ -7,18 +7,18 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
-import { CalendarView } from "@/components/CalendarView";
+
 import { LandingPage } from "@/components/LandingPage";
 import { AchievementBadges } from "@/components/AchievementBadges";
 import { EntryList } from "@/components/dashboard/EntryList";
 import { JournalEntryForm } from "@/components/dashboard/JournalEntryForm";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Calendar, LogOut, List, Sparkles, Bell, Settings } from "lucide-react";
+import { Leaf, LogOut, Sparkles, Bell, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
@@ -32,7 +32,6 @@ const Index = () => {
   
   // UI state
   const [sortBy, setSortBy] = useState<string>("date-desc");
-  const [activeTab, setActiveTab] = useState<'list' | 'calendar'>('list');
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
@@ -45,10 +44,6 @@ const Index = () => {
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
-  
-  // Mobile swipe
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Auth effect
   useEffect(() => {
@@ -177,32 +172,7 @@ const Index = () => {
     toast.info("Complete the 'After' state to finish this entry");
   };
 
-  // Mobile swipe handlers
-  const minSwipeDistance = 50;
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    if (isLeftSwipe && activeTab === 'list') {
-      setActiveTab('calendar');
-    }
-    if (isRightSwipe && activeTab === 'calendar') {
-      setActiveTab('list');
-    }
-  };
 
   if (authLoading || entriesLoading) {
     return (
@@ -308,68 +278,33 @@ const Index = () => {
           </div>
         )}
 
-        {/* Entries List and Calendar View */}
+        {/* Entries List */}
         {entries.length > 0 && (
-          <div 
-            className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'list' | 'calendar')} className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto mb-6 grid-cols-2">
-                <TabsTrigger value="list" className="flex items-center gap-2">
-                  <List className="h-4 w-4" />
-                  List View
-                </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Calendar View
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="list" className="space-y-4">
-                <EntryList
-                  entries={filteredEntries}
-                  isDemoMode={isDemoMode}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  timeRangeFilter={timeRangeFilter}
-                  setTimeRangeFilter={setTimeRangeFilter}
-                  filterObservations={filterObservations}
-                  setFilterObservations={setFilterObservations}
-                  filterActivities={filterActivities}
-                  setFilterActivities={setFilterActivities}
-                  filterSideEffects={filterSideEffects}
-                  setFilterSideEffects={setFilterSideEffects}
-                  filterMethods={filterMethods}
-                  setFilterMethods={setFilterMethods}
-                  onDelete={handleDelete}
-                  onOpenNotesDialog={openNotesDialog}
-                  onOpenTimeEditDialog={openTimeEditDialog}
-                  onCompletePendingEntry={handleCompletePendingEntry}
-                  hasNextPage={hasNextPage}
-                  isFetchingNextPage={isFetchingNextPage}
-                  fetchNextPage={fetchNextPage}
-                  totalCount={totalCount}
-                />
-              </TabsContent>
-
-              <TabsContent value="calendar">
-                <CalendarView 
-                  filterObservations={filterObservations}
-                  setFilterObservations={setFilterObservations}
-                  filterActivities={filterActivities}
-                  setFilterActivities={setFilterActivities}
-                  filterSideEffects={filterSideEffects}
-                  setFilterSideEffects={setFilterSideEffects}
-                  filterMethods={filterMethods}
-                  setFilterMethods={setFilterMethods}
-                  isDemoMode={isDemoMode}
-                  demoEntries={isDemoMode ? filteredEntries : undefined}
-                />
-              </TabsContent>
-            </Tabs>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 space-y-4">
+            <EntryList
+              entries={filteredEntries}
+              isDemoMode={isDemoMode}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              timeRangeFilter={timeRangeFilter}
+              setTimeRangeFilter={setTimeRangeFilter}
+              filterObservations={filterObservations}
+              setFilterObservations={setFilterObservations}
+              filterActivities={filterActivities}
+              setFilterActivities={setFilterActivities}
+              filterSideEffects={filterSideEffects}
+              setFilterSideEffects={setFilterSideEffects}
+              filterMethods={filterMethods}
+              setFilterMethods={setFilterMethods}
+              onDelete={handleDelete}
+              onOpenNotesDialog={openNotesDialog}
+              onOpenTimeEditDialog={openTimeEditDialog}
+              onCompletePendingEntry={handleCompletePendingEntry}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              fetchNextPage={fetchNextPage}
+              totalCount={totalCount}
+            />
           </div>
         )}
 
