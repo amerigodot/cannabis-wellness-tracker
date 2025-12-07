@@ -40,7 +40,7 @@ export const EntryCard = ({
   const effectiveness = calculateEffectiveness(entry);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-bottom-2">
+    <Card className="overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2">
       <div className="p-6">
         {/* Pending Status Banner */}
         {entry.entry_status === 'pending_after' && (
