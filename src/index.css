@@ -64,7 +64,13 @@ All colors MUST be HSL.
     --strain-balanced-light: 175 55% 82%;
     
     --gradient-wellness: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(175 55% 50%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(150 30% 99%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(150 30% 98%) 100%);
+    
+    /* 3D Card shadows */
+    --shadow-card: 0 2px 4px -1px hsl(160 20% 30% / 0.06), 0 4px 8px -2px hsl(160 20% 30% / 0.08), 0 8px 16px -4px hsl(160 20% 30% / 0.06);
+    --shadow-card-hover: 0 4px 8px -2px hsl(160 20% 30% / 0.08), 0 8px 16px -4px hsl(160 20% 30% / 0.10), 0 16px 32px -8px hsl(160 20% 30% / 0.08);
+    --shadow-card-elevated: 0 8px 16px -4px hsl(160 20% 30% / 0.10), 0 16px 32px -8px hsl(160 20% 30% / 0.12), 0 24px 48px -12px hsl(160 20% 30% / 0.08);
+    
     --shadow-soft: 0 4px 20px -2px hsl(220 20% 80% / 0.15);
     --shadow-hover: 0 8px 30px -4px hsl(220 20% 80% / 0.25);
 
@@ -140,7 +146,13 @@ All colors MUST be HSL.
     --strain-balanced-light: 175 55% 20%;
     
     --gradient-wellness: linear-gradient(135deg, hsl(158 64% 35%) 0%, hsl(175 55% 40%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(160 15% 15%) 0%, hsl(160 15% 17%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(160 15% 15%) 0%, hsl(160 15% 14%) 100%);
+    
+    /* 3D Card shadows - dark mode */
+    --shadow-card: 0 2px 4px -1px hsl(0 0% 0% / 0.20), 0 4px 8px -2px hsl(0 0% 0% / 0.25), 0 8px 16px -4px hsl(0 0% 0% / 0.15);
+    --shadow-card-hover: 0 4px 8px -2px hsl(0 0% 0% / 0.25), 0 8px 16px -4px hsl(0 0% 0% / 0.30), 0 16px 32px -8px hsl(0 0% 0% / 0.20);
+    --shadow-card-elevated: 0 8px 16px -4px hsl(0 0% 0% / 0.30), 0 16px 32px -8px hsl(0 0% 0% / 0.35), 0 24px 48px -12px hsl(0 0% 0% / 0.25);
+    
     --shadow-soft: 0 4px 20px -2px hsl(0 0% 0% / 0.3);
     --shadow-hover: 0 8px 30px -4px hsl(0 0% 0% / 0.4);
     --sidebar-background: 240 5.9% 10%;

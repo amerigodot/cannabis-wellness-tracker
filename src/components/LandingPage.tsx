@@ -263,7 +263,7 @@ export function LandingPage() {
             <div className="grid md:grid-cols-3 gap-6">
               <button 
                 onClick={() => setActiveFeature('calendar')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Calendar className="w-8 h-8 text-primary" />
@@ -277,7 +277,7 @@ export function LandingPage() {
               
               <button 
                 onClick={() => setActiveFeature('insights')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <LineChart className="w-8 h-8 text-primary" />
@@ -291,7 +291,7 @@ export function LandingPage() {
               
               <button 
                 onClick={() => setActiveFeature('reminders')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Bell className="w-8 h-8 text-primary" />
@@ -327,7 +327,7 @@ export function LandingPage() {
             <div className="grid md:grid-cols-3 gap-6">
               <button 
                 onClick={() => navigate('/blog/complete-guide-tracking-medical-marijuana')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Complete Tracking Guide</h3>
                 <p className="text-sm text-muted-foreground mb-3">
@@ -338,7 +338,7 @@ export function LandingPage() {
 
               <button 
                 onClick={() => navigate('/blog/understanding-thc-cbd-ratios-wellness')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">THC:CBD Ratios Explained</h3>
                 <p className="text-sm text-muted-foreground mb-3">
@@ -349,7 +349,7 @@ export function LandingPage() {
 
               <button 
                 onClick={() => navigate('/blog/top-strains-chronic-pain-relief')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border shadow-soft hover:border-primary hover:shadow-hover transition-all cursor-pointer group"
+                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
               >
                 <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Top Pain Relief Strains</h3>
                 <p className="text-sm text-muted-foreground mb-3">

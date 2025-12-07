@@ -55,10 +55,6 @@ export default function Settings() {
     totalEntries: 0,
   });
 
-  useEffect(() => {
-    loadPreferences();
-  }, [loadPreferences]);
-
   const loadPreferences = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -76,51 +72,40 @@ export default function Settings() {
         .from("journal_entries")
         .select("*", { count: "exact", head: true });
 
-      // Get last active date (assuming it's the latest created_at or consumption_time)
-      const { data: latestEntry } = await supabase
-        .from("journal_entries")
-        .select("created_at, consumption_time")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-      
-      const lastActiveDate = latestEntry 
-        ? new Date(Math.max(
-            new Date(latestEntry.created_at).getTime(), 
-            new Date(latestEntry.consumption_time).getTime()
-          )).toISOString()
-        : createdAt;
-
-      setUserActivity({
-        accountCreationDate: createdAt,
-        lastActiveDate: lastActiveDate,
+      setAccountInfo({
+        email: user.email || "",
+        createdAt: createdAt,
         totalEntries: count || 0,
       });
 
-      const { data: preferencesData, error: preferencesError } = await supabase
-        .from("user_preferences")
-        .select("*")
+      // Load notification preferences from localStorage
+      const browserNotifications = localStorage.getItem("browserNotificationsEnabled") !== "false";
+      const soundEnabled = localStorage.getItem("notificationSoundEnabled") === "true";
+      
+      // Check email preferences from database
+      const { data: emailPrefs } = await supabase
+        .from("email_preferences")
+        .select("tool_notifications_enabled")
         .eq("user_id", user.id)
         .single();
 
-      if (preferencesError && preferencesError.code !== 'PGRST116') { // PGRST116 means no rows found
-        console.error("Error fetching preferences:", preferencesError);
-      }
-
-      if (preferencesData) {
-        setPreferences({
-          emailReminders: preferencesData.email_reminders,
-          pushNotifications: preferencesData.push_notifications,
-          notificationSound: preferencesData.notification_sound,
-          anonymousUsage: preferencesData.anonymous_usage,
-          dataExportFormat: preferencesData.data_export_format,
-        });
-      }
+      setPreferences({
+        browserNotifications,
+        emailNotifications: emailPrefs?.tool_notifications_enabled ?? true,
+        soundEnabled,
+      });
+      
+      setLoading(false);
     } catch (error) {
       console.error("Error loading preferences:", error);
       toast.error("Failed to load preferences.");
+      setLoading(false);
     }
-  }, [navigate, setPreferences]);
+  }, [navigate]);
+
+  useEffect(() => {
+    loadPreferences();
+  }, [loadPreferences]);
 
   const handleBrowserNotificationToggle = async (enabled: boolean) => {
     if (enabled && Notification.permission === "default") {

@@ -88,6 +88,11 @@ export default {
           "balanced-light": "hsl(var(--strain-balanced-light))",
         },
       },
+      boxShadow: {
+        'card': 'var(--shadow-card)',
+        'card-hover': 'var(--shadow-card-hover)',
+        'card-elevated': 'var(--shadow-card-elevated)',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
