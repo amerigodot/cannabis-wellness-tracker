@@ -263,44 +263,44 @@ export function LandingPage() {
             <div className="grid md:grid-cols-3 gap-6">
               <button 
                 onClick={() => setActiveFeature('calendar')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col items-center text-center p-8 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors shadow-inner">
                   <Calendar className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Calendar Tracking</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold text-lg mb-2">Calendar Tracking</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Log entries with detailed consumption info, effects, and personal notes
                 </p>
-                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+                <p className="relative z-10 text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
               </button>
               
               <button 
                 onClick={() => setActiveFeature('insights')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col items-center text-center p-8 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors shadow-inner">
                   <LineChart className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Insights & Trends</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold text-lg mb-2">Insights & Trends</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Visualize your usage patterns and understand what works best for you
                 </p>
-                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+                <p className="relative z-10 text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
               </button>
               
               <button 
                 onClick={() => setActiveFeature('reminders')}
-                className="flex flex-col items-center text-center p-8 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col items-center text-center p-8 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <div className="relative z-10 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors shadow-inner">
                   <Bell className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Smart Reminders</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold text-lg mb-2">Smart Reminders</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Set recurring reminders to maintain consistent tracking habits
                 </p>
-                <p className="text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
+                <p className="relative z-10 text-xs text-primary font-medium group-hover:underline">Click to learn more →</p>
               </button>
             </div>
           </div>
@@ -327,35 +327,35 @@ export function LandingPage() {
             <div className="grid md:grid-cols-3 gap-6">
               <button 
                 onClick={() => navigate('/blog/complete-guide-tracking-medical-marijuana')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col text-left p-6 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Complete Tracking Guide</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold mb-2 group-hover:text-primary transition-colors">Complete Tracking Guide</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Learn why tracking is essential and how to do it effectively
                 </p>
-                <span className="text-xs text-primary font-medium">8 min read →</span>
+                <span className="relative z-10 text-xs text-primary font-medium">8 min read →</span>
               </button>
 
               <button 
                 onClick={() => navigate('/blog/understanding-thc-cbd-ratios-wellness')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col text-left p-6 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">THC:CBD Ratios Explained</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold mb-2 group-hover:text-primary transition-colors">THC:CBD Ratios Explained</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Discover which cannabinoid ratios work best for your wellness goals
                 </p>
-                <span className="text-xs text-primary font-medium">6 min read →</span>
+                <span className="relative z-10 text-xs text-primary font-medium">6 min read →</span>
               </button>
 
               <button 
                 onClick={() => navigate('/blog/top-strains-chronic-pain-relief')}
-                className="flex flex-col text-left p-6 rounded-lg bg-card border-2 border-border/60 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary transition-all cursor-pointer group"
+                className="relative flex flex-col text-left p-6 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/50 transition-all cursor-pointer group overflow-hidden before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b before:from-white/70 before:via-white/20 before:to-transparent before:pointer-events-none before:opacity-60 dark:before:from-white/10 dark:before:via-white/5"
               >
-                <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">Top Pain Relief Strains</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="relative z-10 font-semibold mb-2 group-hover:text-primary transition-colors">Top Pain Relief Strains</h3>
+                <p className="relative z-10 text-sm text-muted-foreground mb-3">
                   Comprehensive guide to the most effective strains for chronic pain
                 </p>
-                <span className="text-xs text-primary font-medium">10 min read →</span>
+                <span className="relative z-10 text-xs text-primary font-medium">10 min read →</span>
               </button>
             </div>
           </div>
