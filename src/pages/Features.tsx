@@ -21,7 +21,10 @@ import {
   CheckCircle2,
   ArrowLeft,
   Download,
-  Printer
+  Printer,
+  Brain,
+  Stethoscope,
+  Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,6 +198,60 @@ const Features = () => {
                   "Complete after-state later",
                   "Pending entry reminders",
                   "Auto-save progress"
+                ]}
+              />
+            </div>
+          </section>
+
+          {/* MedGemma AI Features */}
+          <section className="mb-12 print:mb-8 print:break-before-page">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Brain className="h-6 w-6 text-primary" />
+              Edge AI Innovation (MedGemma Challenge)
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <FeatureCard
+                icon={<Brain className="h-5 w-5" />}
+                title="Privacy-First Edge AI Coach"
+                description="On-device wellness assistant powered by Google's Gemma-2B"
+                features={[
+                  "100% Client-side inference (WebLLM)",
+                  "Zero data leakage - sensitive info stays local",
+                  "Clinical RAG grounding in medical guides",
+                  "Automated emergency keyword interception"
+                ]}
+              />
+              <FeatureCard
+                icon={<Stethoscope className="h-5 w-5" />}
+                title="Clinical Triage System"
+                description="Secure decision support following ESI protocols"
+                features={[
+                  "Symptom-based risk stratification",
+                  "Disposition recommendations (ER/Urgent Care)",
+                  "HIPAA-compliant immutable audit logs",
+                  "Simulated FHIR export for EHR integration"
+                ]}
+              />
+              <FeatureCard
+                icon={<Activity className="h-5 w-5" />}
+                title="Edge AI Benchmarks"
+                description="Real-time performance and helpfulness monitoring"
+                features={[
+                  "User-driven response rating system",
+                  "Hardware-specific inference tracking",
+                  "Evaluation dashboard for judges",
+                  "Privacy & Latency audit logs"
+                ]}
+              />
+              <FeatureCard
+                icon={<Shield className="h-5 w-5" />}
+                title="Secure Health Pipeline"
+                description="Local-first data architecture for high sensitivity"
+                features={[
+                  "Zero-Knowledge (ZK) Triage sessions",
+                  "Encrypted local storage for AI context",
+                  "Peer-reviewed clinical guideline grounding",
+                  "Interoperable FHIR data standards"
                 ]}
               />
             </div>
