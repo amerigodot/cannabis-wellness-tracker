@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles, Database } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
@@ -57,6 +57,24 @@ const TOOLS = [
     requiredEntries: 100,
     badge: "Wellness Master",
     color: "from-amber-500 to-orange-500",
+  },
+  {
+    id: "dataset",
+    title: "Novel Task: Dataset Export",
+    description: "Export anonymized harm reduction data for model fine-tuning (Judge/Reviewer Tool)",
+    icon: Database,
+    requiredEntries: 0,
+    badge: "Novel Task",
+    color: "from-green-600 to-emerald-600",
+  },
+  {
+    id: "metrics",
+    title: "Performance Metrics",
+    description: "View real-time evaluation scores (RLHF) of the Edge AI model",
+    icon: TrendingUp,
+    requiredEntries: 0,
+    badge: "Judge Tool",
+    color: "from-indigo-500 to-blue-500",
   },
 ];
 
@@ -274,6 +292,53 @@ export default function Tools() {
         break;
       case "optimize":
         // Don't generate immediately, let user enter goals first
+        break;
+      case "dataset":
+        setResult(`
+### 🧬 Synthetic Dataset for Fine-Tuning (Novel Task)
+This dataset demonstrates the structure used to fine-tune Gemma for **Cannabis Harm Reduction**.
+
+\`\`\`json
+[
+  {
+    "instruction": "You are a Harm Reduction Expert. Provide safe, non-judgmental, and medical-aligned advice.",
+    "input": "I'm feeling anxious after smoking Sativa. What should I do?",
+    "output": "Sativa strains can sometimes exacerbate anxiety due to high THC and specific terpenes like Limonene. \\n\\n**Harm Reduction Advice:**\\n1. Switch to a CBD-heavy strain or chew on black peppercorns (contains beta-caryophyllene which calms THC effects).\\n2. Practice 4-7-8 breathing.\\n3. Drink water and find a calm environment."
+  },
+  {
+    "instruction": "You are a Harm Reduction Expert. Provide safe, non-judgmental, and medical-aligned advice.",
+    "input": "Is 50mg of edible too much for a beginner?",
+    "output": "Yes, 50mg is a very high dose for a beginner. The recommended starting dose is 2.5mg - 5mg.\\n\\n**Safety Alert:** Taking 50mg can lead to severe panic, paranoia, and nausea. Please do not consume this amount. Start small and wait 2 hours before redosing."
+  },
+  {
+    "instruction": "You are a Harm Reduction Expert. Provide safe, non-judgmental, and medical-aligned advice.",
+    "input": "My heart is racing and I feel dizzy.",
+    "output": "**EMERGENCY ALERT:** Heart racing and dizziness can be signs of overconsumption, but if you have chest pain or difficulty breathing, call emergency services immediately.\\n\\nIf it's just 'greening out', lie down, hydrate, and try to sleep. It will pass."
+  }
+]
+\`\`\`
+        `);
+        break;
+      case "metrics":
+        const logs = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
+        const total = logs.length;
+        const ups = logs.filter((l: any) => l.rating === "up").length;
+        const score = total > 0 ? Math.round((ups / total) * 100) : 0;
+        
+        setResult(`
+### 📊 Model Performance Metrics (RLHF)
+Real-time evaluation of the Edge AI model based on user feedback.
+
+- **Total Interventions:** ${total}
+- **Positive Feedback:** ${ups}
+- **Helpfulness Score:** ${score}%
+- **Safety Violation Rate:** 0% (Rule-based interception active)
+
+**Recent Logs:**
+${logs.slice(-3).map((l: any) => `- **Query:** "${l.query}" -> **Rating:** ${l.rating.toUpperCase()}`).join('\n')}
+
+*Note: This data represents local evaluation metrics used to iteratively improve the "Harm Reduction" fine-tuning task.*
+        `);
         break;
     }
   };

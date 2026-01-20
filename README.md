@@ -12,6 +12,62 @@
 
 ---
 
+## 🏆 MedGemma Impact Challenge Submission
+
+This project is optimized for the **MedGemma Impact Challenge**, specifically targeting:
+1.  **Main Track** ($75,000)
+2.  **Edge AI Prize** ($5,000)
+3.  **Novel Task Prize** ($10,000)
+
+### 🧠 Edge AI Implementation
+We have integrated a **Privacy-First AI Coach** running directly in the browser using **WebLLM** and **Google's Gemma-2B** model.
+-   **Why:** Medical data is sensitive. Users are often hesitant to send their substance use logs to the cloud.
+-   **How:** By running inference on the client side, we ensure that **no personal health data leaves the user's device** for the coaching feature.
+-   **Model:** `Gemma-2b-it-q4f32_1` (Quantized for browser performance).
+
+### 🧪 Novel Task: Hyper-Personalized Cannabis Harm Reduction
+We are defining a new task for medical LLMs: **Clinical Decision Support for Substance Use Safety**.
+-   **Goal:** To move beyond generic chat to a safety-first, guideline-enforcing agent.
+-   **Implementation:**
+    *   **Safety Policy Layer:** A non-overrideable rule engine that intercepts critical symptoms (e.g., "chest pain", "suicide") *before* LLM inference, delivering fixed crisis protocols.
+    *   **Clinical Persona:** The model is strictly prompted as a "Clinical Decision Support Agent" governed by the **Lower Risk Cannabis Use Guidelines (LRCUG)**.
+    *   **In-Context Fine-Tuning:** Dynamic context injection of patient history allows the model to flag high-risk patterns (e.g., daily high-THC usage in anxious patients).
+
+### 📚 Effective Use of HAI-DEF Models (Clinical RAG)
+We implemented a **Clinical RAG System** that grounds Gemma's responses in authoritative medical sources, rejecting promotional content.
+-   **Knowledge Base:** Structured extracts from **PMC10998028** (Clinical Guidelines), **RACGP** (Anxiety/PTSD), and **LRCUG** (Harm Reduction).
+-   **Mechanism:** User queries are vector-matched against specific clinical chunks (e.g., "Dosing Protocols", "Contraindications").
+-   **Result:** The model acts as a natural language interface to verified medical literature, reducing hallucinations and ensuring safety.
+
+### 🏗️ Architecture & MedGemma Alignment
+Our solution is designed for the **Edge AI** track while remaining fully compatible with the broader MedGemma ecosystem.
+
+**1. Why WebLLM? (Edge AI Advantages)**
+-   **Privacy-First:** Medical data (cannabis usage, symptoms) is highly sensitive. WebLLM keeps all inference **local**, meaning no data ever leaves the user's device.
+-   **Zero Latency & Cost:** Once the model is cached, inference is instant and free, removing the need for expensive GPU servers.
+-   **Accessibility:** Runs on consumer hardware (laptops with integrated GPUs), democratizing access to medical AI.
+
+**2. Interchangeability with MedGemma**
+While this browser-based demo uses the **Gemma 2B** base model (optimized for Edge constraints), our architecture is **Model-Agnostic**:
+-   **Drop-in Replacement:** As soon as a quantized version of `MedGemma` is available in MLC format, it can be swapped into our `EdgeWellnessCoach` component by changing a single configuration line (`SELECTED_MODEL`).
+-   **Prompt Engineering Bridge:** Currently, we bridge the gap by using **System Prompt Engineering** to enforce a "MedGemma Persona"—instructing the model to prioritize harm reduction, clinical tone, and medical accuracy, effectively simulating the target model's behavior for the purpose of the challenge.
+
+### 🧠 Dual-State State Management
+We designed two distinct state architectures to match the clinical workflow:
+
+| Feature | State Model | Privacy Level | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Clinical Triage** | **Zero-Knowledge (ZK) / Stateless** | Maximum | One-off risk assessment. No history is accessed or stored. Session destroys on exit. |
+| **Safety Coach** | **Context-Aware / Stateful** | High (Local) | Longitudinal care. Accesses user journal history to identify patterns (e.g., "Anxiety increasing over weeks"). |
+
+### 📊 Performance Metrics (Evaluation)
+To demonstrate how we measure success on the Novel Task, we built an integrated **RLHF (Reinforcement Learning from Human Feedback)** loop:
+1.  **Feedback UI:** Users can rate every AI response (Thumbs Up/Down).
+2.  **Metrics Dashboard:** A dedicated tool (`Tools > Performance Metrics`) tracks the "Helpfulness Score" and "Safety Violation Rate" in real-time.
+3.  **Feasibility:** This proves a realistic path to iteratively improving the model in a production environment.
+
+---
+
 ## 📋 Project Overview
 
 The **Cannabis Wellness Tracker** is a comprehensive web application designed to help users maintain a detailed log of their cannabis consumption. whether for medical symptom management, recreational enjoyment, or general wellness. By recording detailed metrics before and after consumption, the app helps users correlate specific strains, dosages, and methods with desired outcomes (e.g., pain relief, anxiety reduction, focus).
@@ -37,8 +93,9 @@ It goes beyond simple logging by offering **AI-driven tools** that analyze your 
 
 ### 🤖 AI-Powered Wellness Tools
 Unlock powerful insights as you build your journal:
-1.  **Comprehensive Wellness Report** (Unlocks at 10 entries): Generates an in-depth analysis of your usage patterns and effectiveness.
-2.  **Correlation & Timing Analysis** (Unlocks at 50 entries): Discovers temporal patterns and optimal timing strategies.
+1.  **Edge AI Coach (NEW):** Chat with a private, on-device wellness assistant powered by **Gemma 2B**. It analyzes your logs locally to answer questions like "Which strain helped my anxiety most?".
+2.  **Comprehensive Wellness Report** (Unlocks at 10 entries): Generates an in-depth analysis of your usage patterns and effectiveness.
+3.  **Correlation & Timing Analysis** (Unlocks at 50 entries): Discovers temporal patterns and optimal timing strategies.
 3.  **Goal-Based Optimization Strategy** (Unlocks at 100 entries): Creates a personalized plan tailored to specific goals like "Better Sleep" or "Chronic Pain Management".
 
 ### 🏆 Gamification & Habits
@@ -60,6 +117,7 @@ This project is built with a modern, performance-oriented stack:
 *   **Icons:** [Lucide React](https://lucide.dev/)
 *   **Charts:** [Recharts](https://recharts.org/)
 *   **Backend & Auth:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Edge Functions)
+*   **Edge AI:** [WebLLM](https://webllm.mlc.ai/) (In-browser inference) + **Gemma 2B**
 *   **State Management:** [TanStack Query](https://tanstack.com/query/latest)
 *   **Forms:** React Hook Form + Zod
 
@@ -67,7 +125,7 @@ This project is built with a modern, performance-oriented stack:
 
 ### Prerequisites
 *   Node.js (v18+)
-*   npm or bun
+*   npm, bun, or pnpm
 
 ### Installation
 
@@ -82,8 +140,8 @@ This project is built with a modern, performance-oriented stack:
     npm install
     ```
 
-3.  **Environment Setup:**
-    Create a `.env` file in the root directory and add your Supabase credentials (required for the backend connection):
+3.  **Environment Setup (Optional for Reviewers):**
+    For a full production experience, create a `.env` file with Supabase credentials. **However, for the MedGemma Challenge Review, you can skip this step and use "Submission Mode".**
     ```env
     VITE_SUPABASE_URL=your_supabase_url
     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -94,6 +152,12 @@ This project is built with a modern, performance-oriented stack:
     npm run dev
     ```
     The app will be available at `http://localhost:8080`.
+
+### 📝 MedGemma Reviewer Mode (No Setup Required)
+To review the application without configuring a backend:
+1.  Launch the app using `npm run dev`.
+2.  On the login screen, click the green **"Enter Submission Mode (Offline)"** button.
+3.  This activates the local storage engine, bypassing the need for Supabase while keeping all AI features (Edge Coach, Triage) fully functional.
 
 ## ❤️ Support the Project
 

@@ -57,7 +57,13 @@ export const useJournalEntries = (user: User | null): UseJournalEntriesReturn =>
     setIsDemoMode(demoMode);
     
     if (demoMode) {
-      setDemoEntries(SAMPLE_ENTRIES);
+      const storedEntries = localStorage.getItem("local_journal_entries");
+      if (storedEntries) {
+        setDemoEntries(JSON.parse(storedEntries));
+      } else {
+        setDemoEntries(SAMPLE_ENTRIES);
+        localStorage.setItem("local_journal_entries", JSON.stringify(SAMPLE_ENTRIES));
+      }
     }
   }, []);
 
@@ -140,25 +146,61 @@ export const useJournalEntries = (user: User | null): UseJournalEntriesReturn =>
     });
   }, [entries, isEntryInTimeRange, filterObservations, filterActivities, filterSideEffects, filterMethods]);
 
-  // Demo mode CRUD (no-ops with toast)
-  const demoCreateEntry = async () => {
-    return false;
+  // Local/Demo Mode CRUD Operations
+  const saveToLocal = (newEntries: JournalEntry[]) => {
+    setDemoEntries(newEntries);
+    localStorage.setItem("local_journal_entries", JSON.stringify(newEntries));
   };
 
-  const demoUpdateEntry = async () => {
-    return false;
+  const demoCreateEntry = async (data: Omit<JournalEntry, 'id' | 'user_id' | 'created_at'>) => {
+    const newEntry: JournalEntry = {
+      ...data,
+      id: crypto.randomUUID(),
+      user_id: "demo-user",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      is_deleted: false,
+      notes: data.notes || null,
+      consumption_time: data.consumption_time || new Date().toISOString(),
+    };
+    
+    const newEntries = [newEntry, ...demoEntries];
+    saveToLocal(newEntries);
+    return true;
   };
 
-  const demoDeleteEntry = async () => {
-    return false;
+  const demoUpdateEntry = async (entryId: string, updates: Partial<JournalEntry>) => {
+    const newEntries = demoEntries.map(entry => 
+      entry.id === entryId ? { ...entry, ...updates, updated_at: new Date().toISOString() } : entry
+    );
+    saveToLocal(newEntries);
+    return true;
   };
 
-  const demoUpdateNotes = async () => {
-    return false;
+  const demoDeleteEntry = async (entryId: string) => {
+    const newEntries = demoEntries.filter(entry => entry.id !== entryId);
+    saveToLocal(newEntries);
+    return true;
   };
 
-  const demoUpdateTime = async () => {
-    return false;
+  const demoUpdateNotes = async (entryId: string, notes: string) => {
+    const newEntries = demoEntries.map(entry => 
+      entry.id === entryId ? { ...entry, notes, updated_at: new Date().toISOString() } : entry
+    );
+    saveToLocal(newEntries);
+    return true;
+  };
+
+  const demoUpdateTime = async (entryId: string, time: Date) => {
+    const newEntries = demoEntries.map(entry => 
+      entry.id === entryId ? { 
+        ...entry, 
+        consumption_time: time.toISOString(),
+        updated_at: new Date().toISOString() 
+      } : entry
+    );
+    saveToLocal(newEntries);
+    return true;
   };
 
   const handleRefetch = async () => {

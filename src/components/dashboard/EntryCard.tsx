@@ -224,9 +224,9 @@ export const EntryCard = ({
           <div className="mb-4">
             <Label className="text-xs text-muted-foreground mb-2 block">Observations</Label>
             <div className="flex flex-wrap gap-2">
-              {entry.observations.map((obs) => (
+              {entry.observations.map((obs, index) => (
               <Badge 
-                key={obs} 
+                key={`${obs}-${index}`} 
                 className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                   filterObservations.includes(obs)
                     ? "bg-observation text-observation-foreground"
@@ -252,9 +252,9 @@ export const EntryCard = ({
           <div className="mb-4">
             <Label className="text-xs text-muted-foreground mb-2 block">Activities</Label>
             <div className="flex flex-wrap gap-2">
-              {entry.activities.map((activity) => (
+              {entry.activities.map((activity, index) => (
               <Badge 
-                key={activity} 
+                key={`${activity}-${index}`} 
                 className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                   filterActivities.includes(activity)
                     ? "bg-activity text-activity-foreground"
@@ -280,9 +280,9 @@ export const EntryCard = ({
           <div className="mb-4">
             <Label className="text-xs text-muted-foreground mb-2 block">Negative Side Effects</Label>
             <div className="flex flex-wrap gap-2">
-              {entry.negative_side_effects.map((effect) => (
+              {entry.negative_side_effects.map((effect, index) => (
               <Badge 
-                key={effect} 
+                key={`${effect}-${index}`} 
                 className={`px-2 py-1 cursor-pointer transition-all hover:scale-105 hover:opacity-80 ${
                   filterSideEffects.includes(effect)
                     ? "bg-side-effect text-side-effect-foreground"

@@ -23,6 +23,10 @@ GEMINI.md
 *.njsproj
 *.sln
 *.sw?
+.github
 
 .gemini/
 gha-creds-*.json
+Videoguide.md
+NOVEL_TASK_REPORT.md
+Appendix-Medicinal-use-of-cannabis-products.pdf

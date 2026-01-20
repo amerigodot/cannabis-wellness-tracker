@@ -18,7 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, LogOut, Sparkles, Bell, Settings } from "lucide-react";
+import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
@@ -192,26 +192,27 @@ const Index = () => {
         {/* Header */}
         <header className="mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
           {isDemoMode && (
-            <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">
-                  🎭 Demo Mode - Exploring with sample data (read-only)
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-600" />
+                  Submission Mode (Offline) - All data is stored locally in your browser.
                 </p>
                 <Button 
-                  variant="default" 
+                  variant="outline" 
                   size="sm"
                   onClick={() => {
                     localStorage.removeItem("demoMode");
                     navigate("/auth");
                   }}
                 >
-                  Sign Up to Save Your Data
+                  Exit Submission Mode
                 </Button>
               </div>
             </div>
           )}
           <div className="flex justify-between items-start mb-6">
-            <div className="flex-1">
+            <div className="flex-1 flex gap-2">
               {entries.length >= 10 && (
                 <Button 
                   variant="outline" 
@@ -222,6 +223,22 @@ const Index = () => {
                   Wellness Tools
                 </Button>
               )}
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/coach")}
+                className="gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
+              >
+                <Brain className="h-4 w-4 text-primary" />
+                Private AI Coach
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/triage")}
+                className="gap-2 border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
+              >
+                <Stethoscope className="h-4 w-4" />
+                Clinical Triage
+              </Button>
             </div>
             <div className="flex gap-2">
               <Button 

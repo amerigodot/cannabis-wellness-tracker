@@ -16,6 +16,8 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Donate = lazy(() => import("./pages/Donate"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Tools = lazy(() => import("./pages/Tools"));
+const Triage = lazy(() => import("./pages/Triage"));
+const Coach = lazy(() => import("./pages/Coach"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -39,6 +41,8 @@ const AppContent = () => {
               <Route path="/donate" element={<Donate />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/tools" element={<Tools />} />
+              <Route path="/triage" element={<Triage />} />
+              <Route path="/coach" element={<Coach />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
