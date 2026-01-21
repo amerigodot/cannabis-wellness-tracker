@@ -3,6 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { JournalEntry } from "@/types/journal";
 import { SAMPLE_ENTRIES } from "@/data/sampleEntries";
 import { useInfiniteJournalEntries } from "./useInfiniteJournalEntries";
+import { mockDataProvider } from "@/services/mockDataProvider";
 import { startOfDay, startOfWeek, startOfMonth, endOfDay, endOfWeek, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 
 export type TimeRangeFilter = 'all' | 'today' | 'week' | 'month';
@@ -57,13 +58,8 @@ export const useJournalEntries = (user: User | null): UseJournalEntriesReturn =>
     setIsDemoMode(demoMode);
     
     if (demoMode) {
-      const storedEntries = localStorage.getItem("local_journal_entries");
-      if (storedEntries) {
-        setDemoEntries(JSON.parse(storedEntries));
-      } else {
-        setDemoEntries(SAMPLE_ENTRIES);
-        localStorage.setItem("local_journal_entries", JSON.stringify(SAMPLE_ENTRIES));
-      }
+      mockDataProvider.init();
+      setDemoEntries(mockDataProvider.getAllEntries());
     }
   }, []);
 
@@ -147,59 +143,33 @@ export const useJournalEntries = (user: User | null): UseJournalEntriesReturn =>
   }, [entries, isEntryInTimeRange, filterObservations, filterActivities, filterSideEffects, filterMethods]);
 
   // Local/Demo Mode CRUD Operations
-  const saveToLocal = (newEntries: JournalEntry[]) => {
-    setDemoEntries(newEntries);
-    localStorage.setItem("local_journal_entries", JSON.stringify(newEntries));
-  };
-
   const demoCreateEntry = async (data: Omit<JournalEntry, 'id' | 'user_id' | 'created_at'>) => {
-    const newEntry: JournalEntry = {
-      ...data,
-      id: crypto.randomUUID(),
-      user_id: "demo-user",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      is_deleted: false,
-      notes: data.notes || null,
-      consumption_time: data.consumption_time || new Date().toISOString(),
-    };
-    
-    const newEntries = [newEntry, ...demoEntries];
-    saveToLocal(newEntries);
+    const newEntry = mockDataProvider.createEntry(data);
+    setDemoEntries(mockDataProvider.getAllEntries());
     return true;
   };
 
   const demoUpdateEntry = async (entryId: string, updates: Partial<JournalEntry>) => {
-    const newEntries = demoEntries.map(entry => 
-      entry.id === entryId ? { ...entry, ...updates, updated_at: new Date().toISOString() } : entry
-    );
-    saveToLocal(newEntries);
+    mockDataProvider.updateEntry(entryId, updates);
+    setDemoEntries(mockDataProvider.getAllEntries());
     return true;
   };
 
   const demoDeleteEntry = async (entryId: string) => {
-    const newEntries = demoEntries.filter(entry => entry.id !== entryId);
-    saveToLocal(newEntries);
+    mockDataProvider.deleteEntry(entryId);
+    setDemoEntries(mockDataProvider.getAllEntries());
     return true;
   };
 
   const demoUpdateNotes = async (entryId: string, notes: string) => {
-    const newEntries = demoEntries.map(entry => 
-      entry.id === entryId ? { ...entry, notes, updated_at: new Date().toISOString() } : entry
-    );
-    saveToLocal(newEntries);
+    mockDataProvider.updateEntry(entryId, { notes });
+    setDemoEntries(mockDataProvider.getAllEntries());
     return true;
   };
 
   const demoUpdateTime = async (entryId: string, time: Date) => {
-    const newEntries = demoEntries.map(entry => 
-      entry.id === entryId ? { 
-        ...entry, 
-        consumption_time: time.toISOString(),
-        updated_at: new Date().toISOString() 
-      } : entry
-    );
-    saveToLocal(newEntries);
+    mockDataProvider.updateEntry(entryId, { consumption_time: time.toISOString() });
+    setDemoEntries(mockDataProvider.getAllEntries());
     return true;
   };
 

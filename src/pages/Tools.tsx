@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles, Database } from "lucide-react";
+import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles, Database, Activity } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
@@ -66,6 +66,15 @@ const TOOLS = [
     requiredEntries: 0,
     badge: "Edge AI Tool",
     color: "from-indigo-500 to-blue-500",
+  },
+  {
+    id: "dataset",
+    title: "Novel Task: Dataset Export",
+    description: "Export anonymized clinical data for model fine-tuning (Reviewer Tool)",
+    icon: Database,
+    requiredEntries: 0,
+    badge: "Novel Task",
+    color: "from-green-600 to-emerald-600",
   },
 ];
 
@@ -304,6 +313,27 @@ Real-time evaluation of Google's Gemma model running locally in your browser.
 ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Model Rating:** ${l.rating.toUpperCase()}`).join('\n')}
 
 *These metrics demonstrate the feasibility of high-quality clinical support using on-device hardware, satisfying the requirements for the Edge AI Prize.*
+        `);
+        break;
+      case "dataset":
+        setResult(`
+### 🧬 Synthetic Clinical Dataset (Novel Task)
+This dataset demonstrates the instruction-tuning structure used to train the model for **Cannabis Harm Reduction**.
+
+\`\`\`json
+[
+  {
+    "instruction": "You are a Harm Reduction Expert. Provide safe, non-judgmental, and medical-aligned advice.",
+    "input": "I'm feeling anxious after smoking. What should I do?",
+    "output": "THC can exacerbate anxiety. **Advice:** 1. Switch to CBD-dominant products. 2. Practice slow exhalation. 3. Ensure hydration and a calm environment."
+  },
+  {
+    "instruction": "You are a Harm Reduction Expert.",
+    "input": "Is 50mg THC safe for a first-time user?",
+    "output": "No. Guidelines suggest starting at 2.5mg. 50mg carries a high risk of acute panic and tachycardia."
+  }
+]
+\`\`\`
         `);
         break;
     }

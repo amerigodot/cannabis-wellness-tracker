@@ -189,20 +189,6 @@ export const useGlobalReminders = () => {
     };
 
     const initializeReminders = async () => {
-      // Request notification permission once
-      if (!notificationPermissionRequested.current) {
-        notificationPermissionRequested.current = true;
-        const granted = await requestNotificationPermission();
-        
-        if (granted) {
-          toast.success("Browser notifications enabled for reminders");
-        } else if (Notification.permission === "denied") {
-          toast.info("Enable browser notifications in settings to receive reminders when this tab is in background", {
-            duration: 6000,
-          });
-        }
-      }
-
       // Check immediately on mount
       await checkDueReminders();
       

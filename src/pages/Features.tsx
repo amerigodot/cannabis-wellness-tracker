@@ -212,13 +212,13 @@ const Features = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <FeatureCard
                 icon={<Brain className="h-5 w-5" />}
-                title="Privacy-First Edge AI Coach"
-                description="On-device wellness assistant powered by Google's Gemma-2B"
+                title="Clinical MedGemma-Edge Coach"
+                description="On-device clinical decision support powered by Gemma-2B"
                 features={[
-                  "100% Client-side inference (WebLLM)",
-                  "Zero data leakage - sensitive info stays local",
-                  "Clinical RAG grounding in medical guides",
-                  "Automated emergency keyword interception"
+                  "Few-shot Instruction Tuning for clinical alignment",
+                  "LRCUG-aligned safety & harm reduction protocols",
+                  "Automated Clinical Data Augmentation (Trend Analysis)",
+                  "100% On-device Inference (WebGPU Privacy)"
                 ]}
               />
               <FeatureCard

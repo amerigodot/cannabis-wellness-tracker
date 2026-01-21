@@ -156,22 +156,38 @@ ${item.content.slice(0, 300)}...
       }
     }
 
-    // 2. RETRIEVAL (RAG)
+    // 2. DATA & RAG CONTEXT
     const retrievedContext = findRelevantContext(textToSend);
     
-    // 3. PROMPT CONSTRUCTION
-    let finalPrompt = `
-    [CONTEXTUAL KNOWLEDGE]:
-    ${retrievedContext || "No specific protocol found. Apply general harm reduction principles."}
+    // Check if we actually have data
+    const hasData = entries && entries.length > 0;
+    
+    const userDataset = hasData 
+        ? JSON.stringify(entries.slice(0, 10).map(e => ({ // Limit to 10 to save context
+            strain: e.strain,
+            method: e.method,
+            dose: e.dosage,
+            effect: e.observations.join(", "),
+            bad_reaction: e.negative_side_effects.join(", ")
+          })))
+        : "NO ENTRIES FOUND. The user is new.";
 
-    [USER QUERY]:
-    "${textToSend}"
+    let finalPrompt = `
+    [USER JOURNAL]:
+    ${userDataset}
+
+    [SAFETY GUIDES]:
+    ${retrievedContext || "General Rule: Start low (2.5mg), go slow. Wait 2 hours for edibles."}
+
+    USER QUESTION: "${textToSend}"
     
     INSTRUCTION: 
-    - Answer the USER QUERY using the [CONTEXTUAL KNOWLEDGE] and [PATIENT HISTORY SUMMARY] provided in the system prompt.
-    - Be brief, clinical, and safety-focused.
-    - If suggesting a strain, cite specific data points from history.
+    Answer the question. 
+    If [USER JOURNAL] has data, use it to give specific examples of what worked/failed.
+    If [USER JOURNAL] is empty, give general safe advice based on [SAFETY GUIDES] and tell the user to "log more entries for personalized insights."
     `;
+
+    console.log("Sending Prompt to Engine:", finalPrompt); // Debug log
 
     const userMsg: Message = { role: "user", content: finalPrompt };
     setMessages((prev) => [...prev, { role: "user", content: textToSend }]); // Show only clean text to user
