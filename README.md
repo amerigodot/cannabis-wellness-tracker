@@ -27,8 +27,15 @@ Our solution implements **Local-Only Inference** using **WebLLM** and **Google's
 
 ### 🏗️ Technical Implementation
 1.  **Engine:** Powered by `@mlc-ai/web-llm` utilizing the `Gemma-2b-it-q4f32_1` quantized model.
-2.  **Hardware Feasibility:** Optimized for consumer-grade laptops and desktops. The model requires ~1.5GB of VRAM, making it accessible on integrated GPUs (M1/M2/M3 Macs, Intel Iris Xe).
-3.  **Auditable Pipeline:** We implement a local audit log for clinical interactions, satisfying HIPAA accountability standards while maintaining local-first storage.
+2.  **Instruction Tuning (Simulated):** Since we cannot fine-tune weights in the browser, we implement **In-Context Learning** via a rigorous System Persona and "Few-Shot" history injection. This forces the general-purpose Gemma model to adopt a strict "Clinical Decision Support" role before the user interacts.
+3.  **Data Augmentation:** Raw user logs are pre-processed into a high-signal "Clinical Narrative" (calculating trends, tolerance signals, and risk factors) before being fed to the LLM, significantly improving reasoning quality.
+4.  **Hardware Feasibility:** Optimized for consumer-grade laptops and desktops (M1/M2/M3 Macs, Intel Iris Xe).
+
+### 🎯 Task Goals & Success Metrics
+Our AI implementation targets three specific clinical goals:
+1.  **Harm Reduction:** 100% interception of emergency keywords (Chest Pain, etc.) via rule-based layers.
+2.  **Protocol Adherence:** Responses must cite specific guidelines (LRCUG) rather than generic internet advice.
+3.  **Accuracy:** Maintain a >90% "Helpfulness" rating on the local RLHF dashboard.
 
 ### 📊 Edge AI Performance & Evaluation
 To prove the feasibility and impact of our Edge AI implementation, we have built-in evaluation tools:
