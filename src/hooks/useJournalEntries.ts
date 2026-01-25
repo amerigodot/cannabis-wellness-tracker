@@ -158,7 +158,6 @@ export const useJournalEntries = (user: User | null): UseJournalEntriesReturn =>
       id: crypto.randomUUID(),
       user_id: "demo-user",
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
       is_deleted: false,
       notes: data.notes || null,
       consumption_time: data.consumption_time || new Date().toISOString(),

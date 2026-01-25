@@ -10,27 +10,27 @@ export function generateClinicalNarrative(entries: JournalEntry[]): string {
 
   const recentEntries = entries.slice(0, 10);
   
-  // 1. Calculate Averages
-  let avgAnxiety = 0;
-  let avgRelief = 0;
-  let totalTHC = 0;
+  // 1. Calculate Averages from available mood/anxiety data
+  let totalAnxiety = 0;
+  let anxietyCount = 0;
   
   recentEntries.forEach(e => {
-    const anxiety = e.medical_symptoms?.find(s => s.name === "Anxiety")?.score || 0;
-    const relief = e.effectiveness_score || 0; // Assuming this exists or is derived
-    
-    avgAnxiety += anxiety;
-    avgRelief += relief;
+    // Use before_anxiety or after_anxiety if available
+    const anxiety = e.before_anxiety ?? e.after_anxiety ?? 0;
+    if (anxiety > 0) {
+      totalAnxiety += anxiety;
+      anxietyCount++;
+    }
   });
   
-  avgAnxiety = avgAnxiety / recentEntries.length;
+  const avgAnxiety = anxietyCount > 0 ? totalAnxiety / anxietyCount : 0;
   
   // 2. Identify Trends (Augmentation)
   const isHighRisk = avgAnxiety > 7;
   const isFrequentUser = recentEntries.length >= 7; // e.g., 7 entries in last view
   
   // 3. Detect "Red Flag" patterns
-  const redFlags = [];
+  const redFlags: string[] = [];
   const smokingEntries = recentEntries.filter(e => e.method === "Smoking").length;
   if (smokingEntries > 5) redFlags.push("High frequency of combustion (Respiratory Risk)");
   

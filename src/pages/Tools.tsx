@@ -163,7 +163,7 @@ export default function Tools() {
   const ensureEngine = async () => {
     if (engine) return engine;
     
-    if (!navigator.gpu) {
+    if (!('gpu' in navigator)) {
         toast.error("WebGPU not supported. Use Chrome/Edge.");
         return null;
     }
