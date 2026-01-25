@@ -27,4 +27,5 @@ export interface JournalEntry {
   after_anxiety?: number | null;
   after_energy?: number | null;
   after_focus?: number | null;
+  is_deleted?: boolean;
 }

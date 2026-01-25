@@ -40,7 +40,7 @@ export function EdgeWellnessCoach() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [lastResponseIndex, setLastResponseIndex] = useState<number | null>(null);
-  const { entries } = useJournalEntries();
+  const { entries } = useJournalEntries(null);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +84,7 @@ ${item.content.slice(0, 300)}...
   };
 
   const initModel = async () => {
-    if (!navigator.gpu) {
+    if (!('gpu' in navigator)) {
       toast({ variant: "destructive", title: "WebGPU Not Supported", description: "Try Chrome or Edge." });
       return;
     }
@@ -248,7 +248,7 @@ ${item.content.slice(0, 300)}...
               <CardDescription>Clinical Decision Support (Local)</CardDescription>
             </div>
           </div>
-          <ShieldCheck className="h-5 w-5 text-green-600" title="Data stays on device" />
+          <ShieldCheck className="h-5 w-5 text-green-600" aria-label="Data stays on device" />
         </div>
         {engine && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
