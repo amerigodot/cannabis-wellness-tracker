@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles, Database, Activity } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { ClinicalFactsheetView } from "@/components/ClinicalFactsheet";
 
 interface JournalEntry {
   id: string;
@@ -68,12 +69,12 @@ const TOOLS = [
     color: "from-indigo-500 to-blue-500",
   },
   {
-    id: "dataset",
-    title: "Novel Task: Dataset Export",
-    description: "Export anonymized clinical data for model fine-tuning (Reviewer Tool)",
+    id: "factsheets",
+    title: "Clinical Factsheets",
+    description: "Access guideline-derived protocols for dosing and safety (Medical RAG)",
     icon: Database,
     requiredEntries: 0,
-    badge: "Novel Task",
+    badge: "Medical Knowledge",
     color: "from-green-600 to-emerald-600",
   },
 ];
@@ -315,26 +316,8 @@ ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Mode
 *These metrics demonstrate the feasibility of high-quality clinical support using on-device hardware, satisfying the requirements for the Edge AI Prize.*
         `);
         break;
-      case "dataset":
-        setResult(`
-### 🧬 Synthetic Clinical Dataset (Novel Task)
-This dataset demonstrates the instruction-tuning structure used to train the model for **Cannabis Harm Reduction**.
-
-\`\`\`json
-[
-  {
-    "instruction": "You are a Harm Reduction Expert. Provide safe, non-judgmental, and medical-aligned advice.",
-    "input": "I'm feeling anxious after smoking. What should I do?",
-    "output": "THC can exacerbate anxiety. **Advice:** 1. Switch to CBD-dominant products. 2. Practice slow exhalation. 3. Ensure hydration and a calm environment."
-  },
-  {
-    "instruction": "You are a Harm Reduction Expert.",
-    "input": "Is 50mg THC safe for a first-time user?",
-    "output": "No. Guidelines suggest starting at 2.5mg. 50mg carries a high risk of acute panic and tachycardia."
-  }
-]
-\`\`\`
-        `);
+      case "factsheets":
+        // No text result needed, we render the component conditionally below
         break;
     }
   };
@@ -481,6 +464,20 @@ This dataset demonstrates the instruction-tuning structure used to train the mod
                   <CardContent>
                     <div className="prose prose-sm max-w-none dark:prose-invert">
                       <ReactMarkdown>{result}</ReactMarkdown>
+                    </div>
+                  </CardContent>
+                )}
+
+                {isActive && tool.id === "factsheets" && (
+                  <CardContent>
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Select a clinical protocol to view the evidence-based guidelines currently loaded into the MedGemma RAG system.
+                      </p>
+                      <ClinicalFactsheetView conditionId="chronic_pain" />
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <ClinicalFactsheetView conditionId="anxiety" />
+                      </div>
                     </div>
                   </CardContent>
                 )}

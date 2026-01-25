@@ -211,14 +211,14 @@ const Features = () => {
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
               <FeatureCard
-                icon={<Brain className="h-5 w-5" />}
-                title="Clinical MedGemma-Edge Coach"
-                description="On-device clinical decision support powered by Gemma-2B"
+                icon={<Database className="h-5 w-5" />}
+                title="Clinical Factsheets & Protocols"
+                description="Guideline-anchored medical knowledge base"
                 features={[
-                  "Few-shot Instruction Tuning for clinical alignment",
-                  "LRCUG-aligned safety & harm reduction protocols",
-                  "Automated Clinical Data Augmentation (Trend Analysis)",
-                  "100% On-device Inference (WebGPU Privacy)"
+                  "Structured dosing protocols (Start/Titrate/Max)",
+                  "Numeric clinical goals & review timelines",
+                  "2025 Guideline integration (ACOEM, NCSCT)",
+                  "Crisis interception state machine"
                 ]}
               />
               <FeatureCard
