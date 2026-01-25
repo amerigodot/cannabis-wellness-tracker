@@ -12,6 +12,11 @@
 
 ---
 
+## 🚨 JUDGES START HERE: [Read Full Submission Documentation (SUBMISSION.md)](./SUBMISSION.md)
+**Video Demo Script:** [View Script](./VIDEO_SCRIPT.md)
+
+---
+
 ## 🏆 MedGemma Impact Challenge Submission: EDGE AI TRACK
 
 This submission is specialized for the **Edge AI Prize ($5,000)** and the **Main Track ($75,000)**. 

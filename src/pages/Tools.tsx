@@ -10,6 +10,9 @@ import { ArrowLeft, FileText, TrendingUp, Target, Lock, Loader2, Sparkles, Datab
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { ClinicalFactsheetView } from "@/components/ClinicalFactsheet";
+import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
+
+const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
 
 interface JournalEntry {
   id: string;
@@ -37,7 +40,7 @@ const TOOLS = [
     title: "Comprehensive Wellness Report",
     description: "Generate an in-depth analysis of your usage patterns, effectiveness, and personalized recommendations",
     icon: FileText,
-    requiredEntries: 10,
+    requiredEntries: 0,
     badge: "Awareness Builder",
     color: "from-purple-500 to-pink-500",
   },
@@ -46,7 +49,7 @@ const TOOLS = [
     title: "Correlation & Timing Analysis",
     description: "Discover temporal patterns and optimal timing strategies for maximum effectiveness",
     icon: TrendingUp,
-    requiredEntries: 50,
+    requiredEntries: 0,
     badge: "Insight Seeker",
     color: "from-blue-500 to-cyan-500",
   },
@@ -55,7 +58,7 @@ const TOOLS = [
     title: "Goal-Based Optimization Strategy",
     description: "Get a personalized wellness optimization plan tailored to your specific goals",
     icon: Target,
-    requiredEntries: 100,
+    requiredEntries: 0,
     badge: "Wellness Master",
     color: "from-amber-500 to-orange-500",
   },
@@ -89,6 +92,11 @@ export default function Tools() {
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<string>("");
   const [goals, setGoals] = useState<string>("");
+  
+  // Edge AI Engine
+  const [engine, setEngine] = useState<MLCEngine | null>(null);
+  const [modelLoading, setModelLoading] = useState(false);
+  const [loadProgress, setLoadProgress] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -101,8 +109,8 @@ export default function Tools() {
       }
     });
 
-    const {
-      data: { subscription },
+    const { 
+      data: { subscription }, 
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
@@ -151,133 +159,139 @@ export default function Tools() {
     }
   };
 
-  const getToolAvailability = (toolId: string) => {
-    const usage = toolUsage[toolId];
-    if (!usage) return { available: true, daysRemaining: 0 };
-
-    const lastUsed = new Date(usage.last_used_at);
-    const now = new Date();
-    const daysSinceLastUse = (now.getTime() - lastUsed.getTime()) / (1000 * 60 * 60 * 24);
-    const daysRemaining = Math.max(0, Math.ceil(7 - daysSinceLastUse));
+  // Helper: Initialize Gemma if not ready
+  const ensureEngine = async () => {
+    if (engine) return engine;
     
-    return {
-      available: daysSinceLastUse >= 7,
-      daysRemaining,
-      availableDate: new Date(lastUsed.getTime() + 7 * 24 * 60 * 60 * 1000),
-    };
+    if (!navigator.gpu) {
+        toast.error("WebGPU not supported. Use Chrome/Edge.");
+        return null;
+    }
+
+    setModelLoading(true);
+    try {
+        const newEngine = await CreateMLCEngine(SELECTED_MODEL, {
+            initProgressCallback: (report) => setLoadProgress(report.text),
+            logLevel: "INFO",
+        });
+        setEngine(newEngine);
+        return newEngine;
+    } catch (e) {
+        console.error(e);
+        toast.error("Failed to load AI model.");
+        return null;
+    } finally {
+        setModelLoading(false);
+    }
+  };
+
+  const runLocalInference = async (prompt: string, toolId: string) => {
+    const activeEngine = await ensureEngine();
+    if (!activeEngine) return;
+
+    setGenerating(true);
+    setResult("Analyzing your journal... (This runs locally)");
+
+    try {
+        const response = await activeEngine.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.5,
+            max_tokens: 800,
+        });
+        
+        const output = response.choices[0].message.content || "Analysis failed.";
+        setResult(output);
+        toast.success("Analysis complete!");
+
+        // Record local tool usage
+        if (user) {
+            // Optimistic update for local DB
+            // In a real app we'd sync this back to supabase if online
+            const now = new Date().toISOString();
+            setToolUsage(prev => ({ ...prev, [toolId]: { tool_id: toolId, last_used_at: now } }));
+        }
+
+    } catch (error) {
+        console.error("Local inference error:", error);
+        toast.error("AI Analysis Failed");
+    } finally {
+        setGenerating(false);
+    }
   };
 
   const handleGenerateReport = async () => {
-    setGenerating(true);
-    setResult("");
+    const dataset = JSON.stringify(entries.slice(-20).map(e => ({
+        date: e.created_at,
+        strain: e.strain,
+        dosage: e.dosage,
+        method: e.method,
+        effects: e.observations,
+        bad_effects: e.negative_side_effects
+    })));
 
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-wellness-report", {
-        body: { entries },
-      });
+    const prompt = `
+    You are a Medical Cannabis Analyst. 
+    Analyze this patient journal (Last 20 entries):
+    ${dataset}
 
-      if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
-          const availability = getToolAvailability("report");
-          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
-          // Refresh tool usage
-          if (user) await fetchToolUsage(user.id);
-        } else if (error.message.includes("402") || error.message.includes("credits")) {
-          toast.error("AI credits required. Please add funds to continue.");
-        } else {
-          toast.error("Failed to generate report");
-        }
-        console.error("Error generating report:", error);
-        return;
-      }
+    TASK:
+    Generate a comprehensive "Wellness Report" in Markdown.
+    Include:
+    1. **Usage Overview**: Frequency, preferred methods.
+    2. **Effectiveness**: Which strains had good effects?
+    3. **Risk Analysis**: Flag any negative side effects.
+    4. **Recommendations**: Suggest how to optimize based on this data.
+    `;
 
-      setResult(data.report);
-      toast.success("Report generated successfully!");
-      // Refresh tool usage
-      if (user) await fetchToolUsage(user.id);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred while generating the report");
-    } finally {
-      setGenerating(false);
-    }
+    await runLocalInference(prompt, "report");
   };
 
   const handleAnalyzeCorrelations = async () => {
-    setGenerating(true);
-    setResult("");
+    const dataset = JSON.stringify(entries.slice(-30).map(e => ({
+        time: e.consumption_time,
+        strain: e.strain,
+        dosage: e.dosage,
+        method: e.method,
+        effects: e.observations
+    })));
 
-    try {
-      const { data, error } = await supabase.functions.invoke("analyze-correlations", {
-        body: { entries },
-      });
+    const prompt = `
+    Analyze correlations in this journal data:
+    ${dataset}
 
-      if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
-          const availability = getToolAvailability("correlations");
-          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
-          // Refresh tool usage
-          if (user) await fetchToolUsage(user.id);
-        } else if (error.message.includes("402") || error.message.includes("credits")) {
-          toast.error("AI credits required. Please add funds to continue.");
-        } else {
-          toast.error("Failed to analyze correlations");
-        }
-        console.error("Error analyzing correlations:", error);
-        return;
-      }
+    TASK:
+    Identify patterns between:
+    1. Time of Day vs. Effectiveness.
+    2. Method vs. Onset/Duration (inferred).
+    3. Strain Type vs. Activity. 
+    
+    Output a bulleted Markdown list of key insights.
+    `;
 
-      setResult(data.analysis);
-      toast.success("Analysis complete!");
-      // Refresh tool usage
-      if (user) await fetchToolUsage(user.id);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred during analysis");
-    } finally {
-      setGenerating(false);
-    }
+    await runLocalInference(prompt, "correlations");
   };
 
   const handleOptimizeWellness = async () => {
-    if (!goals.trim()) {
-      toast.error("Please enter your wellness goals");
-      return;
-    }
+    const dataset = JSON.stringify(entries.slice(-20).map(e => ({
+        strain: e.strain,
+        dosage: e.dosage,
+        effects: e.observations
+    })));
 
-    setGenerating(true);
-    setResult("");
+    const prompt = `
+    Patient Goal: "${goals}" 
+    
+    Patient History:
+    ${dataset}
 
-    try {
-      const { data, error } = await supabase.functions.invoke("optimize-wellness", {
-        body: { entries, goals },
-      });
+    TASK:
+    Create a personalized "Optimization Strategy" to help the patient achieve their goal.
+    - Recommend specific strains/dosages from their history that align with the goal.
+    - Suggest timing or method changes.
+    - Provide a 3-step action plan.
+    `;
 
-      if (error) {
-        if (error.message.includes("429") || error.message.includes("rate limit") || error.message.includes("once per week")) {
-          const availability = getToolAvailability("optimize");
-          toast.error(`Tool available again in ${availability.daysRemaining} day${availability.daysRemaining !== 1 ? 's' : ''}`);
-          // Refresh tool usage
-          if (user) await fetchToolUsage(user.id);
-        } else if (error.message.includes("402") || error.message.includes("credits")) {
-          toast.error("AI credits required. Please add funds to continue.");
-        } else {
-          toast.error("Failed to generate optimization strategy");
-        }
-        console.error("Error optimizing wellness:", error);
-        return;
-      }
-
-      setResult(data.strategy);
-      toast.success("Optimization strategy generated!");
-      // Refresh tool usage
-      if (user) await fetchToolUsage(user.id);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred while generating strategy");
-    } finally {
-      setGenerating(false);
-    }
+    await runLocalInference(prompt, "optimize");
   };
 
   const handleToolAction = async (toolId: string) => {
@@ -292,13 +306,17 @@ export default function Tools() {
         await handleAnalyzeCorrelations();
         break;
       case "optimize":
-        // Don't generate immediately, let user enter goals first
+        // Wait for user input
         break;
       case "metrics":
         const logs = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
-        const total = logs.length;
+        const totalChat = logs.length;
         const ups = logs.filter((l: any) => l.rating === "up").length;
-        const score = total > 0 ? Math.round((ups / total) * 100) : 0;
+        const score = totalChat > 0 ? Math.round((ups / totalChat) * 100) : 0;
+        
+        // Count tool usages from the local state
+        const toolExecutions = Object.keys(toolUsage).length;
+        const totalInteractions = totalChat + toolExecutions;
         
         setResult(`
 ### 📊 Edge AI Performance Benchmarks
@@ -307,7 +325,8 @@ Real-time evaluation of Google's Gemma model running locally in your browser.
 - **Inference Mode:** WebGPU (Local)
 - **Model:** Gemma-2B-it (Quantized)
 - **Privacy Score:** 100/100 (Zero Cloud Roundtrips)
-- **Helpfulness Score (RLHF):** ${score}% (${total} interactions)
+- **Total Interactions:** ${totalInteractions} (Chat: ${totalChat}, Tools: ${toolExecutions})
+- **Helpfulness Score (RLHF):** ${score}% (Based on chat feedback)
 - **Safety Interception Rate:** 100% (Rule-based emergency detection)
 
 **Recent Interaction Logs:**
@@ -317,7 +336,6 @@ ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Mode
         `);
         break;
       case "factsheets":
-        // No text result needed, we render the component conditionally below
         break;
     }
   };
@@ -351,10 +369,10 @@ ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Mode
               <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2 sm:mb-3">
-              Wellness Tools
+              Wellness Tools (Edge AI)
             </h1>
             <p className="text-muted-foreground text-base sm:text-lg">
-              AI-powered insights unlock as you progress
+              AI-powered insights running 100% locally on your device
             </p>
           </div>
         </div>
@@ -362,69 +380,49 @@ ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Mode
         {/* Tools Grid */}
         <div className="grid gap-6 mb-8">
           {TOOLS.map((tool) => {
-            const isUnlocked = entryCount >= tool.requiredEntries;
             const IconComponent = tool.icon;
             const isActive = activeToolId === tool.id;
-            const availability = getToolAvailability(tool.id);
-            const isOnCooldown = !availability.available;
 
             return (
               <Card
                 key={tool.id}
-                className={`${
-                  isUnlocked
-                    ? "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow"
-                    : "opacity-60"
-                }`}
+                className="shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow"
               >
                 <CardHeader className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex items-start gap-3 sm:gap-4 flex-1">
                       <div
-                        className={`p-2.5 sm:p-3 rounded-full shrink-0 ${
-                          isUnlocked
-                            ? `bg-gradient-to-br ${tool.color} text-white shadow-lg`
-                            : "bg-muted text-muted-foreground"
-                        }`}
+                        className={`p-2.5 sm:p-3 rounded-full shrink-0 bg-gradient-to-br ${tool.color} text-white shadow-lg`}
                       >
-                        {isUnlocked ? <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" /> : <Lock className="w-5 h-5 sm:w-6 sm:h-6" />}
+                        <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg sm:text-xl mb-1">{tool.title}</CardTitle>
                         <CardDescription className="mb-2 text-sm">{tool.description}</CardDescription>
                         <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                          <span>Unlocks with {tool.badge} badge</span>
-                          <span className="text-xs">
-                            ({tool.requiredEntries} entries)
-                          </span>
+                          <span className="font-medium text-primary">{tool.badge}</span>
                         </div>
-                        {isUnlocked && isOnCooldown && (
-                          <div className="mt-2 px-3 py-1.5 rounded-md bg-amber-500/10 border border-amber-500/20 inline-block">
-                            <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                              ⏱️ Available in {availability.daysRemaining} day{availability.daysRemaining !== 1 ? 's' : ''}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
-                    {isUnlocked && (
-                      <Button
-                        onClick={() => handleToolAction(tool.id)}
-                        disabled={generating || isOnCooldown}
-                        className={`w-full sm:w-auto min-h-[44px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {generating && isActive ? (
+                    <Button
+                      onClick={() => handleToolAction(tool.id)}
+                      disabled={generating || modelLoading}
+                      className={`w-full sm:w-auto min-h-[44px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation`}
+                    >
+                      {modelLoading ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Generating...
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Loading Model ({loadProgress.slice(0, 15)}...)
                           </>
-                        ) : isOnCooldown ? (
-                          `In ${availability.daysRemaining}d`
-                        ) : (
-                          "Use Tool"
-                        )}
-                      </Button>
-                    )}
+                      ) : generating && isActive ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        "Use Tool"
+                      )}
+                    </Button>
                   </div>
                 </CardHeader>
 
@@ -444,8 +442,8 @@ ${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Mode
                       </div>
                       <Button
                         onClick={handleOptimizeWellness}
-                        disabled={generating || !goals.trim() || isOnCooldown}
-                        className={`w-full min-h-[48px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation ${isOnCooldown ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={generating || !goals.trim() || modelLoading}
+                        className={`w-full min-h-[48px] bg-gradient-to-r ${tool.color} hover:opacity-90 touch-manipulation`}
                       >
                         {generating ? (
                           <>

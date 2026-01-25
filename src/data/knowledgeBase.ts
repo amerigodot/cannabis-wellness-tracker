@@ -125,3 +125,44 @@ export const DYNAMIC_RETRIEVAL_QUERIES = {
   "pain_updates": "cannabis chronic pain guidelines 2024 2025 review",
   "interaction_check": "cannabis drug interactions cytochrome p450 updated"
 };
+
+// ==========================================
+// 5. LEGACY / COMPATIBILITY EXPORTS
+// ==========================================
+
+export const CLINICAL_GUIDELINES = [
+  {
+    id: "pain-01",
+    source: "ACOEM_2025",
+    content: {
+      text_summary: CLINICAL_FACTSHEETS.chronic_pain.primary_goal + " " + CLINICAL_FACTSHEETS.chronic_pain.protocol.initial_dose
+    }
+  },
+  {
+    id: "anxiety-01",
+    source: "RACGP_2024",
+    content: {
+      text_summary: CLINICAL_FACTSHEETS.anxiety.primary_goal + " " + CLINICAL_FACTSHEETS.anxiety.protocol.initial_dose
+    }
+  }
+];
+
+export const PATIENT_EDUCATION = [
+  {
+    id: "edu-01",
+    title: "Dosing Guideline",
+    content: "Start low and go slow. For pain, consider a 1:1 ratio. For anxiety, CBD isolate is preferred."
+  },
+  {
+    id: "edu-02",
+    title: "Safety First",
+    content: "Avoid combustion (smoking) if you have respiratory issues. Vaporization or oral oils are safer."
+  }
+];
+
+export const CRISIS_TEMPLATES = CRISIS_MODULE.map(c => ({
+  trigger_keywords: c.triggers,
+  response_template: c.deescalation_script,
+  action_required: c.immediate_action
+}));
+
