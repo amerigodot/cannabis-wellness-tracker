@@ -7,12 +7,54 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Shared secret for cron job authentication
+const CRON_SECRET = Deno.env.get("CRON_SECRET");
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Authentication check - require either service role key or cron secret
+    const authHeader = req.headers.get("Authorization");
+    const cronSecretHeader = req.headers.get("X-Cron-Secret");
+    
+    // Validate service role key if Authorization header is present
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      
+      // Only service role key can access this endpoint
+      if (token !== supabaseServiceKey) {
+        console.error("Unauthorized: Invalid service role key");
+        return new Response(JSON.stringify({ error: "Unauthorized - service role required" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } 
+    // Validate cron secret if X-Cron-Secret header is present
+    else if (cronSecretHeader) {
+      if (!CRON_SECRET || cronSecretHeader !== CRON_SECRET) {
+        console.error("Unauthorized: Invalid cron secret");
+        return new Response(JSON.stringify({ error: "Unauthorized - invalid cron secret" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    // No valid authentication provided
+    else {
+      console.error("Unauthorized: No authentication provided");
+      return new Response(JSON.stringify({ error: "Unauthorized - authentication required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("Authentication successful - processing weekly summaries");
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendKey = Deno.env.get("RESEND_API_KEY")!;
