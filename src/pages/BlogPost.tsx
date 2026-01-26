@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
-import { ArrowLeft, Calendar, Clock, Tag, Share2 } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { Calendar, Clock, Tag, Share2, BookOpen } from "lucide-react";
 import { getPostBySlug, getRelatedPosts } from "@/data/blogPosts";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
@@ -63,21 +63,29 @@ export default function BlogPost() {
         ogType="article"
       />
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        
-        <article className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/blog")}
-            className="mb-8"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Blog
-          </Button>
-
-          {/* Article Header */}
+        <article className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+          <PageHeader
+            title={post.title}
+            backTo="/blog"
+            backLabel="Back to Blog"
+            breadcrumbs={[
+              { label: "Blog", href: "/blog" },
+              { label: post.category }
+            ]}
+            icon={<BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />}
+            actions={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Share</span>
+              </Button>
+            }
+          />
+          {/* Article Meta */}
           <header className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Badge variant="secondary">{post.category}</Badge>
@@ -86,37 +94,23 @@ export default function BlogPost() {
                 {post.readTime}
               </span>
             </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-            
-            <div className="flex items-center justify-between flex-wrap gap-4 text-muted-foreground mb-6">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </span>
-                <span>By {post.author}</span>
-              </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="gap-2"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
+
+            <div className="flex items-center gap-4 text-muted-foreground mb-6">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
+              <span>By {post.author}</span>
             </div>
 
             <img
               src={post.imageUrl}
               alt={post.title}
-              className="w-full h-[400px] object-cover rounded-lg mb-6"
+              className="w-full h-[300px] sm:h-[400px] object-cover rounded-lg mb-6"
             />
 
             <p className="text-lg text-muted-foreground">{post.excerpt}</p>

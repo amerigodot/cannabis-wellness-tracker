@@ -1,13 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Scale } from "lucide-react";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function Terms() {
-  const navigate = useNavigate();
-
   return (
     <>
       <SEO 
@@ -18,26 +14,14 @@ export default function Terms() {
         noindex={true}
       />
       <div className="min-h-screen flex flex-col bg-background">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      
-      <div className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-8"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
+        <div className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+          <PageHeader
+            title="Terms of Service"
+            breadcrumbs={[{ label: "Terms of Service" }]}
+            icon={<Scale className="h-6 w-6 sm:h-7 sm:w-7" />}
+          />
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
-          
-          <p className="text-muted-foreground text-lg mb-8">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
