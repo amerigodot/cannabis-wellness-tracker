@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, Coffee, Sparkles, Crown, Check, Copy } from "lucide-react";
+import { Heart, Coffee, Sparkles, Crown, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -74,7 +73,6 @@ const cryptoAddresses = [
 ];
 
 export default function Donate() {
-  const navigate = useNavigate();
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -109,33 +107,16 @@ export default function Donate() {
         canonicalUrl="https://medical-marijuana-journal.lovable.app/donate"
       />
       <div className="min-h-screen flex flex-col bg-background">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
-      
-      <div className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-8"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
-        </Button>
+        <div className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
+          <PageHeader
+            title="Support Us"
+            description="Your contribution helps keep this app free, private, and ad-free for everyone."
+            breadcrumbs={[{ label: "Donate" }]}
+            icon={<Heart className="h-6 w-6 sm:h-7 sm:w-7" />}
+          />
 
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <Heart className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Support Cannabis Wellness Tracker</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your contribution helps us keep this app free, private, and ad-free for everyone. 
-            Every donation directly supports development, hosting, and new features.
-          </p>
-        </div>
-
-        {/* Contribution Tiers */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {/* Contribution Tiers */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
           {contributionTiers.map((tier) => {
             const Icon = tier.icon;
             const isSelected = selectedTier === tier.id;

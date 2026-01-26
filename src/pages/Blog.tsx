@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
-import { ArrowLeft, Search, Calendar, Clock, Tag } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
+import { Search, Calendar, Clock, Tag, BookOpen } from "lucide-react";
 import { blogPosts, getAllCategories, getAllTags } from "@/data/blogPosts";
 
 export default function Blog() {
@@ -46,27 +46,13 @@ export default function Blog() {
         canonicalUrl="https://medical-marijuana-journal.lovable.app/blog"
       />
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
-        
-        <div className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="mb-8"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
-          </Button>
-
-          {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold mb-4">Medical Marijuana Insights & Guides</h1>
-            <p className="text-lg text-muted-foreground">
-              Expert articles on tracking, strain selection, and wellness optimization
-            </p>
-          </div>
+        <div className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
+          <PageHeader
+            title="Blog"
+            description="Expert articles on tracking, strain selection, and wellness optimization"
+            breadcrumbs={[{ label: "Blog" }]}
+            icon={<BookOpen className="h-6 w-6 sm:h-7 sm:w-7" />}
+          />
 
           {/* Search and Filters */}
           <div className="mb-8 space-y-4">

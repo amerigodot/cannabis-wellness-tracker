@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ShieldAlert, Stethoscope, Activity, Lock, Loader2, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import { PageHeader } from "@/components/PageHeader";
+import { Footer } from "@/components/Footer";
 import { CLINICAL_GUIDELINES } from "@/data/knowledgeBase";
 
 const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
@@ -243,25 +245,24 @@ export default function Triage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background">
       <SEO title="Clinical Triage - Edge AI" description="Privacy-first clinical decision support." />
       
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Stethoscope className="h-8 w-8 text-primary" />
-              Clinical Triage (Edge AI)
-            </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                <Lock className="w-3 h-3 mr-1" />
-                Zero-Knowledge Session
-              </span>
-            </div>
-          </div>
-          <Button variant="ghost" onClick={() => navigate("/")}>Exit</Button>
-        </div>
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-5xl">
+        <PageHeader
+          title="Clinical Triage"
+          description="Privacy-first clinical decision support running locally on your device"
+          breadcrumbs={[{ label: "Clinical Triage" }]}
+          icon={<Stethoscope className="h-6 w-6 sm:h-7 sm:w-7" />}
+          actions={
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
+              <Lock className="w-3 h-3 mr-1" />
+              Zero-Knowledge
+            </span>
+          }
+        />
+
+        <div className="space-y-6">
 
         {!engine && (
           <Card className="bg-primary/5 border-primary/20">
@@ -446,7 +447,9 @@ export default function Triage() {
             </Card>
           </div>
         )}
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

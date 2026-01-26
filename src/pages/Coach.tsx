@@ -1,17 +1,19 @@
+import { Brain } from "lucide-react";
 import { EdgeWellnessCoach } from "@/components/EdgeWellnessCoach";
 import { Footer } from "@/components/Footer";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function Coach() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">AI Wellness Coach</h1>
-            <p className="text-muted-foreground">
-              Chat with a private, on-device AI assistant that understands your journal history.
-            </p>
-          </div>
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
+        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+          <PageHeader
+            title="AI Wellness Coach"
+            description="Chat with a private, on-device AI assistant that understands your journal history."
+            breadcrumbs={[{ label: "Coach" }]}
+            icon={<Brain className="h-6 w-6 sm:h-7 sm:w-7" />}
+          />
           
           <EdgeWellnessCoach />
           
