@@ -17,7 +17,6 @@ export type Database = {
       email_preferences: {
         Row: {
           created_at: string
-          email: string
           id: string
           tool_notifications_enabled: boolean
           updated_at: string
@@ -26,7 +25,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email: string
           id?: string
           tool_notifications_enabled?: boolean
           updated_at?: string
@@ -35,7 +33,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email?: string
           id?: string
           tool_notifications_enabled?: boolean
           updated_at?: string

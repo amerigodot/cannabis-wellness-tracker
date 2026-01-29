@@ -130,7 +130,6 @@ export default function Settings() {
         .from("email_preferences")
         .upsert({
           user_id: user.id,
-          email: user.email || "",
           tool_notifications_enabled: enabled,
         });
 

@@ -66,7 +66,7 @@ serve(async (req) => {
     // Get all users with weekly summaries enabled
     const { data: preferences, error: prefsError } = await supabase
       .from("email_preferences")
-      .select("user_id, email")
+      .select("user_id")
       .eq("weekly_summary_enabled", true);
 
     if (prefsError) {
@@ -82,6 +82,16 @@ serve(async (req) => {
     const results = [];
     for (const pref of preferences || []) {
       try {
+        // Get user email from auth.users table
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(pref.user_id);
+        
+        if (userError || !userData?.user?.email) {
+          console.error(`Error fetching user email for ${pref.user_id}:`, userError);
+          continue;
+        }
+        
+        const userEmail = userData.user.email;
+
         // Get entries from the past week
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -184,20 +194,20 @@ Format as HTML bullet points, keep each insight to 1-2 sentences. Be encouraging
 
         const { error: emailError } = await resend.emails.send({
           from: "Wellness Journal <onboarding@resend.dev>",
-          to: [pref.email],
+          to: [userEmail],
           subject: `Your Weekly Wellness Summary - ${entries.length} Entries`,
           html: emailHtml,
         });
 
         if (emailError) {
-          console.error(`Email error for ${pref.email}:`, emailError);
+          console.error(`Email error for ${userEmail}:`, emailError);
         } else {
-          console.log(`Sent weekly summary to ${pref.email}`);
-          results.push({ email: pref.email, status: "sent" });
+          console.log(`Sent weekly summary to ${userEmail}`);
+          results.push({ email: userEmail, status: "sent" });
         }
       } catch (error) {
         console.error(`Error processing user ${pref.user_id}:`, error);
-        results.push({ email: pref.email, status: "failed", error: error instanceof Error ? error.message : "Unknown error" });
+        results.push({ userId: pref.user_id, status: "failed", error: error instanceof Error ? error.message : "Unknown error" });
       }
     }
 

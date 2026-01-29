@@ -71,7 +71,7 @@ serve(async (req) => {
     // Get all users with tool notifications enabled
     const { data: preferences, error: prefsError } = await supabase
       .from("email_preferences")
-      .select("user_id, email")
+      .select("user_id")
       .eq("tool_notifications_enabled", true);
 
     if (prefsError) {
@@ -87,6 +87,16 @@ serve(async (req) => {
     const results = [];
     for (const pref of preferences || []) {
       try {
+        // Get user email from auth.users table
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(pref.user_id);
+        
+        if (userError || !userData?.user?.email) {
+          console.error(`Error fetching user email for ${pref.user_id}:`, userError);
+          continue;
+        }
+        
+        const userEmail = userData.user.email;
+
         // Get user's entry count to determine unlocked tools
         const { count: entryCount } = await supabase
           .from("journal_entries")
@@ -157,23 +167,23 @@ serve(async (req) => {
 
           const { error: emailError } = await resend.emails.send({
             from: "Wellness Journal <onboarding@resend.dev>",
-            to: [pref.email],
+            to: [userEmail],
             subject: `${availableTools.length} Wellness Tool${availableTools.length > 1 ? 's' : ''} Available!`,
             html: emailHtml,
           });
 
           if (emailError) {
-            console.error(`Email error for ${pref.email}:`, emailError);
-            results.push({ email: pref.email, status: "failed", error: emailError.message });
+            console.error(`Email error for ${userEmail}:`, emailError);
+            results.push({ email: userEmail, status: "failed", error: emailError.message });
           } else {
-            console.log(`Sent tool notification to ${pref.email} (${availableTools.length} tools)`);
-            results.push({ email: pref.email, status: "sent", tools: availableTools.length });
+            console.log(`Sent tool notification to ${userEmail} (${availableTools.length} tools)`);
+            results.push({ email: userEmail, status: "sent", tools: availableTools.length });
           }
         }
       } catch (error) {
         console.error(`Error processing user ${pref.user_id}:`, error);
         results.push({ 
-          email: pref.email, 
+          userId: pref.user_id, 
           status: "failed", 
           error: error instanceof Error ? error.message : "Unknown error" 
         });
