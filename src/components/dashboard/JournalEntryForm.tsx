@@ -36,10 +36,20 @@ import {
 interface JournalEntryFormProps {
   isDemoMode: boolean;
   onSubmit: (data: Omit<JournalEntry, 'id' | 'user_id' | 'created_at'>) => Promise<boolean>;
+  onUpdate: (entryId: string, updates: Partial<JournalEntry>) => Promise<boolean>;
   lastEntry?: JournalEntry | null;
+  pendingEntryToComplete?: JournalEntry | null;
+  onCancelPendingCompletion?: () => void;
 }
 
-export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEntryFormProps) => {
+export const JournalEntryForm = ({ 
+  isDemoMode, 
+  onSubmit, 
+  onUpdate,
+  lastEntry, 
+  pendingEntryToComplete,
+  onCancelPendingCompletion,
+}: JournalEntryFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
@@ -100,8 +110,10 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
     localStorage.setItem('sideEffectsOpen', JSON.stringify(sideEffectsOpen));
   }, [sideEffectsOpen]);
 
-  // Set defaults from last entry
+  // Set defaults from last entry (only when not completing a pending entry)
   useEffect(() => {
+    if (pendingEntryToComplete) return; // Skip if completing pending entry
+    
     if (lastEntry) {
       setValue("strain", lastEntry.strain);
       setValue("strain2", lastEntry.strain_2 || "");
@@ -115,7 +127,47 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
         setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
       }
     }
-  }, [lastEntry, setValue]);
+  }, [lastEntry, setValue, pendingEntryToComplete]);
+
+  // Populate form when completing a pending entry
+  useEffect(() => {
+    if (!pendingEntryToComplete) return;
+    
+    // Populate consumption details from the pending entry
+    setValue("strain", pendingEntryToComplete.strain);
+    setValue("strain2", pendingEntryToComplete.strain_2 || "");
+    setValue("thcPercentage", pendingEntryToComplete.thc_percentage?.toString() || "");
+    setValue("cbdPercentage", pendingEntryToComplete.cbd_percentage?.toString() || "");
+    setValue("method", pendingEntryToComplete.method);
+    setValue("selectedIcon", pendingEntryToComplete.icon || "leaf");
+    setValue("observations", pendingEntryToComplete.observations || []);
+    setValue("activities", pendingEntryToComplete.activities || []);
+    setValue("negativeSideEffects", pendingEntryToComplete.negative_side_effects || []);
+    setValue("notes", pendingEntryToComplete.notes || "");
+    
+    // Set before state values
+    setValue("beforeMood", pendingEntryToComplete.before_mood || 5);
+    setValue("beforePain", pendingEntryToComplete.before_pain || 5);
+    setValue("beforeAnxiety", pendingEntryToComplete.before_anxiety || 5);
+    setValue("beforeEnergy", pendingEntryToComplete.before_energy || 5);
+    setValue("beforeFocus", pendingEntryToComplete.before_focus || 5);
+    setValue("beforeNotes", pendingEntryToComplete.before_notes || "");
+    
+    // Parse dosage
+    const dosageMatch = pendingEntryToComplete.dosage.match(/^([\d.]+)(\w+)$/);
+    if (dosageMatch) {
+      setValue("dosageAmount", dosageMatch[1]);
+      setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
+    }
+    
+    // Switch to Full Tracking mode and go to "after" tab
+    setValue("isQuickEntry", false);
+    setValue("entryFormTab", "after");
+    
+    // Set time to 0 (now) since we're completing the entry
+    setValue("minutesAgo", 0);
+    
+  }, [pendingEntryToComplete, setValue]);
 
   const toggleArrayItem = (field: "observations" | "activities" | "negativeSideEffects", item: string) => {
     const current = watch(field);
@@ -163,11 +215,20 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
     setIsSubmitting(true);
     
     const dosage = `${data.dosageAmount}${data.dosageUnit}`;
-    const consumptionTime = new Date();
-    consumptionTime.setMinutes(consumptionTime.getMinutes() - sliderValueToMinutes(data.minutesAgo));
+    
+    // If completing a pending entry, we use the original consumption time
+    // Otherwise, calculate from minutesAgo
+    let consumptionTime: Date;
+    if (pendingEntryToComplete) {
+      consumptionTime = new Date(pendingEntryToComplete.consumption_time || pendingEntryToComplete.created_at);
+    } else {
+      consumptionTime = new Date();
+      consumptionTime.setMinutes(consumptionTime.getMinutes() - sliderValueToMinutes(data.minutesAgo));
+    }
 
+    // When completing a pending entry, always set status to complete
     let status: 'pending_after' | 'complete' = 'complete';
-    if (!data.isQuickEntry && data.entryFormTab !== 'after') {
+    if (!pendingEntryToComplete && !data.isQuickEntry && data.entryFormTab !== 'after') {
       status = 'pending_after';
     }
 
@@ -185,21 +246,36 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
       icon: data.selectedIcon,
       consumption_time: consumptionTime.toISOString(),
       entry_status: status,
-      before_mood: !data.isQuickEntry ? data.beforeMood : null,
-      before_pain: !data.isQuickEntry ? data.beforePain : null,
-      before_anxiety: !data.isQuickEntry ? data.beforeAnxiety : null,
-      before_energy: !data.isQuickEntry ? data.beforeEnergy : null,
-      before_focus: !data.isQuickEntry ? data.beforeFocus : null,
-      before_notes: !data.isQuickEntry ? data.beforeNotes : null,
-      after_mood: !data.isQuickEntry && data.entryFormTab === 'after' ? data.afterMood : null,
-      after_pain: !data.isQuickEntry && data.entryFormTab === 'after' ? data.afterPain : null,
-      after_anxiety: !data.isQuickEntry && data.entryFormTab === 'after' ? data.afterAnxiety : null,
-      after_energy: !data.isQuickEntry && data.entryFormTab === 'after' ? data.afterEnergy : null,
-      after_focus: !data.isQuickEntry && data.entryFormTab === 'after' ? data.afterFocus : null,
-      effects_duration_minutes: !data.isQuickEntry && data.entryFormTab === 'after' ? data.effectsDurationMinutes : null,
+      // For pending entry completion, preserve the original before values
+      before_mood: pendingEntryToComplete ? pendingEntryToComplete.before_mood : (!data.isQuickEntry ? data.beforeMood : null),
+      before_pain: pendingEntryToComplete ? pendingEntryToComplete.before_pain : (!data.isQuickEntry ? data.beforePain : null),
+      before_anxiety: pendingEntryToComplete ? pendingEntryToComplete.before_anxiety : (!data.isQuickEntry ? data.beforeAnxiety : null),
+      before_energy: pendingEntryToComplete ? pendingEntryToComplete.before_energy : (!data.isQuickEntry ? data.beforeEnergy : null),
+      before_focus: pendingEntryToComplete ? pendingEntryToComplete.before_focus : (!data.isQuickEntry ? data.beforeFocus : null),
+      before_notes: pendingEntryToComplete ? pendingEntryToComplete.before_notes : (!data.isQuickEntry ? data.beforeNotes : null),
+      // For pending entry completion, we're on the after tab, so always save after values
+      after_mood: pendingEntryToComplete ? data.afterMood : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.afterMood : null),
+      after_pain: pendingEntryToComplete ? data.afterPain : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.afterPain : null),
+      after_anxiety: pendingEntryToComplete ? data.afterAnxiety : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.afterAnxiety : null),
+      after_energy: pendingEntryToComplete ? data.afterEnergy : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.afterEnergy : null),
+      after_focus: pendingEntryToComplete ? data.afterFocus : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.afterFocus : null),
+      effects_duration_minutes: pendingEntryToComplete ? data.effectsDurationMinutes : (!data.isQuickEntry && data.entryFormTab === 'after' ? data.effectsDurationMinutes : null),
     };
 
-    const success = await onSubmit(entryData);
+    let success: boolean;
+    
+    if (pendingEntryToComplete) {
+      // Update the existing pending entry
+      success = await onUpdate(pendingEntryToComplete.id, entryData);
+      if (success) {
+        onCancelPendingCompletion?.(); // Clear the pending entry state
+        toast.success("Entry completed successfully!");
+      }
+    } else {
+      // Create a new entry
+      success = await onSubmit(entryData);
+    }
+    
     setIsSubmitting(false);
 
     if (success) {
@@ -689,12 +765,37 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
   const IconComponent = getIconComponent(selectedIcon);
 
   return (
-    <Card id="new-entry-card" className="p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <Card id="new-entry-card" className={`p-6 md:p-8 mb-8 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-hover)] transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700 ${pendingEntryToComplete ? 'ring-2 ring-accent border-accent' : ''}`}>
       <form onSubmit={handleSubmit(handleFormSubmit)}>
+        {/* Pending Entry Completion Banner */}
+        {pendingEntryToComplete && (
+          <div className="mb-6 p-4 bg-accent/20 border border-accent rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-semibold text-accent">Completing Pending Entry</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pendingEntryToComplete.strain} - {new Date(pendingEntryToComplete.consumption_time || pendingEntryToComplete.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancelPendingCompletion}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+        
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold flex items-center gap-2">
             <Calendar className="w-6 h-6 text-primary" />
-            New Entry
+            {pendingEntryToComplete ? "Complete Entry" : "New Entry"}
           </h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -725,32 +826,34 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
           </DropdownMenu>
         </div>
 
-        {/* Entry Mode Toggle */}
-        <div className="flex items-center justify-between p-4 mb-6 bg-muted/30 rounded-lg border border-border/50">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="entry-mode" className="text-sm font-semibold cursor-pointer">
-              {isQuickEntry ? "Quick Entry Mode" : "Full Tracking Mode"}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {isQuickEntry 
-                ? "Fast logging with consumption details and observations only" 
-                : "Track before/after states with detailed effectiveness metrics"}
-            </p>
+        {/* Entry Mode Toggle - hide when completing pending entry */}
+        {!pendingEntryToComplete && (
+          <div className="flex items-center justify-between p-4 mb-6 bg-muted/30 rounded-lg border border-border/50">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="entry-mode" className="text-sm font-semibold cursor-pointer">
+                {isQuickEntry ? "Quick Entry Mode" : "Full Tracking Mode"}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {isQuickEntry 
+                  ? "Fast logging with consumption details and observations only" 
+                  : "Track before/after states with detailed effectiveness metrics"}
+              </p>
+            </div>
+            <Controller
+              name="isQuickEntry"
+              control={control}
+              render={({ field }) => (
+                <Switch
+                  id="entry-mode"
+                  checked={!field.value}
+                  onCheckedChange={(checked) => field.onChange(!checked)}
+                />
+              )}
+            />
           </div>
-          <Controller
-            name="isQuickEntry"
-            control={control}
-            render={({ field }) => (
-              <Switch
-                id="entry-mode"
-                checked={!field.value}
-                onCheckedChange={(checked) => field.onChange(!checked)}
-              />
-            )}
-          />
-        </div>
+        )}
 
-        {isQuickEntry ? (
+        {isQuickEntry && !pendingEntryToComplete ? (
           <div className="space-y-6">
             {renderConsumptionFields()}
             {renderExperienceCard()}
@@ -876,7 +979,12 @@ export const JournalEntryForm = ({ isDemoMode, onSubmit, lastEntry }: JournalEnt
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    {pendingEntryToComplete ? 'Completing...' : 'Saving...'}
+                  </>
+                ) : pendingEntryToComplete ? (
+                  <>
+                    <Activity className="mr-2 h-4 w-4" />
+                    Complete Entry
                   </>
                 ) : (
                   'Save Complete Entry'
