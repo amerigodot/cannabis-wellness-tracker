@@ -44,6 +44,9 @@ const Index = () => {
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
+  
+  // Pending entry completion state
+  const [pendingEntryToComplete, setPendingEntryToComplete] = useState<JournalEntry | null>(null);
 
   // Auth effect
   useEffect(() => {
@@ -161,15 +164,20 @@ const Index = () => {
       return;
     }
     
-    // Navigate to the form and populate with entry data
+    // Find the entry and set it for completion
     const entry = entries.find(e => e.id === entryId);
     if (!entry) return;
     
-    // Delete the pending entry, user will re-create with after data
-    await supabase.from("journal_entries").delete().eq("id", entryId);
+    // Set the entry for completion - form will handle updating it
+    setPendingEntryToComplete(entry);
     
+    // Scroll to form
     document.getElementById('new-entry-card')?.scrollIntoView({ behavior: 'smooth' });
     toast.info("Complete the 'After' state to finish this entry");
+  };
+  
+  const handleCancelPendingCompletion = () => {
+    setPendingEntryToComplete(null);
   };
 
 
@@ -277,7 +285,10 @@ const Index = () => {
         <JournalEntryForm 
           isDemoMode={isDemoMode}
           onSubmit={createEntry}
+          onUpdate={updateEntry}
           lastEntry={entries[0] || null}
+          pendingEntryToComplete={pendingEntryToComplete}
+          onCancelPendingCompletion={handleCancelPendingCompletion}
         />
 
         {/* Insights Chart */}
