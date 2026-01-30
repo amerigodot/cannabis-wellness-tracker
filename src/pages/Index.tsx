@@ -12,13 +12,16 @@ import { LandingPage } from "@/components/LandingPage";
 import { AchievementBadges } from "@/components/AchievementBadges";
 import { EntryList } from "@/components/dashboard/EntryList";
 import { JournalEntryForm } from "@/components/dashboard/JournalEntryForm";
+import { UnlockPrompt } from "@/components/UnlockPrompt";
+import { MigrationWizard } from "@/components/MigrationWizard";
+import { useEncryption } from "@/contexts/EncryptionContext";
 
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope } from "lucide-react";
+import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
@@ -47,8 +50,16 @@ const Index = () => {
   
   // Pending entry completion state
   const [pendingEntryToComplete, setPendingEntryToComplete] = useState<JournalEntry | null>(null);
-
-  // Auth effect
+  
+  // Encryption/Privacy state
+  const { 
+    encryptionEnabled, 
+    isUnlocked, 
+    isLoading: encryptionLoading, 
+    needsMigration, 
+    setNeedsMigration 
+  } = useEncryption();
+  const [showMigrationWizard, setShowMigrationWizard] = useState(false);
   useEffect(() => {
     const demoMode = localStorage.getItem("demoMode") === "true";
     
@@ -99,6 +110,17 @@ const Index = () => {
     timeRangeFilter,
     setTimeRangeFilter,
   } = useJournalEntries(user);
+
+  // Prompt for migration if user has unencrypted entries
+  useEffect(() => {
+    if (!isDemoMode && user && needsMigration && !encryptionEnabled) {
+      // Delay showing to not overwhelm on first load
+      const timer = setTimeout(() => {
+        setShowMigrationWizard(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isDemoMode, user, needsMigration, encryptionEnabled]);
 
   const handleDelete = (entryId: string) => {
     setDeleteEntryId(entryId);
@@ -182,7 +204,7 @@ const Index = () => {
 
 
 
-  if (authLoading || entriesLoading) {
+  if (authLoading || entriesLoading || encryptionLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Loading...</p>
@@ -192,6 +214,30 @@ const Index = () => {
   
   if (!user && !isDemoMode) {
     return <LandingPage />;
+  }
+
+  // Show unlock prompt if encryption is enabled but not unlocked
+  if (!isDemoMode && encryptionEnabled && !isUnlocked) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <UnlockPrompt />
+      </div>
+    );
+  }
+
+  // Show migration wizard if prompted
+  if (showMigrationWizard && !encryptionEnabled) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <MigrationWizard 
+          onComplete={() => {
+            setShowMigrationWizard(false);
+            setNeedsMigration(false);
+          }}
+          onSkip={() => setShowMigrationWizard(false)}
+        />
+      </div>
+    );
   }
 
   return (

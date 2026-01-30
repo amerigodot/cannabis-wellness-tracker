@@ -17,7 +17,9 @@ export type Database = {
       email_preferences: {
         Row: {
           created_at: string
+          data_migrated_at: string | null
           id: string
+          privacy_mode_enabled: boolean
           tool_notifications_enabled: boolean
           updated_at: string
           user_id: string
@@ -25,7 +27,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          data_migrated_at?: string | null
           id?: string
+          privacy_mode_enabled?: boolean
           tool_notifications_enabled?: boolean
           updated_at?: string
           user_id: string
@@ -33,7 +37,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          data_migrated_at?: string | null
           id?: string
+          privacy_mode_enabled?: boolean
           tool_notifications_enabled?: boolean
           updated_at?: string
           user_id?: string
@@ -87,6 +93,8 @@ export type Database = {
           created_at: string
           dosage: string
           effects_duration_minutes: number | null
+          encrypted_data: string | null
+          encryption_version: number | null
           entry_status: string | null
           icon: string | null
           id: string
@@ -118,6 +126,8 @@ export type Database = {
           created_at?: string
           dosage: string
           effects_duration_minutes?: number | null
+          encrypted_data?: string | null
+          encryption_version?: number | null
           entry_status?: string | null
           icon?: string | null
           id?: string
@@ -149,6 +159,8 @@ export type Database = {
           created_at?: string
           dosage?: string
           effects_duration_minutes?: number | null
+          encrypted_data?: string | null
+          encryption_version?: number | null
           entry_status?: string | null
           icon?: string | null
           id?: string
@@ -241,6 +253,30 @@ export type Database = {
           id?: string
           last_used_at?: string
           tool_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_encryption_salts: {
+        Row: {
+          created_at: string
+          key_version: number
+          password_salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          key_version?: number
+          password_salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          key_version?: number
+          password_salt?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
