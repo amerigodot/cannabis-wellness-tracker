@@ -58,7 +58,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendKey = Deno.env.get("RESEND_API_KEY")!;
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     const resend = new Resend(resendKey);
@@ -66,7 +65,7 @@ serve(async (req) => {
     // Get all users with weekly summaries enabled
     const { data: preferences, error: prefsError } = await supabase
       .from("email_preferences")
-      .select("user_id")
+      .select("user_id, privacy_mode_enabled")
       .eq("weekly_summary_enabled", true);
 
     if (prefsError) {
@@ -92,110 +91,109 @@ serve(async (req) => {
         
         const userEmail = userData.user.email;
 
-        // Get entries from the past week
+        // Get entries from the past week (only count, don't read content for privacy)
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        const { data: entries, error: entriesError } = await supabase
+        const { count: weeklyCount, error: weeklyError } = await supabase
           .from("journal_entries")
-          .select("*")
+          .select("*", { count: "exact", head: true })
           .eq("user_id", pref.user_id)
           .eq("is_deleted", false)
-          .gte("created_at", oneWeekAgo.toISOString())
-          .order("created_at", { ascending: false });
+          .gte("created_at", oneWeekAgo.toISOString());
 
-        if (entriesError || !entries || entries.length === 0) {
-          console.log(`No entries for user ${pref.user_id}`);
+        if (weeklyError) {
+          console.error(`Error counting entries for ${pref.user_id}:`, weeklyError);
+          continue;
+        }
+
+        const entriesThisWeek = weeklyCount || 0;
+
+        // Skip if no entries this week
+        if (entriesThisWeek === 0) {
+          console.log(`No entries for user ${pref.user_id} this week`);
           continue;
         }
 
         // Get total entry count for milestone progress
-        const { count } = await supabase
+        const { count: totalCount } = await supabase
           .from("journal_entries")
           .select("*", { count: "exact", head: true })
           .eq("user_id", pref.user_id)
           .eq("is_deleted", false);
 
+        const total = totalCount || 0;
+
         // Calculate next milestone
-        const milestones = [10, 50, 100];
-        const nextMilestone = milestones.find(m => (count || 0) < m) || 100;
-        const remainingToMilestone = nextMilestone - (count || 0);
+        const milestones = [10, 50, 100, 250, 500];
+        const nextMilestone = milestones.find(m => total < m) || 500;
+        const remainingToMilestone = nextMilestone - total;
 
-        // Generate mini-insights using Lovable AI
-        const prompt = `Analyze these ${entries.length} wellness journal entries from the past week and provide 3-5 brief, actionable insights. Focus on patterns, positive trends, and gentle recommendations.
+        // Privacy-first email: Only counts, no content analysis
+        // User's data is encrypted client-side, server cannot read it
+        const isPrivacyMode = pref.privacy_mode_enabled;
 
-Entries: ${JSON.stringify(entries.slice(0, 20).map(e => ({
-  strain: e.strain,
-  dosage: e.dosage,
-  method: e.method,
-  observations: e.observations,
-  activities: e.activities,
-})))}
-
-Format as HTML bullet points, keep each insight to 1-2 sentences. Be encouraging and supportive.`;
-
-        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              { role: "system", content: "You are a supportive wellness coach providing brief insights." },
-              { role: "user", content: prompt },
-            ],
-            temperature: 0.7,
-          }),
-        });
-
-        if (!aiResponse.ok) {
-          console.error(`AI error for user ${pref.user_id}:`, aiResponse.status);
-          continue;
-        }
-
-        const aiData = await aiResponse.json();
-        const insights = aiData.choices[0].message.content;
-
-        // Send email
         const emailHtml = `
-          <h2>Your Weekly Wellness Summary 🌿</h2>
-          <p>Hi! Here's your wellness summary for the past week.</p>
-          
-          <h3>📊 Week in Review</h3>
-          <ul>
-            <li><strong>${entries.length}</strong> entries logged this week</li>
-            <li><strong>${count}</strong> total entries</li>
-            <li><strong>${remainingToMilestone}</strong> entries until your next milestone (${nextMilestone})</li>
-          </ul>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #9b87f5;">Your Weekly Wellness Summary 🌿</h2>
+            <p>Hi! Here's your wellness summary for the past week.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #333;">📊 Week in Review</h3>
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                  <strong>${entriesThisWeek}</strong> entries logged this week
+                </li>
+                <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                  <strong>${total}</strong> total entries in your journal
+                </li>
+                <li style="padding: 8px 0;">
+                  <strong>${remainingToMilestone}</strong> entries until your next milestone (${nextMilestone})
+                </li>
+              </ul>
+            </div>
 
-          <h3>💡 Mini-Insights</h3>
-          ${insights}
+            ${isPrivacyMode ? `
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #2e7d32;">
+                <strong>🔒 Privacy Mode Active</strong><br>
+                <span style="font-size: 14px;">Your journal data is encrypted end-to-end. Only you can read your entries.</span>
+              </p>
+            </div>
+            ` : `
+            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #e65100;">
+                <strong>💡 Enable Privacy Mode</strong><br>
+                <span style="font-size: 14px;">Encrypt your journal for complete privacy. Visit Settings to enable.</span>
+              </p>
+            </div>
+            `}
 
-          ${remainingToMilestone <= 10 ? `
-            <p style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
-              <strong>🎯 Almost there!</strong><br>
-              You're just ${remainingToMilestone} entries away from unlocking new wellness tools at ${nextMilestone} entries!
+            ${remainingToMilestone <= 10 ? `
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <strong>🎯 Almost there!</strong><br>
+                You're just ${remainingToMilestone} entries away from unlocking new wellness achievements at ${nextMilestone} entries!
+              </div>
+            ` : ''}
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="https://cannabis-wellness-tracker.lovable.app" 
+                 style="background: #9b87f5; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 500;">
+                Open Your Journal
+              </a>
+            </div>
+
+            <p style="color: #666; font-size: 12px; margin-top: 30px; text-align: center;">
+              You're receiving this because you have weekly summaries enabled.<br>
+              <a href="https://cannabis-wellness-tracker.lovable.app/settings" style="color: #9b87f5;">Manage email preferences</a>
             </p>
-          ` : ''}
-
-          <p style="margin-top: 30px;">
-            <a href="${supabaseUrl.replace('supabase.co', 'lovable.app')}" style="background: #9b87f5; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">
-              View Full Dashboard
-            </a>
-          </p>
-
-          <p style="color: #666; font-size: 12px; margin-top: 30px;">
-            You're receiving this because you have weekly summaries enabled. 
-            <a href="${supabaseUrl.replace('supabase.co', 'lovable.app')}/settings">Manage preferences</a>
-          </p>
+          </div>
         `;
 
         const { error: emailError } = await resend.emails.send({
           from: "Wellness Journal <onboarding@resend.dev>",
           to: [userEmail],
-          subject: `Your Weekly Wellness Summary - ${entries.length} Entries`,
+          subject: `Your Weekly Wellness Summary - ${entriesThisWeek} Entries`,
           html: emailHtml,
         });
 
