@@ -214,11 +214,11 @@ export function LandingPage() {
       <main className="flex-1 flex flex-col">
         {/* Hero Section - Demo Mode Emphasized */}
         <section className="flex items-center justify-center px-4 py-12 md:py-16">
-          <div className="w-full max-w-4xl text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <div className="w-full max-w-4xl text-center px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-tight">
               Track Your Cannabis Wellness Journey
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-2xl mx-auto px-2">
               Discover patterns, optimize your experience, and take control of your wellness with private, encrypted tracking
             </p>
             
@@ -255,8 +255,8 @@ export function LandingPage() {
         {/* App Functionality Section */}
         <section className="px-4 py-12 bg-muted/30">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">Everything You Need to Optimize Your Wellness</h2>
-            <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 px-2">Everything You Need to Optimize Your Wellness</h2>
+            <p className="text-center text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto px-2 text-sm sm:text-base">
               Comprehensive tracking tools with powerful insights to help you discover what works best
             </p>
             
