@@ -146,12 +146,25 @@ export const JournalEntryForm = ({
     setValue("notes", pendingEntryToComplete.notes || "");
     
     // Set before state values
-    setValue("beforeMood", pendingEntryToComplete.before_mood || 5);
-    setValue("beforePain", pendingEntryToComplete.before_pain || 5);
-    setValue("beforeAnxiety", pendingEntryToComplete.before_anxiety || 5);
-    setValue("beforeEnergy", pendingEntryToComplete.before_energy || 5);
-    setValue("beforeFocus", pendingEntryToComplete.before_focus || 5);
+    const beforeMood = pendingEntryToComplete.before_mood || 5;
+    const beforePain = pendingEntryToComplete.before_pain || 5;
+    const beforeAnxiety = pendingEntryToComplete.before_anxiety || 5;
+    const beforeEnergy = pendingEntryToComplete.before_energy || 5;
+    const beforeFocus = pendingEntryToComplete.before_focus || 5;
+    
+    setValue("beforeMood", beforeMood);
+    setValue("beforePain", beforePain);
+    setValue("beforeAnxiety", beforeAnxiety);
+    setValue("beforeEnergy", beforeEnergy);
+    setValue("beforeFocus", beforeFocus);
     setValue("beforeNotes", pendingEntryToComplete.before_notes || "");
+    
+    // Default after state values to before state values (user can adjust from there)
+    setValue("afterMood", beforeMood);
+    setValue("afterPain", beforePain);
+    setValue("afterAnxiety", beforeAnxiety);
+    setValue("afterEnergy", beforeEnergy);
+    setValue("afterFocus", beforeFocus);
     
     // Parse dosage
     const dosageMatch = pendingEntryToComplete.dosage.match(/^([\d.]+)(\w+)$/);
