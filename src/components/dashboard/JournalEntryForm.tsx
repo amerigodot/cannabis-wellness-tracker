@@ -967,6 +967,55 @@ export const JournalEntryForm = ({
             </TabsContent>
 
             <TabsContent value="after" className="space-y-6">
+              {/* Show pending entry summary when completing */}
+              {pendingEntryToComplete && (
+                <div className="p-4 bg-muted/50 rounded-lg border border-border/50 mb-4">
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Entry Summary</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground block text-xs">Strain</span>
+                      <span className="font-medium">{pendingEntryToComplete.strain}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-xs">Dosage</span>
+                      <span className="font-medium">{pendingEntryToComplete.dosage}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-xs">Method</span>
+                      <span className="font-medium">{pendingEntryToComplete.method}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-xs">Consumed</span>
+                      <span className="font-medium">
+                        {new Date(pendingEntryToComplete.consumption_time || pendingEntryToComplete.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2 mt-3 pt-3 border-t border-border/50 text-xs text-center">
+                    <div>
+                      <span className="text-muted-foreground block">Mood</span>
+                      <span className="font-semibold">{pendingEntryToComplete.before_mood || 5}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block">Pain</span>
+                      <span className="font-semibold">{pendingEntryToComplete.before_pain || 5}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block">Anxiety</span>
+                      <span className="font-semibold">{pendingEntryToComplete.before_anxiety || 5}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block">Energy</span>
+                      <span className="font-semibold">{pendingEntryToComplete.before_energy || 5}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block">Focus</span>
+                      <span className="font-semibold">{pendingEntryToComplete.before_focus || 5}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <p className="text-sm text-muted-foreground mb-4">
                 Track how you're feeling after consumption and record your experience
               </p>
