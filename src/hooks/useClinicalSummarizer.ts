@@ -112,8 +112,24 @@ export function useClinicalSummarizer() {
     }
   };
 
-  return {
-    generateSummary,
-    ...state
-  };
-}
+    const resetSummary = () => {
+
+      setState(prev => ({ ...prev, summary: "" }));
+
+    };
+
+  
+
+    return {
+
+      generateSummary,
+
+      resetSummary,
+
+      ...state
+
+    };
+
+  }
+
+  

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -50,12 +50,12 @@ export default function ClinicianDashboard() {
   
   // Clinical Data State
   const [patientMetrics, setPatientMetrics] = useState<ClinicalMetrics | null>(null);
+  const [patientEntries, setPatientEntries] = useState<JournalEntry[]>([]);
   const [metricsLoading, setMetricsLoading] = useState(false);
   const [activeRegimen, setActiveRegimen] = useState<CannabisRegimen | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
   
   // AI Summarizer Hook
-  const { generateSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
+  const { generateSummary, resetSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
 
   const loadPatients = useCallback(async (demo: boolean) => {
     if (demo) {
@@ -142,8 +142,13 @@ export default function ClinicianDashboard() {
     if (!selectedPatientId) {
       setPatientMetrics(null);
       setActiveRegimen(null);
+      setPatientEntries([]);
+      resetSummary();
       return;
     }
+    
+    // Reset summary for new patient
+    resetSummary();
 
     const fetchPatientData = async () => {
       setMetricsLoading(true);
@@ -166,6 +171,7 @@ export default function ClinicianDashboard() {
             }));
           }
 
+          setPatientEntries(mockEntries);
           setPatientMetrics(computeClinicalFeatures(mockEntries));
           
           // Process trends for chart (Demo)
@@ -205,11 +211,12 @@ export default function ClinicianDashboard() {
             .limit(50);
 
           if (entriesError) throw entriesError;
-          const realEntries = entriesData as unknown as JournalEntry[];
-          setPatientMetrics(computeClinicalFeatures(realEntries));
+          const typedEntries = entriesData as unknown as JournalEntry[];
+          setPatientEntries(typedEntries);
+          setPatientMetrics(computeClinicalFeatures(typedEntries));
           
           // Process trends for chart (Real)
-          const trends = realEntries
+          const trends = typedEntries
             .sort((a, b) => new Date(a.consumption_time || a.created_at).getTime() - new Date(b.consumption_time || b.created_at).getTime())
             .map(e => ({
               date: e.consumption_time || e.created_at,
@@ -228,7 +235,7 @@ export default function ClinicianDashboard() {
     };
 
     fetchPatientData();
-  }, [selectedPatientId, isDemoMode]);
+  }, [selectedPatientId, isDemoMode, resetSummary]);
 
   const handleUpdateRegimen = async (newRegimen: CannabisRegimen) => {
     // In a real app, save to Supabase 'care_plans' table
@@ -243,6 +250,39 @@ export default function ClinicianDashboard() {
   };
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
+
+  // Construct trend data from patientEntries
+  const trendData = useMemo(() => {
+    if (!patientEntries.length) return [];
+
+    const groupedData: Record<string, { painSum: number, anxietySum: number, thcSum: number, count: number }> = {};
+
+    patientEntries.forEach(entry => {
+      const date = new Date(entry.consumption_time || entry.created_at).toISOString().split('T')[0];
+      if (!groupedData[date]) {
+        groupedData[date] = { painSum: 0, anxietySum: 0, thcSum: 0, count: 0 };
+      }
+      
+      groupedData[date].painSum += entry.before_pain || 0;
+      groupedData[date].anxietySum += entry.before_anxiety || 0;
+      
+      // Calculate THC (simplified logic, same as augmentation)
+      const doseVal = parseFloat(entry.dosage) || 0;
+      const thcPercent = entry.thc_percentage || 0;
+      const inferredTHC = doseVal * (thcPercent / 100) * 1000;
+      groupedData[date].thcSum += inferredTHC > 0 ? inferredTHC : 5; // fallback
+      
+      groupedData[date].count++;
+    });
+
+    return Object.entries(groupedData).map(([date, data]) => ({
+      date,
+      pain: data.count > 0 ? data.painSum / data.count : 0,
+      anxiety: data.count > 0 ? data.anxietySum / data.count : 0,
+      thc: data.thcSum // Daily total
+    })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [patientEntries]);
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

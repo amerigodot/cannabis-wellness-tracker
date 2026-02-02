@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CannabisRegimen, Product, DosingSchedule } from "@/types/patient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,12 @@ export function CarePlanEditor({ initialRegimen, onSave }: CarePlanEditorProps) 
   const [regimen, setRegimen] = useState<CannabisRegimen>(initialRegimen);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Sync state with prop changes
+  useEffect(() => {
+    setRegimen(initialRegimen);
+    setHasChanges(false);
+  }, [initialRegimen]);
 
   const handleUpdateDosing = (field: keyof DosingSchedule, value: any) => {
     setRegimen(prev => ({
