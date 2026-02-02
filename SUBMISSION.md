@@ -75,11 +75,15 @@ Generic LLMs often give vague advice. Our system is engineered to be:
 3.  Observe the AI analyzing your local journal entries (even if just samples) and generating a Markdown report instantly, without any server calls.
 
 **Step 5: Clinician Portal & Patient Linking**
+*Option A: Direct Access (Demo Only)*
+1.  On the main dashboard header, click the **"Clinician Dashboard"** button (Blue).
+2.  Explore the patient list, trends, and care plan editor immediately.
+
+*Option B: Full Linking Flow*
 1.  Navigate to **"Settings"**.
-2.  Find the **"Clinical Portal"** card (Highlighted in Green/Blue).
-3.  **Patient Flow:** Click **"Generate Linking Code"** -> Observe the secure 6-digit code.
-4.  **Clinician Flow:** Switch to **"Professional Access"** tab -> Enter the code (or use 000000 in Demo Mode) -> Observe the link success.
-5.  Click **"Go to Dashboard"** (Clinician only) to view the medical timeline and Edge AI summaries for the linked patient.
+2.  Find the **"Clinical Portal"** card.
+3.  **Patient Flow:** Click **"Generate Linking Code"**.
+4.  **Clinician Flow:** Switch to **"Professional Access"** tab -> Enter code (or 000000) -> Link.
 
 **Step 6: View Clinical Basis**
 1.  Navigate to **"Tools"** -> **"Clinical Factsheets"**.

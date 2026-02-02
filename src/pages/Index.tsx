@@ -21,7 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope, Lock } from "lucide-react";
+import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope, Lock, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
@@ -32,37 +32,37 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  
+
   // UI state
   const [sortBy, setSortBy] = useState<string>("date-desc");
   const [showRemindersSheet, setShowRemindersSheet] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
-  
+
   // Time edit dialog state
   const [editingTimeEntryId, setEditingTimeEntryId] = useState<string | null>(null);
   const [editingTime, setEditingTime] = useState<Date>(new Date());
-  
+
   // Notes dialog state
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [tempNotes, setTempNotes] = useState("");
-  
+
   // Pending entry completion state
   const [pendingEntryToComplete, setPendingEntryToComplete] = useState<JournalEntry | null>(null);
-  
+
   // Encryption/Privacy state
-  const { 
-    encryptionEnabled, 
-    isUnlocked, 
-    isLoading: encryptionLoading, 
-    needsMigration, 
-    setNeedsMigration 
+  const {
+    encryptionEnabled,
+    isUnlocked,
+    isLoading: encryptionLoading,
+    needsMigration,
+    setNeedsMigration
   } = useEncryption();
   const [showMigrationWizard, setShowMigrationWizard] = useState(false);
   useEffect(() => {
     const demoMode = localStorage.getItem("demoMode") === "true";
-    
+
     if (demoMode) {
       setAuthLoading(false);
       return;
@@ -149,7 +149,7 @@ const Index = () => {
       toast.error("Demo mode is read-only. Sign up to add or edit notes!");
       return;
     }
-    
+
     if (entryId) {
       setEditingEntryId(entryId);
       setTempNotes(existingNotes || "");
@@ -185,19 +185,19 @@ const Index = () => {
       toast.error("Demo mode is read-only. Sign up to complete entries!");
       return;
     }
-    
+
     // Find the entry and set it for completion
     const entry = entries.find(e => e.id === entryId);
     if (!entry) return;
-    
+
     // Set the entry for completion - form will handle updating it
     setPendingEntryToComplete(entry);
-    
+
     // Scroll to form
     document.getElementById('new-entry-card')?.scrollIntoView({ behavior: 'smooth' });
     toast.info("Complete the 'After' state to finish this entry");
   };
-  
+
   const handleCancelPendingCompletion = () => {
     setPendingEntryToComplete(null);
   };
@@ -211,7 +211,7 @@ const Index = () => {
       </main>
     );
   }
-  
+
   if (!user && !isDemoMode) {
     return <LandingPage />;
   }
@@ -229,7 +229,7 @@ const Index = () => {
   if (showMigrationWizard && !encryptionEnabled) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <MigrationWizard 
+        <MigrationWizard
           onComplete={() => {
             setShowMigrationWizard(false);
             setNeedsMigration(false);
@@ -252,8 +252,8 @@ const Index = () => {
                   <ShieldCheck className="h-4 w-4 text-green-600" />
                   Submission Mode (Offline) - All data is stored locally in your browser.
                 </p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => {
                     localStorage.removeItem("demoMode");
@@ -268,8 +268,8 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
             <div className="flex-1 flex flex-wrap gap-2">
               {entries.length >= 10 && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => navigate("/tools")}
                   className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10"
                 >
@@ -277,27 +277,37 @@ const Index = () => {
                   <span className="whitespace-nowrap">Wellness Tools</span>
                 </Button>
               )}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => navigate("/coach")}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10 border-primary/20 bg-primary/5 hover:bg-primary/10"
               >
                 <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-primary" />
                 <span className="whitespace-nowrap">Private AI Coach</span>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => navigate("/triage")}
                 className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10 border-red-200 bg-red-50 hover:bg-red-100 text-red-700 dark:border-red-800/30 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
               >
                 <Stethoscope className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                 <span className="whitespace-nowrap">Clinical Triage</span>
               </Button>
+              {isDemoMode && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/clinician")}
+                  className="gap-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Clinician Dashboard
+                </Button>
+              )}
             </div>
             <div className="flex gap-1.5 sm:gap-2 self-end sm:self-auto">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => navigate("/settings")}
                 className="rounded-full h-9 w-9 sm:h-10 sm:w-10"
               >
@@ -328,7 +338,7 @@ const Index = () => {
         </div>
 
         {/* Entry Form */}
-        <JournalEntryForm 
+        <JournalEntryForm
           isDemoMode={isDemoMode}
           onSubmit={createEntry}
           onUpdate={updateEntry}
@@ -340,7 +350,7 @@ const Index = () => {
         {/* Insights Chart */}
         {entries.length > 0 && (
           <div id="insights-section" className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <InsightsChart 
+            <InsightsChart
               entries={filteredEntries}
               filterObservations={filterObservations}
               setFilterObservations={setFilterObservations}
