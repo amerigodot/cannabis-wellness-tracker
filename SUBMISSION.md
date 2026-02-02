@@ -13,6 +13,7 @@ This project redefines **Medical AI Privacy** by moving the entire clinical deci
 **Key Innovations:**
 *   **Zero-Knowledge Architecture:** Combining `localStorage` for records and `WebLLM` for inference means we achieve 100% data sovereignty.
 *   **Clinician-Patient Shared Dashboard:** A dual-interface platform where patients can securely link their data to healthcare providers using one-time codes and granular consent scopes.
+*   **Edge AI Summarizer:** Generates SOAP-style pre-visit summaries for clinicians using a local Gemma-2B model, automating chart review without data egress.
 *   **Clinical RAG on the Edge:** We embedded a structured JSON knowledge base of 2025 Clinical Guidelines (ACOEM, NCSCT, Bell et al. 2024) that the local model queries in real-time to ground its advice.
 *   **Safety Interceptor:** A deterministic state machine intercepts high-risk inputs (e.g., "chest pain", "suicide") *before* they reach the LLM, ensuring absolute safety compliance.
 

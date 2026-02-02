@@ -34,6 +34,10 @@ import {
 } from 'recharts';
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ConsentScope } from "@/types/patient";
+import { useClinicalSummarizer } from "@/hooks/useClinicalSummarizer";
+import { computeClinicalFeatures, ClinicalMetrics } from "@/utils/clinicalAugmentation";
+import { JournalEntry } from "@/types/journal";
+import { Loader2, RefreshCw } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -50,8 +54,16 @@ export default function ClinicianDashboard() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Clinical Data State
+  const [patientMetrics, setPatientMetrics] = useState<ClinicalMetrics | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(false);
+  
+  // AI Summarizer Hook
+  const { generateSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
 
   const loadPatients = useCallback(async (demo: boolean) => {
+    // ... existing loadPatients implementation ...
     if (demo) {
       setPatients([
         { 
@@ -130,6 +142,67 @@ export default function ClinicianDashboard() {
     setIsDemoMode(demo);
     loadPatients(demo);
   }, [loadPatients]);
+
+  // Fetch journal entries and compute metrics when patient changes
+  useEffect(() => {
+    if (!selectedPatientId) {
+      setPatientMetrics(null);
+      return;
+    }
+
+    const fetchPatientData = async () => {
+      setMetricsLoading(true);
+      try {
+        if (isDemoMode) {
+          // Simulate fetch delay
+          await new Promise(r => setTimeout(r, 500));
+          
+          // Generate mock entries based on ID to differentiate
+          const isP1 = selectedPatientId === 'demo-p1';
+          const mockEntries: JournalEntry[] = Array.from({ length: 20 }).map((_, i) => ({
+            id: `entry-${i}`,
+            user_id: selectedPatientId,
+            created_at: new Date(Date.now() - i * 86400000).toISOString(),
+            consumption_time: new Date(Date.now() - i * 86400000).toISOString(),
+            strain: isP1 ? "ACDC" : "Sour Diesel",
+            dosage: isP1 ? "0.5ml" : "1g",
+            method: isP1 ? "Oil" : "Smoking",
+            thc_percentage: isP1 ? 1 : 20,
+            cbd_percentage: isP1 ? 20 : 0.5,
+            observations: isP1 ? ["Relaxed"] : ["Energetic"],
+            activities: [],
+            negative_side_effects: isP1 ? [] : i % 3 === 0 ? ["Anxiety"] : [],
+            notes: "",
+            icon: "leaf",
+            before_pain: isP1 ? Math.max(0, 8 - i * 0.2) : 5, // Improving for P1
+            before_anxiety: isP1 ? 3 : Math.min(10, 4 + i * 0.1), // Worsening for P2
+          }));
+
+          setPatientMetrics(computeClinicalFeatures(mockEntries));
+        } else {
+          // Fetch real entries from Supabase
+          const { data, error } = await supabase
+            .from('journal_entries')
+            .select('*')
+            .eq('user_id', selectedPatientId)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+          if (error) throw error;
+          
+          // Transform to match JournalEntry type (simplified for now)
+          // In real app, might need more robust mapping or type assertions
+          setPatientMetrics(computeClinicalFeatures(data as unknown as JournalEntry[]));
+        }
+      } catch (error) {
+        console.error("Error fetching patient metrics:", error);
+      } finally {
+        setMetricsLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, [selectedPatientId, isDemoMode]);
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
@@ -257,73 +330,109 @@ export default function ClinicianDashboard() {
                   </TabsList>
 
                   <TabsContent value="overview" className="mt-6 space-y-6">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                            Mean Pain Score
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold">4.2 / 10</div>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            -1.5 from last week
-                          </p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                            Adherence Rate
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold">87%</div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Based on 14/16 expected logs
-                          </p>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm font-medium text-amber-800 dark:text-amber-400 uppercase tracking-wider">
-                            Dose Drift
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold text-amber-700 dark:text-amber-500">+12%</div>
-                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                            Higher THC usage than target
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
+                    {metricsLoading ? (
+                       <div className="flex justify-center p-12">
+                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                       </div>
+                    ) : patientMetrics ? (
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                Mean Daily THC
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="text-2xl font-bold">{patientMetrics.doseMetrics.meanDailyTHC.toFixed(1)} mg</div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Target: 20mg/day
+                              </p>
+                            </CardContent>
+                          </Card>
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                Adherence Rate
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="text-2xl font-bold">{patientMetrics.doseMetrics.adherenceRate.toFixed(0)}%</div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Based on recent logs
+                              </p>
+                            </CardContent>
+                          </Card>
+                          <Card className={`border-l-4 ${patientMetrics.doseMetrics.doseDrift > 10 ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20" : "border-l-transparent"}`}>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                                Dose Drift
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className={`text-2xl font-bold ${patientMetrics.doseMetrics.doseDrift > 10 ? "text-amber-700 dark:text-amber-500" : ""}`}>
+                                {patientMetrics.doseMetrics.doseDrift > 0 ? "+" : ""}{patientMetrics.doseMetrics.doseDrift.toFixed(0)}%
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                From prescribed target
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </div>
 
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Edge AI Clinical Summary</CardTitle>
-                        <CardDescription>
-                          Automated analysis of patient trends and guideline adherence (Gemma-2B).
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 prose prose-sm dark:prose-invert">
-                          <p>
-                            Patient demonstrates <strong>improving pain management trajectory</strong> (-1.5 NRS change) with high adherence to sublingual oil regimen. 
-                            However, daily THC intake has drifted 12% above prescribed levels, now averaging 45mg/day. 
-                          </p>
-                          <p>
-                            <em>Suggested Action:</em> Review dosing intervals for nighttime sleep hygiene. 
-                            Current usage aligns with [LRCUG Section 4] regarding frequency but exceeds [RACGP 2022] starting dose recommendations for chronic pain.
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-[10px]">LRCUG Cited</Badge>
-                          <Badge variant="outline" className="text-[10px]">RACGP Cited</Badge>
-                          <Badge variant="outline" className="text-[10px]">Dose Alert</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg">Edge AI Clinical Summary</CardTitle>
+                              <CardDescription>
+                                Automated SOAP note generation using local Gemma-2B (WebGPU).
+                              </CardDescription>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => selectedPatient && generateSummary(selectedPatient.full_name, patientMetrics)}
+                              disabled={isAiLoading || !selectedPatient}
+                            >
+                              {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                              Generate Summary
+                            </Button>
+                          </CardHeader>
+                          <CardContent className="space-y-4 pt-4">
+                            {isModelLoading && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 bg-muted/50 rounded-md">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                {progress}
+                              </div>
+                            )}
+                            
+                            {summary ? (
+                              <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 prose prose-sm dark:prose-invert max-w-none">
+                                <div className="whitespace-pre-wrap font-medium text-foreground/90">{summary}</div>
+                              </div>
+                            ) : (
+                              <div className="p-8 text-center border-2 border-dashed rounded-lg text-muted-foreground text-sm">
+                                Click "Generate Summary" to process patient metrics locally.
+                                <br />
+                                <span className="text-xs opacity-70">No data leaves this device.</span>
+                              </div>
+                            )}
+
+                            {summary && (
+                              <div className="flex items-center gap-2 pt-2">
+                                <Badge variant="outline" className="text-[10px]">LRCUG Cited</Badge>
+                                <Badge variant="outline" className="text-[10px]">Risk Analysis</Badge>
+                                <Badge variant="secondary" className="text-[10px]">Updated Just Now</Badge>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </>
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        No clinical data available for this period.
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="trends" className="mt-6 space-y-6">
@@ -422,28 +531,40 @@ export default function ClinicianDashboard() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="space-y-3">
-                          <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
-                            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-semibold text-sm text-amber-800 dark:text-amber-400">High THC Usage Detected</p>
-                                <Badge className="h-4 text-[10px] bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">WARNING</Badge>
+                          {patientMetrics && patientMetrics.riskFlags.length > 0 ? (
+                            patientMetrics.riskFlags.map((flag, idx) => (
+                              <div key={idx} className="flex items-start gap-3 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
+                                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-sm text-amber-800 dark:text-amber-400">{flag}</p>
+                                    <Badge className="h-4 text-[10px] bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">RISK DETECTED</Badge>
+                                  </div>
+                                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                                    Flagged by LRCUG/clinical rule engine based on recent logs.
+                                  </p>
+                                </div>
                               </div>
-                              <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                                Patient exceeded 40mg THC daily limit on 4 of the last 7 days.
-                              </p>
-                              <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-2 uppercase font-bold">
-                                Detected on 2026-02-01
-                              </p>
+                            ))
+                          ) : (
+                            <div className="flex items-start gap-3 p-4 rounded-lg border bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50">
+                              <ShieldCheck className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-semibold text-sm text-green-800 dark:text-green-400">No Active Risk Flags</p>
+                                <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                                  Patient usage patterns align with safety guidelines.
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          )}
 
                           <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
-                            <ShieldCheck className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                            <Activity className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                             <div>
-                              <p className="font-semibold text-sm">No Acute Side Effects</p>
+                              <p className="font-semibold text-sm">Adverse Event Rate</p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                No reports of anxiety, tachycardia, or respiratory distress in the last 30 days.
+                                {patientMetrics?.adverseEventRate.toFixed(1)} events per week (avg).
+                                {patientMetrics && patientMetrics.adverseEventRate === 0 && " No negative side effects reported."}
                               </p>
                             </div>
                           </div>

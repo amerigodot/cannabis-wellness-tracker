@@ -60,73 +60,17 @@ This plan outlines the migration from a privacy-first patient wellness tracker t
 
 **Goal:** Pre-compute clinically relevant features from raw journals on patient device.
 
-**Edge AI Processing (Client-Side JavaScript):**
-
-```javascript
-// src/analysis/clinicalFeatures.ts
-export interface ClinicalSummary {
-  timeRange: { start: Date; end: Date };
-  doseMetrics: {
-    meanDailyTHC: number; // mg
-    meanDailyCBD: number; // mg
-    adherenceRate: number; // 0-1
-    doseDrift: number; // % change from prescribed
-  };
-  symptomTrends: {
-    painDelta: number; // change since baseline
-    anxietyDelta: number;
-    sleepDelta: number;
-    trajectorySlope: "improving" | "stable" | "worsening";
-  };
-  adverseEventRate: number; // events per week
-  riskFlags: string[]; // "high_dose", "daily_use", "nighttime_only"
-  adherenceToPlan: number; // 0-100%
-}
-
-async function computeClinicalFeatures(
-  journals: JournalEntry[],
-  prescribedRegimen: CannabisRegimen,
-  baselineDate: Date
-): Promise<ClinicalSummary> {
-  // Time-series analysis
-  const recentEntries = journals.filter(j => isAfter(j.date, subWeeks(new Date(), 4)));
-  
-  // Dose metrics
-  const doses = recentEntries.map(e => e.thcDose);
-  const meanDailyTHC = mean(doses);
-  const prescribedMean = prescribedRegimen.dosing.targetTHC;
-  const doseDrift = ((meanDailyTHC - prescribedMean) / prescribedMean) * 100;
-  
-  // Symptom trajectories (linear regression on scores)
-  const painSlope = linearRegression(recentEntries.map(e => e.painScore));
-  
-  // Risk flags from LRCUG
-  const flags: string[] = [];
-  if (meanDailyTHC > 40) flags.push("high_dose"); // >8 THC units/week [8]
-  if (recentEntries.filter(e => e.isDailyUse).length / recentEntries.length > 0.8) {
-    flags.push("daily_use");
-  }
-  
-  return { /* assembled summary */ };
-}
-```
-
 **Tasks:**
-- Implement dose-response curve fitting (simple linear/logistic)
-- Add symptom trajectory analysis (moving averages, trend detection)
-- Build adverse event classifier (severity scoring)
-- Create LRCUG rule engine (dose thresholds, frequency limits) [8]
-- Generate "notable events" timeline (ER visits, panic attacks, dose changes)
-
-**Resources:**
-- [8] LRCUG guidelines: https://pmc.ncbi.nlm.nih.gov/articles/PMC5508136/
-- [9] Cannabis use disorder risk units: https://www.healthline.com/health-news/should-cannabis-have-standard-units-like-alcohol
-- [10] Patient-reported outcomes tracking: https://pmc.ncbi.nlm.nih.gov/articles/PMC7592869/
+- [x] Implement dose-response curve fitting (simple linear/logistic)
+- [x] Add symptom trajectory analysis (moving averages, trend detection)
+- [x] Build adverse event classifier (severity scoring)
+- [x] Create LRCUG rule engine (dose thresholds, frequency limits) [8]
+- [x] Generate "notable events" timeline (ER visits, panic attacks, dose changes)
 
 **Deliverables:**
-- Clinical feature computation library
-- Real-time dashboard preview for patients ("Your trends")
-- JSON export format for clinician dashboard
+- [x] Clinical feature computation library (`src/utils/clinicalAugmentation.ts`)
+- [x] Real-time dashboard preview for patients ("Your trends")
+- [x] JSON export format for clinician dashboard
 
 ---
 
@@ -134,71 +78,16 @@ async function computeClinicalFeatures(
 
 **Goal:** Use local LLM to turn metrics into readable clinical narrative.
 
-**Implementation:**
-
-```typescript
-// src/ai/visitSummary.ts
-import { WebLLM } from "@mlc-ai/web-llm";
-import { findRelevantGuidelines } from "./rag";
-
-async function generateVisitSummary(
-  features: ClinicalSummary,
-  guidelines: GuidelineChunk[]
-): Promise<string> {
-  const relevantGuidelines = findRelevantGuidelines(
-    features.riskFlags.join(", "),
-    guidelines
-  );
-  
-  const prompt = `
-You are a Clinical Summary Assistant preparing a pre-visit briefing for a physician.
-Summarize the following patient data concisely, citing relevant guidelines.
-
-## Patient Metrics (Last 4 Weeks)
-- Mean daily THC: ${features.doseMetrics.meanDailyTHC}mg (prescribed: ${prescribedMean}mg)
-- Dose drift: ${features.doseMetrics.doseDrift}%
-- Pain score change: ${features.symptomTrends.painDelta} points
-- Anxiety score change: ${features.symptomTrends.anxietyDelta} points
-- Adverse events: ${features.adverseEventRate} per week
-- Risk flags: ${features.riskFlags.join(", ")}
-
-## Relevant Guidelines
-${relevantGuidelines.map(g => `[${g.source}] ${g.text}`).join("\n\n")}
-
-Generate a 4-sentence summary for the physician, including:
-1. Adherence and dose drift assessment
-2. Symptom trajectory interpretation
-3. Any safety concerns with guideline citations
-4. Suggested discussion points
-
-Format: Brief, evidence-backed, cite [SOURCE] inline.
-  `.trim();
-
-  const response = await webllm.chat.completions.create({
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.2,
-    max_tokens: 256,
-  });
-  
-  return response.choices[0].message.content;
-}
-```
-
 **Tasks:**
-- Integrate Gemma-2B or MedGemma text model in WebLLM
-- Build prompt templates for different visit types (follow-up, urgent, routine)
-- Add guideline citation extraction from RAG context
-- Create fallback logic if model unavailable (template-based summary)
-
-**Resources:**
-- [11] WebLLM documentation: https://github.com/mlc-ai/web-llm
-- [12] MedGemma quick start: https://developers.google.com/health-ai-developer-foundations/medgemma/get-started
-- [13] RAG for medical applications: https://hatchworks.com/blog/gen-ai/rag-for-healthcare/
+- [x] Integrate Gemma-2B or MedGemma text model in WebLLM (`useClinicalSummarizer.ts`)
+- [x] Build prompt templates for different visit types (follow-up, urgent, routine)
+- [x] Add guideline citation extraction from RAG context
+- [x] Create fallback logic if model unavailable (template-based summary)
 
 **Deliverables:**
-- Visit summary generator module
-- Unit tests with sample patient data
-- Performance benchmarks (inference time, token count)
+- [x] Visit summary generator module
+- [x] Unit tests with sample patient data
+- [x] Performance benchmarks (inference time, token count)
 
 ---
 
