@@ -1,10 +1,10 @@
-import { 
-  Calendar, 
-  TrendingUp, 
-  Bell, 
-  Shield, 
-  Lock, 
-  Eye, 
+import {
+  Calendar,
+  TrendingUp,
+  Bell,
+  Shield,
+  Lock,
+  Eye,
   Sparkles,
   FileText,
   Target,
@@ -25,7 +25,11 @@ import {
   Brain,
   Stethoscope,
   Database,
-  Activity
+  Activity,
+  LayoutDashboard,
+  Link as LinkIcon,
+  ClipboardList,
+  MessageSquareText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,17 +46,17 @@ const Features = () => {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Features - Cannabis Wellness Tracker"
         description="Discover all features of Cannabis Wellness Tracker: journal entries, insights, reminders, achievements, and more."
       />
-      
+
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 print:bg-white">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50 print:hidden">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate("/")}
               className="gap-2"
             >
@@ -216,10 +220,10 @@ const Features = () => {
                 title="Clinical Factsheets & Protocols"
                 description="Guideline-anchored medical knowledge base"
                 features={[
+                  "Local RAG (Retrieval Augmented Gen)",
                   "Structured dosing protocols (Start/Titrate/Max)",
                   "Numeric clinical goals & review timelines",
-                  "2025 Guideline integration (ACOEM, NCSCT)",
-                  "Crisis interception state machine"
+                  "2025 Guideline integration (ACOEM, NCSCT)"
                 ]}
               />
               <FeatureCard
@@ -229,7 +233,7 @@ const Features = () => {
                 features={[
                   "Symptom-based risk stratification",
                   "Disposition recommendations (ER/Urgent Care)",
-                  "HIPAA-compliant immutable audit logs",
+                  "Crisis interception state machine",
                   "Simulated FHIR export for EHR integration"
                 ]}
               />
@@ -249,10 +253,64 @@ const Features = () => {
                 title="Secure Health Pipeline"
                 description="Local-first data architecture for high sensitivity"
                 features={[
-                  "Zero-Knowledge (ZK) Triage sessions",
+                  "Zero-Knowledge (ZK) inference sessions",
                   "Encrypted local storage for AI context",
-                  "Peer-reviewed clinical guideline grounding",
-                  "Interoperable FHIR data standards"
+                  "Deterministic feature engineering",
+                  "Peer-reviewed clinical guideline grounding"
+                ]}
+              />
+            </div>
+          </section>
+
+          {/* Clinician Portal & Care Management */}
+          <section className="mb-12 print:mb-8">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Stethoscope className="h-6 w-6 text-primary" />
+              Clinician Portal & Care Management
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <FeatureCard
+                icon={<LayoutDashboard className="h-5 w-5" />}
+                title="Medical Dashboard"
+                description="Dual-interface platform connecting patients with providers"
+                features={[
+                  "Longitudinal symptom tracking",
+                  "Adherence monitoring (Dose Drift)",
+                  "Multi-axis trend visualization",
+                  "Risk flag alerts (LRCUG)"
+                ]}
+              />
+              <FeatureCard
+                icon={<LinkIcon className="h-5 w-5" />}
+                title="Secure Patient Linking"
+                description="Privacy-preserving connection protocol"
+                features={[
+                  "6-digit one-time access codes",
+                  "Granular consent scopes",
+                  "Instant access revocation",
+                  "Zero-knowledge architecture"
+                ]}
+              />
+              <FeatureCard
+                icon={<ClipboardList className="h-5 w-5" />}
+                title="AI Clinical Summaries"
+                description="Automated chart review via Edge AI"
+                features={[
+                  "SOAP-style pre-visit notes",
+                  "Symptom trajectory analysis",
+                  "Computed clinical metrics",
+                  "Local inference (No PHI egress)"
+                ]}
+              />
+              <FeatureCard
+                icon={<MessageSquareText className="h-5 w-5" />}
+                title="Care Plan Synchronization"
+                description="Digital regimen management"
+                features={[
+                  "Prescribe products & dosages",
+                  "Update instructions remotely",
+                  "Syncs directly to patient app",
+                  "Track protocol compliance"
                 ]}
               />
             </div>
@@ -288,7 +346,7 @@ const Features = () => {
                 ]}
               />
             </div>
-            
+
             {/* Effectiveness Scoring Card */}
             <Card className="mt-4">
               <CardHeader>
@@ -451,15 +509,15 @@ const Features = () => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ 
-  icon, 
-  title, 
-  description, 
-  features 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+  features
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
   features: string[];
 }) => (
   <Card className="h-full">
@@ -484,13 +542,13 @@ const FeatureCard = ({
 );
 
 // Mini Feature Card Component
-const MiniFeatureCard = ({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
+const MiniFeatureCard = ({
+  icon,
+  title,
+  description
+}: {
+  icon: React.ReactNode;
+  title: string;
   description: string;
 }) => (
   <Card className="p-4">
