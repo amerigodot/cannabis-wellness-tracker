@@ -65,6 +65,14 @@ export default function Triage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    return () => {
+      if (engine) {
+        engine.unload();
+      }
+    };
+  }, [engine]);
+
   const initModel = async () => {
     if (!('gpu' in navigator)) {
       toast({ variant: "destructive", title: "Error", description: "WebGPU not supported." });

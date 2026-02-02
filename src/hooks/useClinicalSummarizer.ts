@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
 import { ClinicalMetrics } from "@/utils/clinicalAugmentation";
 import { toast } from "sonner";
@@ -20,6 +20,16 @@ export function useClinicalSummarizer() {
     progress: "",
     summary: ""
   });
+
+  // Cleanup engine on unmount
+  useEffect(() => {
+    return () => {
+      if (engine) {
+        console.log("Unloading Clinical Summarizer Engine...");
+        engine.unload();
+      }
+    };
+  }, [engine]);
 
   const initModel = async () => {
     if (engine) return engine;

@@ -99,6 +99,14 @@ export default function Tools() {
   const [loadProgress, setLoadProgress] = useState("");
 
   useEffect(() => {
+    return () => {
+      if (engine) {
+        engine.unload();
+      }
+    };
+  }, [engine]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);

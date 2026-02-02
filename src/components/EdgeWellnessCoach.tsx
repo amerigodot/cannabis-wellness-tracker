@@ -32,7 +32,15 @@ export function EdgeWellnessCoach() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
-  }, []);
+    
+    // Cleanup function
+    return () => {
+      if (engine) {
+        console.log("Unloading EdgeWellnessCoach Engine...");
+        engine.unload();
+      }
+    };
+  }, [engine]);
 
   const { entries } = useJournalEntries(user);
   const { toast } = useToast();
