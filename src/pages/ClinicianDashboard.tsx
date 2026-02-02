@@ -160,10 +160,19 @@ export default function ClinicianDashboard() {
           let mockEntries: JournalEntry[] = [];
           
           if (selectedPatientId === 'demo-p1') {
-            // John Doe uses the full SAMPLE_ENTRIES set (consistent with Journal view)
-            mockEntries = SAMPLE_ENTRIES;
+            // John Doe uses local_journal_entries if available, else SAMPLE_ENTRIES
+            // This aligns with the main Journal view behavior
+            const stored = localStorage.getItem("local_journal_entries");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              // Ensure we have data for the demo persona even if local storage is empty
+              mockEntries = parsed.length > 0 ? parsed : SAMPLE_ENTRIES;
+            } else {
+              mockEntries = SAMPLE_ENTRIES;
+            }
           } else {
-            // Jane Roe gets a filtered/modified subset for variety
+            // Jane Roe gets a generated variation
+            // We base it on SAMPLE_ENTRIES to ensure data quality
             mockEntries = SAMPLE_ENTRIES.filter((_, i) => i % 2 === 0).map(e => ({
               ...e,
               before_pain: Math.min(10, (e.before_pain || 0) + 2), // Jane has higher pain
@@ -237,28 +246,46 @@ export default function ClinicianDashboard() {
     const groupedData: Record<string, { painSum: number, anxietySum: number, thcSum: number, count: number }> = {};
 
     patientEntries.forEach(entry => {
-      const date = new Date(entry.consumption_time || entry.created_at).toISOString().split('T')[0];
+      const dateStr = entry.consumption_time || entry.created_at;
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return;
+      const date = d.toISOString().split('T')[0];
+
       if (!groupedData[date]) {
         groupedData[date] = { painSum: 0, anxietySum: 0, thcSum: 0, count: 0 };
       }
       
-      groupedData[date].painSum += entry.before_pain || 0;
-      groupedData[date].anxietySum += entry.before_anxiety || 0;
+      groupedData[date].painSum += typeof entry.before_pain === 'number' ? entry.before_pain : 0;
+      groupedData[date].anxietySum += typeof entry.before_anxiety === 'number' ? entry.before_anxiety : 0;
       
       // Calculate THC (simplified logic, same as augmentation)
       const doseVal = parseFloat(entry.dosage) || 0;
-      const thcPercent = entry.thc_percentage || 0;
-      const inferredTHC = doseVal * (thcPercent / 100) * 1000;
-      groupedData[date].thcSum += inferredTHC > 0 ? inferredTHC : 5; // fallback
+      // Default to 10% if missing, or 0 if user has explicit 0
+      const thcPercent = typeof entry.thc_percentage === 'number' ? entry.thc_percentage : 15; 
       
+      // If dosage is just a number string "0.5", treat as grams -> 500mg * percent
+      // If "10mg", treat as 10 * 1
+      let inferredTHC = 0;
+      if (entry.dosage.toLowerCase().includes('mg')) {
+        inferredTHC = doseVal;
+      } else {
+        // Assume grams if no unit, or if 'g' is present
+        inferredTHC = doseVal * 1000 * (thcPercent / 100);
+      }
+      
+      // Sanity check cap
+      if (inferredTHC > 1000) inferredTHC = 50; 
+      if (inferredTHC === 0 && doseVal > 0) inferredTHC = 5; // Fallback for visualization
+
+      groupedData[date].thcSum += inferredTHC;
       groupedData[date].count++;
     });
 
     return Object.entries(groupedData).map(([date, data]) => ({
       date,
-      pain: data.count > 0 ? data.painSum / data.count : 0,
-      anxiety: data.count > 0 ? data.anxietySum / data.count : 0,
-      thc: data.thcSum // Daily total
+      pain: data.count > 0 ? Number((data.painSum / data.count).toFixed(1)) : 0,
+      anxiety: data.count > 0 ? Number((data.anxietySum / data.count).toFixed(1)) : 0,
+      thc: Number(data.thcSum.toFixed(1)) // Daily total
     })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [patientEntries]);
 
@@ -487,8 +514,14 @@ export default function ClinicianDashboard() {
                        <div className="flex justify-center p-12">
                          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                        </div>
-                    ) : (
+                    ) : trendData.length > 0 ? (
                       <AdvancedTrendChart data={trendData} />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg text-muted-foreground">
+                        <Activity className="w-10 h-10 mb-2 opacity-20" />
+                        <p>Not enough data to generate trends.</p>
+                        <p className="text-xs mt-1">Logs must have dates and symptom scores.</p>
+                      </div>
                     )}
                   </TabsContent>
 
