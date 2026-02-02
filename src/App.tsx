@@ -15,7 +15,6 @@ const Trash = lazy(() => import("./pages/Trash"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Donate = lazy(() => import("./pages/Donate"));
-const Achievements = lazy(() => import("./pages/Achievements"));
 const Tools = lazy(() => import("./pages/Tools"));
 const Triage = lazy(() => import("./pages/Triage"));
 const Coach = lazy(() => import("./pages/Coach"));
@@ -41,7 +40,6 @@ const AppContent = () => {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/donate" element={<Donate />} />
-              <Route path="/achievements" element={<Achievements />} />
               <Route path="/tools" element={<Tools />} />
               <Route path="/triage" element={<Triage />} />
               <Route path="/coach" element={<Coach />} />

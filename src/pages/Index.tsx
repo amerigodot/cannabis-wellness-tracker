@@ -9,7 +9,6 @@ import { InsightsChart } from "@/components/InsightsChart";
 import { Reminders } from "@/components/Reminders";
 
 import { LandingPage } from "@/components/LandingPage";
-import { AchievementBadges } from "@/components/AchievementBadges";
 import { EntryList } from "@/components/dashboard/EntryList";
 import { JournalEntryForm } from "@/components/dashboard/JournalEntryForm";
 import { UnlockPrompt } from "@/components/UnlockPrompt";
@@ -331,11 +330,6 @@ const Index = () => {
             <p className="text-muted-foreground text-lg">Track your wellness journey with ease</p>
           </div>
         </header>
-
-        {/* Achievement Badges */}
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <AchievementBadges entryCount={entries.length} />
-        </div>
 
         {/* Entry Form */}
         <JournalEntryForm

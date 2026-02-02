@@ -89,7 +89,8 @@ To facilitate testing without any backend setup:
 ### 🤖 Edge AI Wellness Tools
 1.  **Private AI Coach:** Chat with a local Gemma model that analyzes your history to discover effectiveness patterns.
 2.  **Clinical Triage System:** Secure, protocol-driven triage for respiratory and inflammation symptoms with disposition recommendations.
-3.  **Performance Metrics:** Real-time dashboard to view model helpfulness scores and safety statistics.
+3.  **Clinician Portal:** Secure dashboard for healthcare providers to view patient trends and adjust care plans (Edge AI Summaries included).
+4.  **Performance Metrics:** Real-time dashboard to view model helpfulness scores and safety statistics.
 
 ### 📓 Advanced Journaling
 *   **Flexible Tracking Modes:** Quick Entry and Full "Before/After" tracking.

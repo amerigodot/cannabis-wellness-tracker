@@ -374,41 +374,6 @@ const Features = () => {
             </Card>
           </section>
 
-          {/* Gamification */}
-          <section className="mb-12 print:mb-8 print:break-before-page">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Award className="h-6 w-6 text-primary" />
-              Achievements & Gamification
-            </h2>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="text-center p-4 rounded-xl bg-primary/5 border border-primary/20">
-                    <div className="text-3xl font-bold text-primary mb-2">10</div>
-                    <div className="font-semibold mb-1">First Steps</div>
-                    <p className="text-sm text-muted-foreground">Build awareness of your patterns and responses</p>
-                  </div>
-                  <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/30">
-                    <div className="text-3xl font-bold text-primary mb-2">50</div>
-                    <div className="font-semibold mb-1">Getting Insights</div>
-                    <p className="text-sm text-muted-foreground">Unlock valuable insights and optimize your experience</p>
-                  </div>
-                  <div className="text-center p-4 rounded-xl bg-primary/15 border border-primary/40">
-                    <div className="text-3xl font-bold text-primary mb-2">100+</div>
-                    <div className="font-semibold mb-1">Wellness Master</div>
-                    <p className="text-sm text-muted-foreground">Master your wellness journey with comprehensive data</p>
-                  </div>
-                </div>
-                <div className="mt-6 flex flex-wrap gap-2 justify-center">
-                  <Badge variant="outline">🎉 Celebration animations</Badge>
-                  <Badge variant="outline">📊 Progress tracking</Badge>
-                  <Badge variant="outline">🔓 Unlockable badges</Badge>
-                  <Badge variant="outline">🏅 Visual milestones</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
           {/* Additional Features */}
           <section className="mb-12 print:mb-8">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
