@@ -15,10 +15,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
 const SELECTED_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
-// ... imports
 
-// ... inside initModel function ...
-// ...
+const PROMPT_TEMPLATES = {
+  consumption: "Analyze my recent consumption patterns. focus on efficacy.",
+  side_effects: "Check my logs for adverse events and side effects.",
+  stress: "How effective has my usage been for stress and anxiety relief?"
+};
+
+interface Message {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+interface FeedbackLog {
+  query: string;
+  response: string;
+  rating: "up" | "down";
+  timestamp: string;
+}
 
 export function EdgeWellnessCoach() {
   const [engine, setEngine] = useState<MLCEngine | null>(null);
@@ -32,7 +46,7 @@ export function EdgeWellnessCoach() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
-    
+
     // Cleanup function
     return () => {
       if (engine) {
@@ -317,8 +331,8 @@ ${item.content.slice(0, 300)}...
                     >
                       <div
                         className={`max-w-[85%] rounded-lg p-3 ${msg.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
                           }`}
                       >
                         <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
