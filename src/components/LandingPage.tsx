@@ -224,14 +224,15 @@ export function LandingPage() {
             
             {/* Demo Mode - Primary CTA */}
             <div className="mb-6">
-            <Button 
+              <Button 
                 size="lg"
-                className="text-lg px-8 py-6 h-auto relative animate-scale-in animate-glow-pulse hover:scale-105 hover:animate-none transition-all duration-300"
+                className="text-base sm:text-lg px-4 sm:px-8 py-5 sm:py-6 h-auto relative animate-scale-in animate-glow-pulse-slow hover:scale-105 hover:animate-none transition-all duration-300"
                 onClick={handleDemoMode}
               >
-                <Sparkles className="w-6 h-6 mr-2 text-accent-foreground" />
-                Try Demo Mode - No Signup Required
-                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1 rounded-full animate-pulse">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0 text-accent-foreground" />
+                <span className="whitespace-nowrap">Try Demo Mode</span>
+                <span className="hidden sm:inline">&nbsp;- No Signup Required</span>
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-xs font-semibold px-2 sm:px-3 py-1 rounded-full">
                   Free
                 </span>
               </Button>
