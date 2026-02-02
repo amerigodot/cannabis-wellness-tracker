@@ -265,48 +265,48 @@ const Index = () => {
               </div>
             </div>
           )}
-          <div className="flex justify-between items-start mb-6">
-            <div className="flex-1 flex gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+            <div className="flex-1 flex flex-wrap gap-2">
               {entries.length >= 10 && (
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/tools")}
-                  className="gap-2"
+                  className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10"
                 >
-                  <Sparkles className="h-4 w-4" />
-                  Wellness Tools
+                  <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Wellness Tools</span>
                 </Button>
               )}
               <Button 
                 variant="outline" 
                 onClick={() => navigate("/coach")}
-                className="gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
+                className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10 border-primary/20 bg-primary/5 hover:bg-primary/10"
               >
-                <Brain className="h-4 w-4 text-primary" />
-                Private AI Coach
+                <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-primary" />
+                <span className="whitespace-nowrap">Private AI Coach</span>
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate("/triage")}
-                className="gap-2 border-red-200 bg-red-50 hover:bg-red-100 text-red-700"
+                className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 h-9 sm:h-10 border-red-200 bg-red-50 hover:bg-red-100 text-red-700 dark:border-red-800/30 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
               >
-                <Stethoscope className="h-4 w-4" />
-                Clinical Triage
+                <Stethoscope className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">Clinical Triage</span>
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2 self-end sm:self-auto">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => navigate("/settings")}
-                className="rounded-full"
+                className="rounded-full h-9 w-9 sm:h-10 sm:w-10"
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">Settings</span>
               </Button>
               <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full">
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full h-9 w-9 sm:h-10 sm:w-10">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="sr-only">{isDemoMode ? "Exit demo" : "Sign out"}</span>
               </Button>
             </div>
