@@ -58,7 +58,6 @@ export default function ClinicianDashboard() {
   const { generateSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
 
   const loadPatients = useCallback(async (demo: boolean) => {
-    // ... existing loadPatients implementation ...
     if (demo) {
       setPatients([
         { 
