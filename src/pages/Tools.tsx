@@ -107,6 +107,18 @@ export default function Tools() {
   }, [engine]);
 
   useEffect(() => {
+    // Check for Demo Mode first
+    const isDemo = localStorage.getItem("demoMode") === "true";
+    
+    if (isDemo) {
+      setLoading(false);
+      // Load sample entries for demo mode tools
+      import("@/data/sampleEntries").then(mod => {
+        setEntries(mod.SAMPLE_ENTRIES);
+      });
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);

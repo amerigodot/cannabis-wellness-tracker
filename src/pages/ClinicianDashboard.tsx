@@ -30,6 +30,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { CarePlanEditor } from "@/components/clinical/CarePlanEditor";
 import { AdvancedTrendChart } from "@/components/clinical/AdvancedTrendChart";
 import { toast } from "sonner";
+import { SAMPLE_ENTRIES } from "@/data/sampleEntries";
 
 interface Patient {
   id: string;
@@ -51,6 +52,7 @@ export default function ClinicianDashboard() {
   const [patientMetrics, setPatientMetrics] = useState<ClinicalMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
   const [activeRegimen, setActiveRegimen] = useState<CannabisRegimen | null>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
   
   // AI Summarizer Hook
   const { generateSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
@@ -151,28 +153,32 @@ export default function ClinicianDashboard() {
           // Simulate fetch delay
           await new Promise(r => setTimeout(r, 500));
           
-          // Generate mock entries based on ID to differentiate
-          const isP1 = selectedPatientId === 'demo-p1';
-          const mockEntries: JournalEntry[] = Array.from({ length: 20 }).map((_, i) => ({
-            id: `entry-${i}`,
-            user_id: selectedPatientId,
-            created_at: new Date(Date.now() - i * 86400000).toISOString(),
-            consumption_time: new Date(Date.now() - i * 86400000).toISOString(),
-            strain: isP1 ? "ACDC" : "Sour Diesel",
-            dosage: isP1 ? "0.5ml" : "1g",
-            method: isP1 ? "Oil" : "Smoking",
-            thc_percentage: isP1 ? 1 : 20,
-            cbd_percentage: isP1 ? 20 : 0.5,
-            observations: isP1 ? ["Relaxed"] : ["Energetic"],
-            activities: [],
-            negative_side_effects: isP1 ? [] : i % 3 === 0 ? ["Anxiety"] : [],
-            notes: "",
-            icon: "leaf",
-            before_pain: isP1 ? Math.max(0, 8 - i * 0.2) : 5, // Improving for P1
-            before_anxiety: isP1 ? 3 : Math.min(10, 4 + i * 0.1), // Worsening for P2
-          }));
+          let mockEntries: JournalEntry[] = [];
+          
+          if (selectedPatientId === 'demo-p1') {
+            // John Doe uses the full SAMPLE_ENTRIES set (consistent with Journal view)
+            mockEntries = SAMPLE_ENTRIES;
+          } else {
+            // Jane Roe gets a filtered/modified subset for variety
+            mockEntries = SAMPLE_ENTRIES.filter((_, i) => i % 2 === 0).map(e => ({
+              ...e,
+              before_pain: Math.min(10, (e.before_pain || 0) + 2), // Jane has higher pain
+              user_id: 'demo-p2'
+            }));
+          }
 
           setPatientMetrics(computeClinicalFeatures(mockEntries));
+          
+          // Process trends for chart (Demo)
+          const trends = mockEntries
+            .sort((a, b) => new Date(a.consumption_time).getTime() - new Date(b.consumption_time).getTime())
+            .map(e => ({
+              date: e.consumption_time,
+              pain: e.before_pain || 0,
+              anxiety: e.before_anxiety || 0,
+              thc: e.thc_percentage ? (parseFloat(e.dosage) || 0.5) * (e.thc_percentage / 100) * 1000 : 10
+            }));
+          setChartData(trends);
 
           // Set mock regimen
           setActiveRegimen({
@@ -200,7 +206,20 @@ export default function ClinicianDashboard() {
             .limit(50);
 
           if (entriesError) throw entriesError;
-          setPatientMetrics(computeClinicalFeatures(entriesData as unknown as JournalEntry[]));
+          const realEntries = entriesData as unknown as JournalEntry[];
+          setPatientMetrics(computeClinicalFeatures(realEntries));
+          
+          // Process trends for chart (Real)
+          const trends = realEntries
+            .sort((a, b) => new Date(a.consumption_time || a.created_at).getTime() - new Date(b.consumption_time || b.created_at).getTime())
+            .map(e => ({
+              date: e.consumption_time || e.created_at,
+              pain: e.before_pain || 0,
+              anxiety: e.before_anxiety || 0,
+              thc: e.thc_percentage ? (parseFloat(e.dosage) || 0.5) * (e.thc_percentage / 100) * 1000 : 
+                   (e.dosage.includes('mg') ? parseFloat(e.dosage) : 5) // Fallback logic
+            }));
+          setChartData(trends);
         }
       } catch (error) {
         console.error("Error fetching patient metrics:", error);
@@ -225,20 +244,6 @@ export default function ClinicianDashboard() {
   };
 
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
-
-  // Construct trend data from whatever source available (mock or real)
-  // Ideally this comes from the same source as patientMetrics
-  const trendData = isDemoMode && selectedPatientId 
-    ? Array.from({ length: 14 }).map((_, i) => ({
-        date: new Date(Date.now() - (13 - i) * 86400000).toISOString(),
-        pain: selectedPatientId === 'demo-p1' ? Math.max(2, 8 - i * 0.4) : 5 + Math.random() * 2,
-        anxiety: selectedPatientId === 'demo-p1' ? 3 + Math.random() : Math.min(9, 4 + i * 0.3),
-        thc: selectedPatientId === 'demo-p1' ? 20 : 10 + Math.random() * 20
-      }))
-    : []; 
-    // Note: For real data, we would need to aggregate the 'entriesData' fetched in useEffect
-    // into daily averages. For MVP simplicity, we use the detailed mock data in demo mode
-    // or placeholder structure.
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -460,7 +465,7 @@ export default function ClinicianDashboard() {
                   </TabsContent>
 
                   <TabsContent value="trends" className="mt-6 space-y-6">
-                    <AdvancedTrendChart data={trendData} />
+                    <AdvancedTrendChart data={chartData} />
                   </TabsContent>
 
                   <TabsContent value="regimen" className="mt-6">
