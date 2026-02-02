@@ -16,7 +16,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Footer } from "@/components/Footer";
 import { CLINICAL_GUIDELINES } from "@/data/knowledgeBase";
 
-const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
+const SELECTED_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
 
 interface TreatmentOption {
   name: string;

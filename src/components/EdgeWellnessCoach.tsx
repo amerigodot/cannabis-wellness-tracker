@@ -11,55 +11,30 @@ import { PATIENT_EDUCATION, CRISIS_TEMPLATES } from "@/data/knowledgeBase";
 import { CLINICAL_PROTOCOLS, SYSTEM_PERSONA } from "@/data/clinicalProtocols";
 import { computeClinicalFeatures } from "@/utils/clinicalAugmentation";
 
-const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+
+const SELECTED_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
 // ... imports
 
 // ... inside initModel function ...
-      setEngine(engine);
-
-      // Data Augmentation: Pre-calculate clinical trends
-      const metrics = computeClinicalFeatures(entries);
-      const clinicalNarrative = `
-[CLINICAL SUMMARY]
-- Observation Window: Last 14 days.
-- Mean Daily THC: ${metrics.doseMetrics.meanDailyTHC.toFixed(1)}mg (Target: 20mg).
-- Adherence Rate: ${metrics.doseMetrics.adherenceRate.toFixed(0)}%.
-- Symptom Trajectory: ${metrics.symptomTrends.trajectorySlope.toUpperCase()} (Pain Delta: ${metrics.symptomTrends.painDelta.toFixed(1)}).
-- Adverse Event Rate: ${metrics.adverseEventRate.toFixed(1)} events/week.
-- Risk Flags: ${metrics.riskFlags.length > 0 ? metrics.riskFlags.join(", ") : "None detected"}.
-- Usage Patterns: ${metrics.utilization.combustionRate > 0 ? `Combustion detected (${metrics.utilization.combustionRate.toFixed(0)}%)` : "No combustion"}.
-`;
-
-      // Virtual Fine-Tuning (Few-Shot Injection)
-
-interface Message {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-interface FeedbackLog {
-  query: string;
-  response: string;
-  rating: "up" | "down";
-  timestamp: string;
-}
-
-const PROMPT_TEMPLATES = {
-  consumption: "Analyze my successful sessions. What Strain/Dosage combinations worked best for me?",
-  side_effects: "Have I logged any negative side effects recently? If so, what patterns do you see?",
-  stress: "I'm stressed. Which specific strain in my history provided the best relief?",
-  emergency: "What are the clinical signs of cannabis overconsumption according to the protocols?",
-};
+// ...
 
 export function EdgeWellnessCoach() {
   const [engine, setEngine] = useState<MLCEngine | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(false);
   const [loadProgress, setLoadProgress] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [lastResponseIndex, setLastResponseIndex] = useState<number | null>(null);
-  const { entries } = useJournalEntries(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
+  }, []);
+
+  const { entries } = useJournalEntries(user);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -73,16 +48,16 @@ export function EdgeWellnessCoach() {
     // 1. Match Clinical Protocols (Gold Standard)
     const terms = query.toLowerCase().split(" ");
     let protocolBuffer = "";
-    
+
     CLINICAL_PROTOCOLS.forEach(p => {
-        if (terms.some(t => p.trigger.toLowerCase().includes(t))) {
-            protocolBuffer += `
+      if (terms.some(t => p.trigger.toLowerCase().includes(t))) {
+        protocolBuffer += `
 [PROTOCOL: ${p.id}]
 IF: ${p.trigger}
 THEN: ${p.recommendation}
 WARN: ${p.contraindication}
 `;
-        }
+      }
     });
 
     // 2. Match Knowledge Base (Patient Guides)
@@ -98,7 +73,7 @@ ${item.content.slice(0, 300)}...
 `;
       }
     });
-    
+
     return protocolBuffer;
   };
 
@@ -133,35 +108,35 @@ ${item.content.slice(0, 300)}...
       // We inject "perfect" examples of how MedGemma SHOULD behave
       const fewShotHistory: Message[] = [
         {
-            role: "system", 
-            content: SYSTEM_PERSONA + "\n\n[PATIENT HISTORY SUMMARY]:\n" + clinicalNarrative 
+          role: "system",
+          content: SYSTEM_PERSONA + "\n\n[PATIENT HISTORY SUMMARY]:\n" + clinicalNarrative
         },
         {
-            role: "user",
-            content: "I want to get really high tonight. Should I take 50mg?"
+          role: "user",
+          content: "I want to get really high tonight. Should I take 50mg?"
         },
         {
-            role: "assistant",
-            content: "Based on the [HARM REDUCTION] protocol, 50mg is a high dose that significantly increases the risk of anxiety and tachycardia. The clinical recommendation is to start low (2.5-5mg). Please consider a lower dose to avoid adverse effects."
+          role: "assistant",
+          content: "Based on the [HARM REDUCTION] protocol, 50mg is a high dose that significantly increases the risk of anxiety and tachycardia. The clinical recommendation is to start low (2.5-5mg). Please consider a lower dose to avoid adverse effects."
         },
         {
-            role: "user",
-            content: "What strain helps with my anxiety?"
+          role: "user",
+          content: "What strain helps with my anxiety?"
         },
         {
-            role: "assistant",
-            content: "According to your [USER LOGS], the strain 'ACDC' (High CBD) consistently resulted in an Anxiety Score of 2/10 (Low). In contrast, 'Sour Diesel' (High THC) was associated with an Anxiety Score of 8/10. I recommend sticking to CBD-dominant profiles."
+          role: "assistant",
+          content: "According to your [USER LOGS], the strain 'ACDC' (High CBD) consistently resulted in an Anxiety Score of 2/10 (Low). In contrast, 'Sour Diesel' (High THC) was associated with an Anxiety Score of 8/10. I recommend sticking to CBD-dominant profiles."
         }
       ];
 
       setMessages(fewShotHistory); // Pre-load the "Fine-Tuning" context
-      
+
       // Add the visible welcome message
-      setMessages(prev => [...prev, { 
-          role: "assistant", 
-          content: "Hello! I am MedGemma-Edge. I have analyzed your journal history and am ready to provide clinical decision support. How can I assist you?" 
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: "Hello! I am MedGemma-Edge. I have analyzed your journal history and am ready to provide clinical decision support. How can I assist you?"
       }]);
-      
+
       toast({ title: "MedGemma-Edge Active", description: "In-Context Learning & Clinical Protocols loaded." });
     } catch (error) {
       console.error(error);
@@ -187,19 +162,19 @@ ${item.content.slice(0, 300)}...
 
     // 2. DATA & RAG CONTEXT
     const retrievedContext = findRelevantContext(textToSend);
-    
+
     // Check if we actually have data
     const hasData = entries && entries.length > 0;
-    
-    const userDataset = hasData 
-        ? JSON.stringify(entries.slice(0, 10).map(e => ({ // Limit to 10 to save context
-            strain: e.strain,
-            method: e.method,
-            dose: e.dosage,
-            effect: e.observations.join(", "),
-            bad_reaction: e.negative_side_effects.join(", ")
-          })))
-        : "NO ENTRIES FOUND. The user is new.";
+
+    const userDataset = hasData
+      ? JSON.stringify(entries.slice(0, 10).map(e => ({ // Limit to 10 to save context
+        strain: e.strain,
+        method: e.method,
+        dose: e.dosage,
+        effect: e.observations.join(", "),
+        bad_reaction: e.negative_side_effects.join(", ")
+      })))
+      : "NO ENTRIES FOUND. The user is new.";
 
     let finalPrompt = `
     [USER JOURNAL]:
@@ -296,7 +271,7 @@ ${item.content.slice(0, 300)}...
           </div>
         )}
       </CardHeader>
-      
+
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         {!engine ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
@@ -306,8 +281,8 @@ ${item.content.slice(0, 300)}...
               <div className="text-sm text-muted-foreground space-y-2">
                 <p>Loads <strong>Gemma 2B</strong> with specialized clinical instruction tuning.</p>
                 <ul className="list-disc list-inside text-left pl-4 space-y-1">
-                    <li><strong>Protocol-Driven:</strong> Follows LRCUG guidelines.</li>
-                    <li><strong>Privacy-First:</strong> Zero data egress (WebGPU).</li>
+                  <li><strong>Protocol-Driven:</strong> Follows LRCUG guidelines.</li>
+                  <li><strong>Privacy-First:</strong> Zero data egress (WebGPU).</li>
                 </ul>
               </div>
             </div>
@@ -329,36 +304,34 @@ ${item.content.slice(0, 300)}...
                 {messages.filter(m => m.role !== "system").slice(2).map((msg, idx) => (
                   <div key={idx}>
                     <div
-                      className={`flex ${ 
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      }`}
+                      className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                        }`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-lg p-3 ${ 
-                          msg.role === "user"
+                        className={`max-w-[85%] rounded-lg p-3 ${msg.role === "user"
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted"
-                        }`}
+                          }`}
                       >
                         <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                         {msg.role === "assistant" && !msg.content.includes("EMERGENCY") && (
-                            <div className="flex items-center gap-1 mt-2 pt-2 border-t border-black/10">
-                                <BookOpen className="w-3 h-3 opacity-50" />
-                                <span className="text-[10px] opacity-70">Evidence-Based Response</span>
-                            </div>
+                          <div className="flex items-center gap-1 mt-2 pt-2 border-t border-black/10">
+                            <BookOpen className="w-3 h-3 opacity-50" />
+                            <span className="text-[10px] opacity-70">Evidence-Based Response</span>
+                          </div>
                         )}
                       </div>
                     </div>
                     {msg.role === "assistant" && idx === messages.filter(m => m.role !== "system").slice(2).length - 1 && (
-                        <div className="flex items-center gap-2 mt-1 ml-1">
-                            <span className="text-xs text-muted-foreground">Clinical Accuracy?</span>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRateResponse("up")}>
-                                <ThumbsUp className="h-3 w-3" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRateResponse("down")}>
-                                <ThumbsDown className="h-3 w-3" />
-                            </Button>
-                        </div>
+                      <div className="flex items-center gap-2 mt-1 ml-1">
+                        <span className="text-xs text-muted-foreground">Clinical Accuracy?</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRateResponse("up")}>
+                          <ThumbsUp className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRateResponse("down")}>
+                          <ThumbsDown className="h-3 w-3" />
+                        </Button>
+                      </div>
                     )}
                   </div>
                 ))}

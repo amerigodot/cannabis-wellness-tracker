@@ -3,7 +3,7 @@ import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
 import { ClinicalMetrics } from "@/utils/clinicalAugmentation";
 import { toast } from "sonner";
 
-const SUMMARY_MODEL = "gemma-2b-it-q4f32_1-MLC";
+const SUMMARY_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
 
 export interface SummaryState {
   isLoading: boolean;

@@ -12,7 +12,7 @@ import ReactMarkdown from "react-markdown";
 import { ClinicalFactsheetView } from "@/components/ClinicalFactsheet";
 import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
 
-const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
+const SELECTED_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
 
 interface JournalEntry {
   id: string;
