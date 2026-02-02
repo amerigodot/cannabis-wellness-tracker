@@ -991,26 +991,29 @@ export const JournalEntryForm = ({
                       </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-5 gap-2 mt-3 pt-3 border-t border-border/50 text-xs text-center">
-                    <div>
-                      <span className="text-muted-foreground block">Mood</span>
-                      <span className="font-semibold">{pendingEntryToComplete.before_mood || 5}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">Pain</span>
-                      <span className="font-semibold">{pendingEntryToComplete.before_pain || 5}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">Anxiety</span>
-                      <span className="font-semibold">{pendingEntryToComplete.before_anxiety || 5}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">Energy</span>
-                      <span className="font-semibold">{pendingEntryToComplete.before_energy || 5}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">Focus</span>
-                      <span className="font-semibold">{pendingEntryToComplete.before_focus || 5}</span>
+                  <div className="mt-3 pt-3 border-t border-border/50">
+                    <span className="text-xs text-muted-foreground block mb-2">Before State</span>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs text-center">
+                      <div className="bg-background/50 rounded-md p-2">
+                        <span className="text-muted-foreground block text-[10px]">Mood</span>
+                        <span className="font-semibold">{pendingEntryToComplete.before_mood || 5}</span>
+                      </div>
+                      <div className="bg-background/50 rounded-md p-2">
+                        <span className="text-muted-foreground block text-[10px]">Pain</span>
+                        <span className="font-semibold">{pendingEntryToComplete.before_pain || 5}</span>
+                      </div>
+                      <div className="bg-background/50 rounded-md p-2">
+                        <span className="text-muted-foreground block text-[10px]">Anxiety</span>
+                        <span className="font-semibold">{pendingEntryToComplete.before_anxiety || 5}</span>
+                      </div>
+                      <div className="bg-background/50 rounded-md p-2">
+                        <span className="text-muted-foreground block text-[10px]">Energy</span>
+                        <span className="font-semibold">{pendingEntryToComplete.before_energy || 5}</span>
+                      </div>
+                      <div className="bg-background/50 rounded-md p-2">
+                        <span className="text-muted-foreground block text-[10px]">Focus</span>
+                        <span className="font-semibold">{pendingEntryToComplete.before_focus || 5}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
