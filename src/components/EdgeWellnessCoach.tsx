@@ -9,9 +9,28 @@ import { useToast } from "@/hooks/use-toast";
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { PATIENT_EDUCATION, CRISIS_TEMPLATES } from "@/data/knowledgeBase";
 import { CLINICAL_PROTOCOLS, SYSTEM_PERSONA } from "@/data/clinicalProtocols";
-import { generateClinicalNarrative } from "@/utils/clinicalAugmentation";
+import { computeClinicalFeatures } from "@/utils/clinicalAugmentation";
 
 const SELECTED_MODEL = "gemma-2b-it-q4f32_1-MLC";
+// ... imports
+
+// ... inside initModel function ...
+      setEngine(engine);
+
+      // Data Augmentation: Pre-calculate clinical trends
+      const metrics = computeClinicalFeatures(entries);
+      const clinicalNarrative = `
+[CLINICAL SUMMARY]
+- Observation Window: Last 14 days.
+- Mean Daily THC: ${metrics.doseMetrics.meanDailyTHC.toFixed(1)}mg (Target: 20mg).
+- Adherence Rate: ${metrics.doseMetrics.adherenceRate.toFixed(0)}%.
+- Symptom Trajectory: ${metrics.symptomTrends.trajectorySlope.toUpperCase()} (Pain Delta: ${metrics.symptomTrends.painDelta.toFixed(1)}).
+- Adverse Event Rate: ${metrics.adverseEventRate.toFixed(1)} events/week.
+- Risk Flags: ${metrics.riskFlags.length > 0 ? metrics.riskFlags.join(", ") : "None detected"}.
+- Usage Patterns: ${metrics.utilization.combustionRate > 0 ? `Combustion detected (${metrics.utilization.combustionRate.toFixed(0)}%)` : "No combustion"}.
+`;
+
+      // Virtual Fine-Tuning (Few-Shot Injection)
 
 interface Message {
   role: "system" | "user" | "assistant";
@@ -98,7 +117,17 @@ ${item.content.slice(0, 300)}...
       setEngine(engine);
 
       // Data Augmentation: Pre-calculate clinical trends
-      const clinicalNarrative = generateClinicalNarrative(entries);
+      const metrics = computeClinicalFeatures(entries);
+      const clinicalNarrative = `
+[CLINICAL SUMMARY]
+- Observation Window: Last 14 days.
+- Mean Daily THC: ${metrics.doseMetrics.meanDailyTHC.toFixed(1)}mg (Target: 20mg).
+- Adherence Rate: ${metrics.doseMetrics.adherenceRate.toFixed(0)}%.
+- Symptom Trajectory: ${metrics.symptomTrends.trajectorySlope.toUpperCase()} (Pain Delta: ${metrics.symptomTrends.painDelta.toFixed(1)}).
+- Adverse Event Rate: ${metrics.adverseEventRate.toFixed(1)} events/week.
+- Risk Flags: ${metrics.riskFlags.length > 0 ? metrics.riskFlags.join(", ") : "None detected"}.
+- Usage Patterns: ${metrics.utilization.combustionRate > 0 ? `Combustion detected (${metrics.utilization.combustionRate.toFixed(0)}%)` : "No combustion"}.
+`;
 
       // Virtual Fine-Tuning (Few-Shot Injection)
       // We inject "perfect" examples of how MedGemma SHOULD behave

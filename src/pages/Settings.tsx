@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2, Download, ChevronDown, Shield, Lock } from "lucide-react";
+import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2, Download, ChevronDown, Shield, Lock, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useEncryption } from "@/contexts/EncryptionContext";
 import { MigrationWizard } from "@/components/MigrationWizard";
+import { ClinicianLinking } from "@/components/clinical/ClinicianLinking";
+import { ClinicianAccess } from "@/components/clinical/ClinicianAccess";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface NotificationPreferences {
   browserNotifications: boolean;
@@ -38,6 +41,7 @@ interface AccountInfo {
   email: string;
   createdAt: string;
   totalEntries: number;
+  role: 'patient' | 'clinician';
 }
 
 export default function Settings() {
@@ -47,6 +51,7 @@ export default function Settings() {
   const [exporting, setExporting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showMigrationWizard, setShowMigrationWizard] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const { encryptionEnabled, isUnlocked, lock, needsMigration, setNeedsMigration } = useEncryption();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     browserNotifications: true,
@@ -57,19 +62,35 @@ export default function Settings() {
     email: "",
     createdAt: "",
     totalEntries: 0,
+    role: 'patient',
   });
 
   const loadPreferences = useCallback(async () => {
     try {
+      const demoMode = localStorage.getItem("demoMode") === "true";
+      setIsDemoMode(demoMode);
+
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (!user && !demoMode) {
         navigate("/auth");
         return;
       }
 
       // Get account creation date
-      const createdAt = user.created_at || "";
+      const createdAt = user?.created_at || new Date().toISOString();
+
+      // Get profile info (role)
+      let role: 'patient' | 'clinician' = 'patient';
+      if (!demoMode && user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) role = profile.role as 'patient' | 'clinician';
+      }
 
       // Get total entries count
       const { count } = await supabase
@@ -77,9 +98,10 @@ export default function Settings() {
         .select("*", { count: "exact", head: true });
 
       setAccountInfo({
-        email: user.email || "",
+        email: user?.email || "demo@example.com",
         createdAt: createdAt,
         totalEntries: count || 0,
+        role: role,
       });
 
       // Load notification preferences from localStorage
@@ -363,6 +385,42 @@ export default function Settings() {
                 View Journal
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Clinical Portal */}
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Stethoscope className="w-5 h-5 text-primary" />
+                <CardTitle>Clinical Portal</CardTitle>
+              </div>
+              {accountInfo.role === 'clinician' && (
+                <Button variant="default" size="sm" onClick={() => navigate("/clinician")}>
+                  Go to Dashboard
+                </Button>
+              )}
+            </div>
+            <CardDescription>
+              Connect with healthcare providers and manage clinical sharing
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="linking" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="linking">Patient Linking</TabsTrigger>
+                <TabsTrigger value="clinician">Professional Access</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="linking" className="space-y-4">
+                <ClinicianLinking />
+              </TabsContent>
+              
+              <TabsContent value="clinician" className="space-y-4">
+                <ClinicianAccess onLinkSuccess={() => navigate("/clinician")} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 

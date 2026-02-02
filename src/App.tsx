@@ -20,6 +20,7 @@ const Tools = lazy(() => import("./pages/Tools"));
 const Triage = lazy(() => import("./pages/Triage"));
 const Coach = lazy(() => import("./pages/Coach"));
 const Settings = lazy(() => import("./pages/Settings"));
+const ClinicianDashboard = lazy(() => import("./pages/ClinicianDashboard"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Features = lazy(() => import("./pages/Features"));
@@ -45,6 +46,7 @@ const AppContent = () => {
               <Route path="/triage" element={<Triage />} />
               <Route path="/coach" element={<Coach />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/clinician" element={<ClinicianDashboard />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/features" element={<Features />} />

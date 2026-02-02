@@ -308,10 +308,14 @@ export default function Tools() {
       case "optimize":
         // Wait for user input
         break;
-      case "metrics":
-        const logs = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
+      case "metrics": {
+        interface FeedbackLog {
+          rating: 'up' | 'down';
+          query: string;
+        }
+        const logs: FeedbackLog[] = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
         const totalChat = logs.length;
-        const ups = logs.filter((l: any) => l.rating === "up").length;
+        const ups = logs.filter((l) => l.rating === "up").length;
         const score = totalChat > 0 ? Math.round((ups / totalChat) * 100) : 0;
         
         // Count tool usages from the local state
@@ -330,11 +334,12 @@ Real-time evaluation of Google's Gemma model running locally in your browser.
 - **Safety Interception Rate:** 100% (Rule-based emergency detection)
 
 **Recent Interaction Logs:**
-${logs.slice(-3).map((l: any) => `- **User Query:** "${l.query}" -> **Local Model Rating:** ${l.rating.toUpperCase()}`).join('\n')}
+${logs.slice(-3).map((l) => `- **User Query:** "${l.query}" -> **Local Model Rating:** ${l.rating.toUpperCase()}`).join('\n')}
 
 *These metrics demonstrate the feasibility of high-quality clinical support using on-device hardware, satisfying the requirements for the Edge AI Prize.*
         `);
         break;
+      }
       case "factsheets":
         break;
     }
