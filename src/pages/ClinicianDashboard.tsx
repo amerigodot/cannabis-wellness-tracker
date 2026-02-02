@@ -174,17 +174,6 @@ export default function ClinicianDashboard() {
           setPatientEntries(mockEntries);
           setPatientMetrics(computeClinicalFeatures(mockEntries));
           
-          // Process trends for chart (Demo)
-          const trends = mockEntries
-            .sort((a, b) => new Date(a.consumption_time).getTime() - new Date(b.consumption_time).getTime())
-            .map(e => ({
-              date: e.consumption_time,
-              pain: e.before_pain || 0,
-              anxiety: e.before_anxiety || 0,
-              thc: e.thc_percentage ? (parseFloat(e.dosage) || 0.5) * (e.thc_percentage / 100) * 1000 : 10
-            }));
-          setChartData(trends);
-
           // Set mock regimen
           setActiveRegimen({
             products: [
@@ -214,18 +203,6 @@ export default function ClinicianDashboard() {
           const typedEntries = entriesData as unknown as JournalEntry[];
           setPatientEntries(typedEntries);
           setPatientMetrics(computeClinicalFeatures(typedEntries));
-          
-          // Process trends for chart (Real)
-          const trends = typedEntries
-            .sort((a, b) => new Date(a.consumption_time || a.created_at).getTime() - new Date(b.consumption_time || b.created_at).getTime())
-            .map(e => ({
-              date: e.consumption_time || e.created_at,
-              pain: e.before_pain || 0,
-              anxiety: e.before_anxiety || 0,
-              thc: e.thc_percentage ? (parseFloat(e.dosage) || 0.5) * (e.thc_percentage / 100) * 1000 : 
-                   (e.dosage.includes('mg') ? parseFloat(e.dosage) : 5) // Fallback logic
-            }));
-          setChartData(trends);
         }
       } catch (error) {
         console.error("Error fetching patient metrics:", error);
@@ -504,7 +481,7 @@ export default function ClinicianDashboard() {
                   </TabsContent>
 
                   <TabsContent value="trends" className="mt-6 space-y-6">
-                    <AdvancedTrendChart data={chartData} />
+                    <AdvancedTrendChart data={trendData} />
                   </TabsContent>
 
                   <TabsContent value="regimen" className="mt-6">
