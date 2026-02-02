@@ -97,47 +97,17 @@ This plan outlines the migration from a privacy-first patient wellness tracker t
 
 **Goal:** Create intuitive, timeline-focused interface for busy clinicians.
 
-**Core Views:**
-
-1. **Patient List View**
-   - Sortable table: name, last visit, next scheduled, alert badges (red: adverse event, yellow: dose drift)
-   - Quick filters: "High risk", "Overdue visit", "New patients"
-
-2. **Patient Card Detail View**
-   - Header: demographics, diagnoses, current regimen
-   - Timeline (interactive chart):
-     - Y-axes: pain score, anxiety score, sleep quality, THC/CBD dose
-     - X-axis: time (last 3 months default, expandable)
-     - Event markers: ER visit, panic attack, dose change, clinician note
-   - Tabbed sections:
-     - **Summary**: Auto-generated pre-visit narrative + risk flags
-     - **Trends**: Statistical tables (mean, std dev, trajectory slopes)
-     - **Adverse Events**: Chronological list with severity tags
-     - **Guidelines**: RAG snippets relevant to current regimen + diagnoses
-     - **Plan Editor**: Adjust dose, frequency, product recommendations
-
-3. **Plan Editor Workflow**
-   - Clinician proposes changes (e.g., "Reduce THC to 5mg/night, add CBD 10mg")
-   - System validates against guidelines, shows warnings (e.g., "LRCUG recommends <8 THC units/week")
-   - Saves as structured `CarePlan` object, syncs to patient app
-   - Patient receives notification: "Dr. Smith updated your plan. Review and confirm."
-
 **Tasks:**
-- Wireframe all views (Figma or similar)
-- Implement responsive dashboard (React + Tailwind or Chakra UI)
-- Build interactive timeline component (Recharts, D3.js, or Plotly.js)
-- Add guideline citation popovers (hover over risk flag → shows LRCUG excerpt)
-- Create plan editor form with real-time validation
-
-**Resources:**
-- [14] Medical dashboard UX patterns: https://www.nngroup.com/articles/medical-dashboard-design/
-- [15] Cannabis registry dashboard examples: https://pmc.ncbi.nlm.nih.gov/articles/PMC11303852/
-- [16] Shared decision-making UI: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0336598
+- [x] Wireframe all views (Figma or similar)
+- [x] Implement responsive dashboard (React + Tailwind or Chakra UI)
+- [x] Build interactive timeline component (Recharts)
+- [x] Add guideline citation popovers (hover over risk flag → shows LRCUG excerpt)
+- [x] Create plan editor form with real-time validation
 
 **Deliverables:**
-- High-fidelity mockups (5 key screens)
-- React dashboard prototype (read-only data)
-- Plan editor with validation logic
+- [x] High-fidelity mockups (5 key screens)
+- [x] React dashboard prototype (read-only data)
+- [x] Plan editor with validation logic
 
 ---
 
@@ -145,75 +115,17 @@ This plan outlines the migration from a privacy-first patient wellness tracker t
 
 **Goal:** Enable secure, patient-controlled data sharing without centralizing raw journals.
 
-**Privacy-Preserving Sync Model:**
-
-```
-┌─────────────────┐           ┌──────────────────┐
-│  Patient Device │           │ Clinician Device │
-│   (Edge AI)     │           │   (Dashboard)    │
-└────────┬────────┘           └────────┬─────────┘
-         │                              │
-         │ 1. Generate summary          │
-         │    (local Gemma)             │
-         │                              │
-         │ 2. Encrypt summary +         │
-         │    consented fields          │
-         │    (NaCl box, clinician      │
-         │     public key)              │
-         │                              │
-         ▼                              │
-┌─────────────────────────────────┐    │
-│  Sync Server (Minimal State)    │    │
-│  - Stores: encrypted blobs       │    │
-│  - Indexed by: patientID +       │    │
-│    clinicianID                   │    │
-│  - No decryption keys            │    │
-│  - Audit log only                │    │
-└─────────────┬───────────────────┘    │
-              │                        │
-              │ 3. Fetch encrypted     │
-              │    data                │
-              ▼                        ▼
-         ┌────────────────────────────────┐
-         │ Clinician decrypts locally     │
-         │ (private key in browser        │
-         │  keystore or HSM token)        │
-         └────────────────────────────────┘
-```
-
-**Implementation:**
-- **Patient side:** 
-  - Runs `computeClinicalFeatures()` locally
-  - Generates summary via WebLLM
-  - Encrypts bundle with clinician's public key (retrieved once during linking)
-  - POSTs to `/sync/upload` with signature
-  
-- **Sync server (Node.js + PostgreSQL or Firebase):**
-  - Stores encrypted blobs (no PHI in plaintext)
-  - Enforces access control (only linked clinician can fetch)
-  - Logs all access attempts for audit
-  
-- **Clinician side:**
-  - Fetches latest blob from `/sync/fetch/:patientId`
-  - Decrypts in browser with private key (Web Crypto API)
-  - Renders in dashboard
-
 **Tasks:**
-- Implement end-to-end encryption layer (libsodium.js)
-- Build lightweight sync API (REST or WebSocket)
-- Add key management UI (patient exports public key QR for clinician)
-- Implement offline queueing (patient can generate summaries offline, sync when online)
-- Create audit log viewer (patient can see who accessed what, when)
-
-**Resources:**
-- [17] End-to-end encryption in healthcare: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570116/
-- [18] Edge AI privacy: https://edge-ai-tech.eu/edge-ai-security-privacy-protecting-data-where-it-matters-most/
-- [19] FHIR security: https://www.hl7.org/fhir/security.html
+- [x] Implement end-to-end encryption layer (libsodium.js or similar logic)
+- [x] Build lightweight sync API (REST or WebSocket)
+- [x] Add key management UI (patient exports public key QR for clinician)
+- [x] Implement offline queueing (patient can generate summaries offline, sync when online)
+- [x] Create audit log viewer (patient can see who accessed what, when)
 
 **Deliverables:**
-- Sync server API (2 endpoints: upload, fetch)
-- Encryption module with key exchange protocol
-- Audit log viewer UI
+- [x] Sync server API (2 endpoints: upload, fetch)
+- [x] Encryption module with key exchange protocol
+- [x] Audit log viewer UI
 
 ---
 

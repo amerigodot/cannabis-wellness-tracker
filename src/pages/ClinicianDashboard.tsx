@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,33 +11,25 @@ import {
   ArrowLeft, 
   Users, 
   User, 
-  LineChart, 
-  AlertCircle, 
   FileText, 
   Calendar,
   Activity,
   ShieldCheck,
   Search,
   ChevronRight,
-  Filter
+  Filter,
+  AlertCircle
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { 
-  LineChart as RechartsLineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ConsentScope } from "@/types/patient";
+import { ConsentScope, CannabisRegimen } from "@/types/patient";
 import { useClinicalSummarizer } from "@/hooks/useClinicalSummarizer";
 import { computeClinicalFeatures, ClinicalMetrics } from "@/utils/clinicalAugmentation";
 import { JournalEntry } from "@/types/journal";
 import { Loader2, RefreshCw } from "lucide-react";
+import { CarePlanEditor } from "@/components/clinical/CarePlanEditor";
+import { AdvancedTrendChart } from "@/components/clinical/AdvancedTrendChart";
+import { toast } from "sonner";
 
 interface Patient {
   id: string;
@@ -58,6 +50,7 @@ export default function ClinicianDashboard() {
   // Clinical Data State
   const [patientMetrics, setPatientMetrics] = useState<ClinicalMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
+  const [activeRegimen, setActiveRegimen] = useState<CannabisRegimen | null>(null);
   
   // AI Summarizer Hook
   const { generateSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
@@ -147,6 +140,7 @@ export default function ClinicianDashboard() {
   useEffect(() => {
     if (!selectedPatientId) {
       setPatientMetrics(null);
+      setActiveRegimen(null);
       return;
     }
 
@@ -179,20 +173,34 @@ export default function ClinicianDashboard() {
           }));
 
           setPatientMetrics(computeClinicalFeatures(mockEntries));
+
+          // Set mock regimen
+          setActiveRegimen({
+            products: [
+              { name: "CBD Oil 20:1", strain: "ACDC", type: "oil", thcContent: 1, cbdContent: 20 },
+              { name: "Night Flower", strain: "GSC", type: "flower", thcContent: 18, cbdContent: 1 }
+            ],
+            dosing: {
+              frequency: "bid",
+              targetTHC: 20,
+              targetCBD: 40,
+              instructions: "Take oil in morning. Vaporize flower only for breakthrough pain."
+            },
+            route: "sublingual",
+            startDate: new Date(),
+            prescribingClinician: "Dr. Demo"
+          });
         } else {
           // Fetch real entries from Supabase
-          const { data, error } = await supabase
+          const { data: entriesData, error: entriesError } = await supabase
             .from('journal_entries')
             .select('*')
             .eq('user_id', selectedPatientId)
             .order('created_at', { ascending: false })
             .limit(50);
 
-          if (error) throw error;
-          
-          // Transform to match JournalEntry type (simplified for now)
-          // In real app, might need more robust mapping or type assertions
-          setPatientMetrics(computeClinicalFeatures(data as unknown as JournalEntry[]));
+          if (entriesError) throw entriesError;
+          setPatientMetrics(computeClinicalFeatures(entriesData as unknown as JournalEntry[]));
         }
       } catch (error) {
         console.error("Error fetching patient metrics:", error);
@@ -204,17 +212,33 @@ export default function ClinicianDashboard() {
     fetchPatientData();
   }, [selectedPatientId, isDemoMode]);
 
+  const handleUpdateRegimen = async (newRegimen: CannabisRegimen) => {
+    // In a real app, save to Supabase 'care_plans' table
+    if (isDemoMode) {
+      await new Promise(r => setTimeout(r, 800)); // Sim network
+      setActiveRegimen(newRegimen);
+    } else {
+      console.log("Saving to DB:", newRegimen);
+      // Implementation pending DB schema for care_plans
+      toast.info("Backend sync pending Phase 4 implementation");
+    }
+  };
+
   const selectedPatient = patients.find(p => p.id === selectedPatientId);
 
-  const mockTrendData = [
-    { date: '2026-01-26', pain: 8, mood: 4, thc: 10 },
-    { date: '2026-01-27', pain: 7, mood: 5, thc: 15 },
-    { date: '2026-01-28', pain: 6, mood: 6, thc: 10 },
-    { date: '2026-01-29', pain: 7, mood: 5, thc: 20 },
-    { date: '2026-01-30', pain: 5, mood: 7, thc: 15 },
-    { date: '2026-01-31', pain: 4, mood: 8, thc: 10 },
-    { date: '2026-02-01', pain: 3, mood: 8, thc: 5 },
-  ];
+  // Construct trend data from whatever source available (mock or real)
+  // Ideally this comes from the same source as patientMetrics
+  const trendData = isDemoMode && selectedPatientId 
+    ? Array.from({ length: 14 }).map((_, i) => ({
+        date: new Date(Date.now() - (13 - i) * 86400000).toISOString(),
+        pain: selectedPatientId === 'demo-p1' ? Math.max(2, 8 - i * 0.4) : 5 + Math.random() * 2,
+        anxiety: selectedPatientId === 'demo-p1' ? 3 + Math.random() : Math.min(9, 4 + i * 0.3),
+        thc: selectedPatientId === 'demo-p1' ? 20 : 10 + Math.random() * 20
+      }))
+    : []; 
+    // Note: For real data, we would need to aggregate the 'entriesData' fetched in useEffect
+    // into daily averages. For MVP simplicity, we use the detailed mock data in demo mode
+    // or placeholder structure.
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -436,89 +460,29 @@ export default function ClinicianDashboard() {
                   </TabsContent>
 
                   <TabsContent value="trends" className="mt-6 space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <LineChart className="w-5 h-5 text-primary" />
-                          Symptom & Dosage Correlation
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-[400px] w-full mt-4">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <RechartsLineChart data={mockTrendData}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                              <XAxis dataKey="date" />
-                              <YAxis yAxisId="left" orientation="left" domain={[0, 10]} />
-                              <YAxis yAxisId="right" orientation="right" domain={[0, 30]} />
-                              <Tooltip />
-                              <Legend />
-                              <Line 
-                                yAxisId="left"
-                                type="monotone" 
-                                dataKey="pain" 
-                                stroke="#ef4444" 
-                                name="Pain (0-10)" 
-                                strokeWidth={3}
-                                dot={{ r: 4 }}
-                              />
-                              <Line 
-                                yAxisId="left"
-                                type="monotone" 
-                                dataKey="mood" 
-                                stroke="#10b981" 
-                                name="Mood (0-10)" 
-                                strokeWidth={3}
-                                dot={{ r: 4 }}
-                              />
-                              <Line 
-                                yAxisId="right"
-                                type="stepAfter" 
-                                dataKey="thc" 
-                                stroke="#8b5cf6" 
-                                name="THC Dose (mg)" 
-                                strokeWidth={2}
-                                strokeDasharray="5 5"
-                              />
-                            </RechartsLineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <AdvancedTrendChart data={trendData} />
                   </TabsContent>
 
                   <TabsContent value="regimen" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Current Cannabis Care Plan</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid gap-6 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label className="text-muted-foreground">Product Recommendations</Label>
-                            <div className="p-3 rounded-md bg-accent/50 border">
-                              <p className="font-semibold text-sm">CBD-Dominant Oil (20:1)</p>
-                              <p className="text-xs text-muted-foreground mt-1">Target: 20mg CBD, 1mg THC per dose</p>
-                            </div>
-                            <div className="p-3 rounded-md bg-accent/50 border">
-                              <p className="font-semibold text-sm">Balanced Hybrid Flower</p>
-                              <p className="text-xs text-muted-foreground mt-1">Target: 5mg-10mg THC for breakthrough pain</p>
-                            </div>
+                    {activeRegimen ? (
+                      <CarePlanEditor 
+                        initialRegimen={activeRegimen}
+                        onSave={handleUpdateRegimen}
+                      />
+                    ) : (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>No Active Care Plan</CardTitle>
+                          <CardDescription>Create a care plan to track patient adherence.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <FileText className="w-8 h-8 mb-2 opacity-50" />
+                            <p>Care plans are available in Demo Mode or after Phase 4 backend integration.</p>
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-muted-foreground">Dosing Schedule</Label>
-                            <div className="p-3 rounded-md bg-accent/50 border">
-                              <p className="font-semibold text-sm">Twice Daily (BID)</p>
-                              <p className="text-xs text-muted-foreground mt-1">0.5ml sublingual morning and night</p>
-                            </div>
-                            <div className="p-3 rounded-md bg-accent/50 border">
-                              <p className="font-semibold text-sm">As Needed (PRN)</p>
-                              <p className="text-xs text-muted-foreground mt-1">Vaporized as required, max 3 times daily</p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="safety" className="mt-6">
