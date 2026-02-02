@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
 import { ClinicalMetrics } from "@/utils/clinicalAugmentation";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ export function useClinicalSummarizer() {
     };
   }, [engine]);
 
-  const initModel = async () => {
+  const initModel = useCallback(async () => {
     if (engine) return engine;
     
     setState(prev => ({ ...prev, isModelLoading: true, progress: "Initializing Edge AI..." }));
@@ -57,9 +57,9 @@ export function useClinicalSummarizer() {
       setState(prev => ({ ...prev, isModelLoading: false, progress: "Error loading model" }));
       return null;
     }
-  };
+  }, [engine]);
 
-  const generateSummary = async (patientName: string, metrics: ClinicalMetrics) => {
+  const generateSummary = useCallback(async (patientName: string, metrics: ClinicalMetrics) => {
     let currentEngine = engine;
     if (!currentEngine) {
       currentEngine = await initModel();
@@ -110,26 +110,18 @@ export function useClinicalSummarizer() {
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
+  }, [engine, initModel]);
+
+  const resetSummary = useCallback(() => {
+    setState(prev => ({ ...prev, summary: "" }));
+  }, []);
+
+  return {
+    generateSummary,
+    resetSummary,
+    ...state
   };
+}
 
-    const resetSummary = () => {
-
-      setState(prev => ({ ...prev, summary: "" }));
-
-    };
-
-  
-
-    return {
-
-      generateSummary,
-
-      resetSummary,
-
-      ...state
-
-    };
-
-  }
 
   

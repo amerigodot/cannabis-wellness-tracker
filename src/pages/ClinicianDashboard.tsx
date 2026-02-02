@@ -221,8 +221,10 @@ export default function ClinicianDashboard() {
       setActiveRegimen(newRegimen);
     } else {
       console.log("Saving to DB:", newRegimen);
+      // Optimistic update for UI persistence during session
+      setActiveRegimen(newRegimen); 
       // Implementation pending DB schema for care_plans
-      toast.info("Backend sync pending Phase 4 implementation");
+      toast.info("Care plan updated locally (Backend sync pending Phase 4)");
     }
   };
 
@@ -481,11 +483,21 @@ export default function ClinicianDashboard() {
                   </TabsContent>
 
                   <TabsContent value="trends" className="mt-6 space-y-6">
-                    <AdvancedTrendChart data={trendData} />
+                    {metricsLoading ? (
+                       <div className="flex justify-center p-12">
+                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                       </div>
+                    ) : (
+                      <AdvancedTrendChart data={trendData} />
+                    )}
                   </TabsContent>
 
                   <TabsContent value="regimen" className="mt-6">
-                    {activeRegimen ? (
+                    {metricsLoading ? (
+                       <div className="flex justify-center p-12">
+                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                       </div>
+                    ) : activeRegimen ? (
                       <CarePlanEditor 
                         initialRegimen={activeRegimen}
                         onSave={handleUpdateRegimen}
@@ -507,6 +519,11 @@ export default function ClinicianDashboard() {
                   </TabsContent>
 
                   <TabsContent value="safety" className="mt-6">
+                    {metricsLoading ? (
+                       <div className="flex justify-center p-12">
+                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                       </div>
+                    ) : (
                     <Card className="border-destructive/20">
                       <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
@@ -556,6 +573,7 @@ export default function ClinicianDashboard() {
                         </div>
                       </CardContent>
                     </Card>
+                    )}
                   </TabsContent>
                 </Tabs>
               </div>
