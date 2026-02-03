@@ -220,7 +220,12 @@ export default function ClinicianDashboard() {
 
   // Construct trend data from patientEntries
   const trendData = useMemo(() => {
-    if (!patientEntries.length) return [];
+    if (!patientEntries.length) {
+      console.log("[Clinician] No patient entries for trend chart");
+      return [];
+    }
+
+    console.log("[Clinician] Building trend data from", patientEntries.length, "entries");
 
     const groupedData: Record<string, { painSum: number, anxietySum: number, thcSum: number, count: number }> = {};
 
@@ -237,35 +242,38 @@ export default function ClinicianDashboard() {
       groupedData[date].painSum += typeof entry.before_pain === 'number' ? entry.before_pain : 0;
       groupedData[date].anxietySum += typeof entry.before_anxiety === 'number' ? entry.before_anxiety : 0;
       
-      // Calculate THC (simplified logic, same as augmentation)
-      const doseVal = parseFloat(entry.dosage) || 0;
-      // Default to 10% if missing, or 0 if user has explicit 0
-      const thcPercent = typeof entry.thc_percentage === 'number' ? entry.thc_percentage : 15; 
+      // Calculate THC from dosage string
+      const dosageStr = entry.dosage || "0";
+      const doseVal = parseFloat(dosageStr) || 0;
+      const thcPercent = typeof entry.thc_percentage === 'number' ? entry.thc_percentage : 18; // Default 18% THC
       
-      // If dosage is just a number string "0.5", treat as grams -> 500mg * percent
-      // If "10mg", treat as 10 * 1
       let inferredTHC = 0;
-      if (entry.dosage.toLowerCase().includes('mg')) {
+      if (dosageStr.toLowerCase().includes('mg')) {
+        // Direct mg value
         inferredTHC = doseVal;
       } else {
-        // Assume grams if no unit, or if 'g' is present
+        // Assume grams (e.g., "0.5g" -> 0.5) -> convert to mg * THC%
+        // 0.5g = 500mg flower -> 500 * 0.18 = 90mg THC
         inferredTHC = doseVal * 1000 * (thcPercent / 100);
       }
       
-      // Sanity check cap
-      if (inferredTHC > 1000) inferredTHC = 50; 
-      if (inferredTHC === 0 && doseVal > 0) inferredTHC = 5; // Fallback for visualization
+      // Cap sanity: typical daily max is ~200mg for heavy users
+      if (inferredTHC > 500) inferredTHC = 100; 
+      if (inferredTHC === 0 && doseVal > 0) inferredTHC = 10; // Fallback for display
 
       groupedData[date].thcSum += inferredTHC;
       groupedData[date].count++;
     });
 
-    return Object.entries(groupedData).map(([date, data]) => ({
+    const result = Object.entries(groupedData).map(([date, data]) => ({
       date,
       pain: data.count > 0 ? Number((data.painSum / data.count).toFixed(1)) : 0,
       anxiety: data.count > 0 ? Number((data.anxietySum / data.count).toFixed(1)) : 0,
-      thc: Number(data.thcSum.toFixed(1)) // Daily total
+      thc: Number(data.thcSum.toFixed(1))
     })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    console.log("[Clinician] Trend data computed:", result.length, "data points");
+    return result;
   }, [patientEntries]);
 
 

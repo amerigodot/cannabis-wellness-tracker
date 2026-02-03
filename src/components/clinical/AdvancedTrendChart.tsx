@@ -30,6 +30,23 @@ export function AdvancedTrendChart({ data }: AdvancedTrendChartProps) {
   // Sort data by date
   const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  console.log("[TrendChart] Rendering with data:", sortedData.length, "points", sortedData);
+
+  // Show placeholder if no valid data points
+  if (sortedData.length === 0) {
+    return (
+      <Card className="h-full flex flex-col">
+        <CardHeader>
+          <CardTitle>Symptom vs. Dosage Correlations</CardTitle>
+          <CardDescription>No data available to display.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center text-muted-foreground">
+          <p>Select a patient with journal entries to see trends.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
