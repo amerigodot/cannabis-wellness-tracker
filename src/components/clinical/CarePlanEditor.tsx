@@ -27,7 +27,7 @@ export function CarePlanEditor({ initialRegimen, onSave }: CarePlanEditorProps) 
     setHasChanges(false);
   }, [initialRegimen]);
 
-  const handleUpdateDosing = (field: keyof DosingSchedule, value: any) => {
+  const handleUpdateDosing = (field: keyof DosingSchedule, value: string | number) => {
     setRegimen(prev => ({
       ...prev,
       dosing: { ...prev.dosing, [field]: value }
@@ -50,8 +50,9 @@ export function CarePlanEditor({ initialRegimen, onSave }: CarePlanEditorProps) 
     setHasChanges(true);
   };
 
-  const handleUpdateProduct = (index: number, field: keyof Product, value: any) => {
+  const handleUpdateProduct = (index: number, field: keyof Product, value: string | number) => {
     const newProducts = [...regimen.products];
+    // @ts-ignore - dynamic assignment
     newProducts[index] = { ...newProducts[index], [field]: value };
     setRegimen(prev => ({ ...prev, products: newProducts }));
     setHasChanges(true);
@@ -122,7 +123,7 @@ export function CarePlanEditor({ initialRegimen, onSave }: CarePlanEditorProps) 
                 <Select 
                   value={regimen.route} 
                   onValueChange={(v) => {
-                    setRegimen(prev => ({ ...prev, route: v as any }));
+                    setRegimen(prev => ({ ...prev, route: v as "oral" | "sublingual" | "vaporised" | "topical" }));
                     setHasChanges(true);
                   }}
                 >

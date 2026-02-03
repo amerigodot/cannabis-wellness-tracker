@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
 import { EntryFormValues, entryFormSchema, defaultFormValues } from "@/types/entryForm";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { sliderValueToMinutes, formatTimeAgo } from "@/utils/wellness";
 import { 
   COMMON_OBSERVATIONS, 
@@ -54,6 +55,10 @@ export const JournalEntryForm = ({
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [tempNotes, setTempNotes] = useState("");
+  
+  // Persist form state and slider history
+  const [formDraft, setFormDraft] = useLocalStorage<EntryFormValues | null>("journal_form_draft", null);
+  const [sliderHistory, setSliderHistory] = useLocalStorage<{timestamp: number, field: string, value: number}[]>("journal_slider_history", []);
   
   // Collapsible section states
   const [observationsOpen, setObservationsOpen] = useState(() => {
@@ -96,6 +101,53 @@ export const JournalEntryForm = ({
   const afterAnxiety = watch("afterAnxiety");
   const afterEnergy = watch("afterEnergy");
   const afterFocus = watch("afterFocus");
+  
+  const hasLoadedDraft = useRef(false);
+
+  // Auto-load draft on init
+  useEffect(() => {
+    if (!hasLoadedDraft.current && !pendingEntryToComplete && formDraft) {
+      // Restore draft if we're not explicitly editing an existing entry
+      // We use a timeout to allow the defaultValues to settle first if needed
+      const timer = setTimeout(() => {
+        reset(formDraft);
+        toast.info("Restored your previous session");
+        hasLoadedDraft.current = true;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingEntryToComplete, reset, formDraft]);
+
+  // Sync form state to local storage (draft)
+  useEffect(() => {
+    if (!pendingEntryToComplete) {
+      const subscription = watch((value) => {
+        setFormDraft(value as EntryFormValues);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [watch, setFormDraft, pendingEntryToComplete]);
+
+  // Log slider changes to history
+  useEffect(() => {
+    const timestamp = Date.now();
+    // Helper to log if value changed
+    const logChange = (field: string, value: number) => {
+      setSliderHistory(prev => {
+        const last = prev[prev.length - 1];
+        // Avoid duplicate logs for same value (debounce effect naturally via react batching, but check anyway)
+        if (last && last.field === field && last.value === value) return prev;
+        return [...prev, { timestamp, field, value }];
+      });
+    };
+
+    if (afterMood) logChange('afterMood', afterMood);
+  }, [afterMood, setSliderHistory]);
+
+  useEffect(() => { if (afterPain) setSliderHistory(prev => [...prev, { timestamp: Date.now(), field: 'afterPain', value: afterPain }]); }, [afterPain, setSliderHistory]);
+  useEffect(() => { if (afterAnxiety) setSliderHistory(prev => [...prev, { timestamp: Date.now(), field: 'afterAnxiety', value: afterAnxiety }]); }, [afterAnxiety, setSliderHistory]);
+  useEffect(() => { if (afterEnergy) setSliderHistory(prev => [...prev, { timestamp: Date.now(), field: 'afterEnergy', value: afterEnergy }]); }, [afterEnergy, setSliderHistory]);
+  useEffect(() => { if (afterFocus) setSliderHistory(prev => [...prev, { timestamp: Date.now(), field: 'afterFocus', value: afterFocus }]); }, [afterFocus, setSliderHistory]);
 
   // Persist collapsible states
   useEffect(() => {
@@ -293,6 +345,10 @@ export const JournalEntryForm = ({
 
     if (success) {
       setShowSuccessAnimation(true);
+      
+      // Clear draft and history
+      setFormDraft(null);
+      setSliderHistory([]);
       
       // Reset form (keep consumption defaults)
       reset({
