@@ -57,6 +57,23 @@ export default function ClinicianDashboard() {
   // AI Summarizer Hook
   const { generateSummary, resetSummary, summary, isLoading: isAiLoading, isModelLoading, progress } = useClinicalSummarizer();
 
+  // Helper to get default regimen
+  const getDefaultRegimen = (): CannabisRegimen => ({
+    products: [
+      { name: "CBD Oil 20:1", strain: "ACDC", type: "oil", thcContent: 1, cbdContent: 20 },
+      { name: "Night Flower", strain: "GSC", type: "flower", thcContent: 18, cbdContent: 1 }
+    ],
+    dosing: {
+      frequency: "bid",
+      targetTHC: 20,
+      targetCBD: 40,
+      instructions: "Take oil in morning. Vaporize flower only for breakthrough pain."
+    },
+    route: "sublingual",
+    startDate: new Date(),
+    prescribingClinician: "Dr. Demo"
+  });
+
   const loadPatients = useCallback(async (demo: boolean) => {
     if (demo) {
       setPatients([
@@ -89,46 +106,10 @@ export default function ClinicianDashboard() {
       return;
     }
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('clinician_patient_links')
-        .select(`
-          patient_id,
-          status,
-          consent_scope,
-          updated_at,
-          patient_profile:profiles!clinician_patient_links_patient_id_fkey(full_name)
-        `)
-        .eq('clinician_id', user.id);
-
-      if (error) throw error;
-
-      const formattedPatients = (data as unknown as Array<{
-        patient_id: string;
-        status: 'active' | 'pending' | 'revoked';
-        consent_scope: ConsentScope;
-        updated_at: string;
-        patient_profile: { full_name: string } | null;
-      }>).map((d) => ({
-        id: d.patient_id,
-        full_name: d.patient_profile?.full_name || "Unknown Patient",
-        last_sync: d.updated_at,
-        status: d.status,
-        consent_scope: d.consent_scope
-      }));
-
-      setPatients(formattedPatients);
-    } catch (error) {
-      console.error("Error loading patients:", error);
-    } finally {
-      setLoading(false);
-    }
+    // Non-demo mode - backend tables for clinician_patient_links don't exist yet
+    // For now, show empty patient list until Phase 4 backend implementation
+    setPatients([]);
+    setLoading(false);
   }, [navigate]);
 
   useEffect(() => {
@@ -160,16 +141,8 @@ export default function ClinicianDashboard() {
           let mockEntries: JournalEntry[] = [];
           
           if (selectedPatientId === 'demo-p1') {
-            // John Doe uses local_journal_entries if available, else SAMPLE_ENTRIES
-            // This aligns with the main Journal view behavior
-            const stored = localStorage.getItem("local_journal_entries");
-            if (stored) {
-              const parsed = JSON.parse(stored);
-              // Ensure we have data for the demo persona even if local storage is empty
-              mockEntries = parsed.length > 0 ? parsed : SAMPLE_ENTRIES;
-            } else {
-              mockEntries = SAMPLE_ENTRIES;
-            }
+            // John Doe always uses SAMPLE_ENTRIES for consistent demo experience
+            mockEntries = SAMPLE_ENTRIES;
           } else {
             // Jane Roe gets a generated variation
             // We base it on SAMPLE_ENTRIES to ensure data quality
@@ -183,22 +156,23 @@ export default function ClinicianDashboard() {
           setPatientEntries(mockEntries);
           setPatientMetrics(computeClinicalFeatures(mockEntries));
           
-          // Set mock regimen
-          setActiveRegimen({
-            products: [
-              { name: "CBD Oil 20:1", strain: "ACDC", type: "oil", thcContent: 1, cbdContent: 20 },
-              { name: "Night Flower", strain: "GSC", type: "flower", thcContent: 18, cbdContent: 1 }
-            ],
-            dosing: {
-              frequency: "bid",
-              targetTHC: 20,
-              targetCBD: 40,
-              instructions: "Take oil in morning. Vaporize flower only for breakthrough pain."
-            },
-            route: "sublingual",
-            startDate: new Date(),
-            prescribingClinician: "Dr. Demo"
-          });
+          // Load persisted regimen from localStorage or use default
+          const savedRegimenKey = `clinician_regimen_${selectedPatientId}`;
+          const savedRegimen = localStorage.getItem(savedRegimenKey);
+          
+          if (savedRegimen) {
+            try {
+              const parsed = JSON.parse(savedRegimen);
+              // Convert startDate back to Date object
+              parsed.startDate = new Date(parsed.startDate);
+              setActiveRegimen(parsed);
+            } catch {
+              // Fall back to default
+              setActiveRegimen(getDefaultRegimen());
+            }
+          } else {
+            setActiveRegimen(getDefaultRegimen());
+          }
         } else {
           // Fetch real entries from Supabase
           const { data: entriesData, error: entriesError } = await supabase
@@ -224,10 +198,15 @@ export default function ClinicianDashboard() {
   }, [selectedPatientId, isDemoMode, resetSummary]);
 
   const handleUpdateRegimen = async (newRegimen: CannabisRegimen) => {
-    // In a real app, save to Supabase 'care_plans' table
-    if (isDemoMode) {
+    if (isDemoMode && selectedPatientId) {
       await new Promise(r => setTimeout(r, 800)); // Sim network
+      
+      // Persist to localStorage for demo mode
+      const savedRegimenKey = `clinician_regimen_${selectedPatientId}`;
+      localStorage.setItem(savedRegimenKey, JSON.stringify(newRegimen));
+      
       setActiveRegimen(newRegimen);
+      toast.success("Care plan saved and synced!");
     } else {
       console.log("Saving to DB:", newRegimen);
       // Optimistic update for UI persistence during session

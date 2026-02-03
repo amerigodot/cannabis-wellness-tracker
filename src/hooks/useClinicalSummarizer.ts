@@ -37,7 +37,9 @@ export function useClinicalSummarizer() {
     setState(prev => ({ ...prev, isModelLoading: true, progress: "Initializing Edge AI..." }));
     
     try {
-      if (!navigator.gpu) {
+      // Check for WebGPU support
+      const gpu = (navigator as Navigator & { gpu?: unknown }).gpu;
+      if (!gpu) {
         throw new Error("WebGPU not supported");
       }
 
@@ -122,6 +124,3 @@ export function useClinicalSummarizer() {
     ...state
   };
 }
-
-
-  

@@ -80,17 +80,9 @@ export default function Settings() {
       // Get account creation date
       const createdAt = user?.created_at || new Date().toISOString();
 
-      // Get profile info (role)
-      let role: 'patient' | 'clinician' = 'patient';
-      if (!demoMode && user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        
-        if (profile) role = profile.role as 'patient' | 'clinician';
-      }
+      // Role is always 'patient' for now - profiles table doesn't exist
+      // Clinician role requires Phase 4 backend implementation
+      const role: 'patient' | 'clinician' = demoMode ? 'clinician' : 'patient';
 
       // Get total entries count
       const { count } = await supabase

@@ -1,14 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Key, Users, RefreshCw, Trash2, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Loader2, Key, Users, RefreshCw, Trash2, ShieldAlert } from "lucide-react";
 
 interface LinkCode {
   code: string;
@@ -39,13 +37,11 @@ export function ClinicianLinking() {
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
-    setIsDemoMode(localStorage.getItem("demoMode") === "true");
-    loadLinks();
-    loadCurrentCode();
-  }, []);
-
-  const loadLinks = async () => {
-    if (localStorage.getItem("demoMode") === "true") {
+    const demo = localStorage.getItem("demoMode") === "true";
+    setIsDemoMode(demo);
+    
+    if (demo) {
+      // Load demo data
       setLinks([
         {
           id: 'demo-link-1',
@@ -61,141 +57,41 @@ export function ClinicianLinking() {
           clinician_profile: { full_name: "Dr. Jane Smith (Demo)" }
         }
       ]);
-      return;
     }
-
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('clinician_patient_links')
-        .select(`
-          *,
-          clinician_profile:profiles!clinician_patient_links_clinician_id_fkey(full_name)
-        `)
-        .eq('patient_id', user.id);
-
-      if (error) throw error;
-      setLinks(data as ClinicianLink[]);
-    } catch (error) {
-      console.error("Error loading links:", error);
-      toast.error("Failed to load clinician links");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCurrentCode = async () => {
-    if (localStorage.getItem("demoMode") === "true") return;
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('link_codes')
-        .select('code, expires_at')
-        .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString())
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      if (data) setCurrentCode(data);
-    } catch (error) {
-      console.error("Error loading code:", error);
-    }
-  };
+    setLoading(false);
+  }, []);
 
   const generateCode = async () => {
-    if (isDemoMode) {
-      const mockCode = Math.floor(100000 + Math.random() * 900000).toString();
-      setCurrentCode({
-        code: mockCode,
-        expires_at: new Date(Date.now() + 15 * 60000).toISOString()
-      });
-      toast.success("Demo code generated!");
-      return;
-    }
-
     setGenerating(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 15 * 60000).toISOString();
-
-      const { error } = await supabase
-        .from('link_codes')
-        .insert([{ user_id: user.id, code, expires_at: expiresAt }]);
-
-      if (error) throw error;
-
+    
+    // Generate a random 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60000).toISOString();
+    
+    if (isDemoMode) {
+      await new Promise(r => setTimeout(r, 300));
       setCurrentCode({ code, expires_at: expiresAt });
-      toast.success("New access code generated");
-    } catch (error) {
-      console.error("Error generating code:", error);
-      toast.error("Failed to generate code");
-    } finally {
-      setGenerating(false);
+      toast.success("Demo code generated!");
+    } else {
+      // Non-demo mode - backend tables don't exist yet
+      setCurrentCode({ code, expires_at: expiresAt });
+      toast.info("Code generated locally (Backend sync coming in Phase 4)");
     }
+    
+    setGenerating(false);
   };
 
   const updateConsent = async (linkId: string, scopeKey: keyof ClinicianLink['consent_scope'], value: boolean) => {
-    if (isDemoMode) {
-      setLinks(prev => prev.map(l => 
-        l.id === linkId ? { ...l, consent_scope: { ...l.consent_scope, [scopeKey]: value } } : l
-      ));
-      toast.success("Consent updated (Demo)");
-      return;
-    }
-
-    try {
-      const link = links.find(l => l.id === linkId);
-      if (!link) return;
-
-      const newScope = { ...link.consent_scope, [scopeKey]: value };
-
-      const { error } = await supabase
-        .from('clinician_patient_links')
-        .update({ consent_scope: newScope })
-        .eq('id', linkId);
-
-      if (error) throw error;
-
-      setLinks(prev => prev.map(l => l.id === linkId ? { ...l, consent_scope: newScope } : l));
-      toast.success("Consent preferences updated");
-    } catch (error) {
-      console.error("Error updating consent:", error);
-      toast.error("Failed to update consent");
-    }
+    // Update locally
+    setLinks(prev => prev.map(l => 
+      l.id === linkId ? { ...l, consent_scope: { ...l.consent_scope, [scopeKey]: value } } : l
+    ));
+    toast.success(isDemoMode ? "Consent updated (Demo)" : "Consent updated locally");
   };
 
   const revokeLink = async (linkId: string) => {
-    if (isDemoMode) {
-      setLinks(prev => prev.filter(l => l.id !== linkId));
-      toast.success("Link revoked (Demo)");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('clinician_patient_links')
-        .delete()
-        .eq('id', linkId);
-
-      if (error) throw error;
-
-      setLinks(prev => prev.filter(l => l.id !== linkId));
-      toast.success("Clinician access revoked");
-    } catch (error) {
-      console.error("Error revoking link:", error);
-      toast.error("Failed to revoke access");
-    }
+    setLinks(prev => prev.filter(l => l.id !== linkId));
+    toast.success(isDemoMode ? "Link revoked (Demo)" : "Clinician access revoked locally");
   };
 
   return (

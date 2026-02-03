@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,39 +18,20 @@ export function ClinicianAccess({ onLinkSuccess }: ClinicianAccessProps) {
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
-    setIsDemoMode(localStorage.getItem("demoMode") === "true");
-    checkClinicianStatus();
-  }, []);
-
-  const checkClinicianStatus = async () => {
-    if (localStorage.getItem("demoMode") === "true") {
+    const demo = localStorage.getItem("demoMode") === "true";
+    setIsDemoMode(demo);
+    
+    // In demo mode, always grant clinician access
+    if (demo) {
       setIsClinician(true);
       setVerifying(false);
-      return;
-    }
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setVerifying(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role, clinician_verified')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      
-      setIsClinician(data.role === 'clinician');
-    } catch (error) {
-      console.error("Error checking status:", error);
-    } finally {
+    } else {
+      // For now, non-demo mode shows access required message
+      // Backend tables for clinician roles don't exist yet
+      setIsClinician(false);
       setVerifying(false);
     }
-  };
+  }, []);
 
   const handleLinkPatient = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,49 +43,16 @@ export function ClinicianAccess({ onLinkSuccess }: ClinicianAccessProps) {
     setLoading(true);
     try {
       if (isDemoMode) {
+        // Simulate link success in demo mode
+        await new Promise(r => setTimeout(r, 500));
         toast.success("Demo: Patient linked successfully!");
         setLinkCode("");
         onLinkSuccess?.();
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // 1. Verify and get patient_id from code
-      const { data: codeData, error: codeError } = await supabase
-        .from('link_codes')
-        .select('user_id')
-        .eq('code', linkCode)
-        .gt('expires_at', new Date().toISOString())
-        .single();
-
-      if (codeError) {
-        throw new Error("Invalid or expired code");
-      }
-
-      // 2. Create link
-      const { error: linkError } = await supabase
-        .from('clinician_patient_links')
-        .insert([{
-          patient_id: codeData.user_id,
-          clinician_id: user.id,
-          status: 'active'
-        }]);
-
-      if (linkError) {
-        if (linkError.code === '23505') {
-          throw new Error("You are already linked to this patient");
-        }
-        throw linkError;
-      }
-
-      // 3. Delete the used code
-      await supabase.from('link_codes').delete().eq('code', linkCode);
-
-      toast.success("Patient linked successfully!");
-      setLinkCode("");
-      onLinkSuccess?.();
+      // Non-demo mode - backend tables don't exist yet
+      toast.info("Patient linking requires backend setup (coming in Phase 4)");
     } catch (error) {
       console.error("Linking error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to link patient");
@@ -136,10 +83,10 @@ export function ClinicianAccess({ onLinkSuccess }: ClinicianAccessProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm mb-4">
-            If you are a clinician, please update your profile role to 'clinician' or contact support for professional verification.
+            Clinician portal features are available in Demo Mode. Enable demo mode to explore the full clinician dashboard experience.
           </p>
-          <Button variant="outline" onClick={() => window.location.href = 'mailto:support@example.com'}>
-            Contact Professional Support
+          <Button variant="outline" onClick={() => window.location.href = '/auth'}>
+            Try Demo Mode
           </Button>
         </CardContent>
       </Card>
