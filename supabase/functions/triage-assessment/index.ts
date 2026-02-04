@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const TriageInputSchema = z.object({
+  symptoms: z.string().min(1, "Symptoms are required").max(2000, "Symptoms too long"),
+  duration: z.string().min(1, "Duration is required").max(500, "Duration too long"),
+  severity: z.number().int().min(1, "Severity must be at least 1").max(10, "Severity cannot exceed 10"),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,18 +24,55 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { symptoms, duration, severity } = await req.json();
+    // Parse and validate input
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch {
+      console.error("[triage-assessment] Invalid JSON in request body");
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Validate input using Zod schema
+    const validationResult = TriageInputSchema.safeParse(requestBody);
+    if (!validationResult.success) {
+      console.error("[triage-assessment] Validation failed:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid input data",
+          details: validationResult.error.errors.map(e => e.message)
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const { symptoms, duration, severity } = validationResult.data;
 
     // 1. Authenticate User (RBAC)
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Missing Auth Header");
+    if (!authHeader) {
+      console.warn("[triage-assessment] Missing auth header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
     
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      console.warn("[triage-assessment] Auth failed:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: corsHeaders }
+      );
     }
+
+    console.log(`[triage-assessment] Processing request for user ${user.id}`);
 
     // 2. Risk Stratification (MedGemma Logic)
     // We prompt the model to act as a Triage Nurse using ESI (Emergency Severity Index)
@@ -87,7 +132,7 @@ serve(async (req) => {
     }
 
     // 3. Audit Logging (HIPAA Requirement)
-    await supabase.from("triage_audit_logs").insert({
+    const { error: auditError } = await supabase.from("triage_audit_logs").insert({
         user_id: user.id,
         symptoms: symptoms,
         risk_level: analysis.risk_level,
@@ -95,14 +140,28 @@ serve(async (req) => {
         encrypted_metadata: analysis // Storing full analysis securely
     });
 
+    if (auditError) {
+      // Log server-side but don't expose to client
+      console.error("[triage-assessment] Audit log insert failed:", auditError);
+    }
+
+    console.log(`[triage-assessment] Completed assessment for user ${user.id}: ${analysis.risk_level}`);
+
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Log detailed error server-side only
+    console.error("[triage-assessment] Error:", error);
+    
+    // Return generic error to client
+    return new Response(
+      JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
