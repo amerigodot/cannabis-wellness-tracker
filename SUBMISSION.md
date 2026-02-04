@@ -1,4 +1,4 @@
-# 🏆 MedGemma Impact Challenge: Submission Documentation
+# 🏆 MedGemma Impact Challenge: Edge AI Architecture
 
 **Project Name:** Cannabis Wellness Tracker (MedGemma-Edge Edition)  
 **Track:** Main Track + Edge AI Prize  
@@ -7,98 +7,61 @@
 
 ---
 
-## 1. Executive Summary
-This project redefines **Medical AI Privacy** by moving the entire clinical decision support pipeline to the **Edge**. We leverage **Google's Gemma-2B** model running directly in the browser via WebGPU to provide HIPAA-compliant harm reduction coaching and clinician-ready summaries without a single byte of patient data leaving the device.
+## 1. Clinical Narrative & Architectural Philosophy
 
-**Key Innovations:**
-*   **Zero-Knowledge Architecture:** Combining `localStorage` for records and `WebLLM` for inference means we achieve 100% data sovereignty.
-*   **Clinician-Patient Shared Dashboard:** A dual-interface platform where patients can securely link their data to healthcare providers using one-time codes and granular consent scopes.
-*   **Edge AI Summarizer:** Generates SOAP-style pre-visit summaries for clinicians using a local Gemma-2B model, automating chart review without data egress.
-*   **Clinical RAG on the Edge:** We embedded a structured JSON knowledge base of 2025 Clinical Guidelines (ACOEM, NCSCT, Bell et al. 2024) that the local model queries in real-time to ground its advice.
-*   **Safety Interceptor:** A deterministic state machine intercepts high-risk inputs (e.g., "chest pain", "suicide") *before* they reach the LLM, ensuring absolute safety compliance.
+The **Cannabis Wellness Tracker** reimagines the patient-provider relationship through the lens of **Zero-Knowledge (ZK) AI**. In the delicate domain of cannabinoid medicine, where patient privacy is paramount and data sovereignty is a clinical necessity, traditional cloud-based AI architectures introduce unacceptable risk.
+
+Our solution moves the entire clinical decision support pipeline—from symptom tracking to triage and physician summarization—directly to the **Edge**. By running Google’s **Gemma-2B** model entirely within the browser via WebGPU, we achieve a breakthrough in privacy-preserving healthcare: a system that can reason about sensitive substance use patterns, detect adverse events, and generate SOAP notes without a single byte of Protected Health Information (PHI) ever leaving the patient’s device.
+
+This is not merely a tracking app; it is a **dual-interface clinical platform**. Patients maintain a granular, private journal of their regimen, while clinicians access a synthesized, AI-generated dashboard that highlights "Dose Drift," adherence to safety protocols, and symptom trajectories. The bridge between these two worlds is built on a "Verify, Don't Trust" model, where connection is established via ephemeral, offline-first linking codes, ensuring that the patient remains the sole custodian of their medical narrative.
 
 ---
 
-## 2. Edge AI Implementation (Edge AI Prize)
+## 2. Technical & Clinical Stack
 
-We optimized the application for consumer hardware to democratize access to medical AI.
+We have engineered a high-performance, local-first stack optimized for consumer hardware, demonstrating the viability of Edge AI for complex medical reasoning.
 
-| Component | Technology | Role |
-| :--- | :--- | :--- |
-| **Inference Engine** | **WebLLM (MLC-LLM)** | Runs `Gemma-2b-it-q4f32_1` in the browser using WebGPU/WASM. |
-| **Storage** | **IndexedDB / LocalStorage** | Stores patient journal logs locally. No cloud DB required. |
-| **Retrieval (RAG)** | **Client-Side Vector/Keyword** | Matches user queries against embedded `ClinicalFactsheets` JSON. |
-| **Clinical Summarization** | **Local Gemma-2B** | Converts raw patient logs into structured pre-visit summaries for clinicians. |
-| **Orchestration** | **React + Vite** | Manages the "Virtual Fine-Tuning" context injection. |
-
-**Feasibility:**
-*   **Download Size:** ~1.5GB (One-time cached).
-*   **Inference Speed:** ~15-20 tokens/sec on M1 MacBook Air (Integrated GPU).
-*   **Offline Capable:** Fully functional in Airplane Mode after initial load.
+| Layer | Component | Implementation Detail | Role |
+| :--- | :--- | :--- | :--- |
+| **Inference** | **WebLLM (MLC)** | `Gemma-2b-it-q4f32_1` (WASM/WebGPU) | Runs the LLM locally on the client GPU. |
+| **Orchestration** | **Virtual Fine-Tuning** | In-Context Learning (ICL) | Injects rigorous "System Persona" & "Few-Shot" clinical examples into the context window at runtime, forcing the model to adhere to medical protocols without weight modification. |
+| **Retrieval (RAG)** | **Local Vector Store** | Client-Side JSON Knowledge Base | Embeds 2025 Clinical Guidelines (ACOEM, NCSCT, Bell et al.) for real-time citation and grounding. |
+| **Data Eng.** | **Feature Engine** | `computeClinicalFeatures.ts` | Deterministic pre-processing of raw logs into high-signal metrics (e.g., "Adverse Event Rate," "Combustion %") *before* LLM ingestion. |
+| **Safety** | **State Machine** | `SafetyInterceptor.ts` | Regex/Rule-based pre-filter that catches emergency keywords (e.g., "chest pain") with 100% deterministic reliability, bypassing the LLM for immediate crisis triage. |
+| **Persistence** | **Local Storage** | `IndexedDB` / `localStorage` | Encrypted at rest. No cloud database required for the core AI loop. |
 
 ---
 
-## 3. Novel Task: Clinical Harm Reduction
+## 3. The Edge AI Pipeline: From Raw Data to Clinical Insight
 
-We defined a new medical task: **"Hyper-Personalized Cannabis Harm Reduction"**.
-Generic LLMs often give vague advice. Our system is engineered to be:
+Our pipeline transforms noisy, subjective patient logs into structured, actionable clinical intelligence using a multi-stage process that leverages the strengths of both deterministic code and probabilistic AI.
 
-1.  **Protocol-Driven:** It doesn't just "chat"; it enforces the **Lower Risk Cannabis Use Guidelines (LRCUG)**.
-    *   *User:* "I want to get super high."
-    *   *MedGemma-Edge:* "Based on the Harm Reduction Protocol, high doses increase risk of tachycardia. Start low (2.5mg)."
-2.  **Data-Augmented:** We pre-process raw user logs into a "Clinical Narrative" (e.g., calculating "Adverse Event Rate: 20%") *before* feeding it to the LLM. This allows the small 2B model to "reason" about complex trends it couldn't calculate on its own.
+### Stage 1: Deterministic Feature Engineering
+Before the LLM is invoked, raw journal entries are processed by our local feature engine. This transforms unstructured data into rigorous clinical metrics:
+*   **Dose Drift:** Calculates the percentage deviation from the prescribed THC target.
+*   **Adherence Rate:** Measures compliance with the dosing schedule (e.g., BID vs. PRN).
+*   **Risk Flagging:** Applies the **Lower Risk Cannabis Use Guidelines (LRCUG)** rules to detect patterns like "Early Morning Use" or "High THC Velocity."
 
----
+### Stage 2: Virtual Fine-Tuning & RAG Injection
+We overcome the limitation of unable to fine-tune weights in the browser by constructing a dynamic system prompt for every inference call. This prompt injects:
+1.  **The System Persona:** "You are an expert Clinical Assistant specializing in Harm Reduction..."
+2.  **The Patient Context:** The pre-calculated metrics from Stage 1.
+3.  **The Evidence Basis:** Relevant chunks of clinical guidelines (e.g., *Bell et al. 2024* for dosing, *NCSCT* for respiratory risks) retrieved via local keyword matching.
 
-## 4. Reviewer Instructions (Verification)
-
-**Step 1: Activate Offline Mode**
-1.  Open the app.
-2.  On the Login screen, click the green **"Enter Submission Mode (Offline)"** button.
-3.  *Optional:* Disconnect your internet connection (after step 2).
-
-**Step 2: Test the Edge AI Coach**
-1.  Navigate to **"Private AI Coach"**.
-2.  Click **"Load Assistant"** (Wait for Gemma-2B to initialize via WebGPU).
-3.  **Test RAG:** Ask *"What is the dosing protocol for anxiety?"* -> Observe it citing the `RACGP` guideline from `ClinicalFactsheets`.
-4.  **Test Safety:** Type *"I have chest pain."* -> Observe the immediate "MEDICAL ALERT" interception (Red Box).
-
-**Step 3: Clinical Triage**
-1.  Navigate to **"Clinical Triage"**.
-2.  Enter symptoms (e.g., "Severe anxiety, duration 2 weeks").
-3.  Click "Generate Treatment Plans".
-4.  Observe the AI generating a structured JSON response with "Conservative", "Balanced", and "Advanced" options based on the ESI protocol.
-
-**Step 4: Wellness Tools (Local Analysis)**
-1.  Navigate to **"Tools"**.
-2.  Click **"Comprehensive Wellness Report"**.
-3.  Observe the AI analyzing your local journal entries (even if just samples) and generating a Markdown report instantly, without any server calls.
-
-**Step 5: Clinician Portal & Patient Linking**
-*Option A: Direct Access (Demo Only)*
-1.  On the main dashboard header, click the **"Clinician Dashboard"** button (Blue).
-2.  Explore the patient list, trends, and care plan editor immediately.
-
-*Option B: Full Linking Flow*
-1.  Navigate to **"Settings"**.
-2.  Find the **"Clinical Portal"** card.
-3.  **Patient Flow:** Click **"Generate Linking Code"**.
-4.  **Clinician Flow:** Switch to **"Professional Access"** tab -> Enter code (or 000000) -> Link.
-
-**Step 6: View Clinical Basis**
-1.  Navigate to **"Tools"** -> **"Clinical Factsheets"**.
-2.  Review the embedded 2025 ACOEM/NCSCT guidelines that power the RAG system.
+### Stage 3: Zero-Knowledge Inference
+The constructed prompt is sent to the local Gemma-2B instance. The model generates a response—whether a patient chat reply or a clinician SOAP note—completely offline. This architecture ensures that the "reasoning" happens on data that the server never sees.
 
 ---
 
-## 5. Clinical Evidence Basis
-The system is anchored in the following embedded guidelines (visible in `src/data/knowledgeBase.ts`):
-*   **ACOEM 2025:** Guidance for the Medical Use of Cannabis (Chronic Pain protocols).
-*   **Bell et al. 2024:** Clinical Practice Guidelines for Cannabis-Based Medicines (NRS/GAD-7 integration).
-*   **UK Medical Cannabis Registry:** Standardized outcome measures for real-world evidence.
-*   **NCSCT 2025:** Harm Reduction briefing (Respiratory risks).
-*   **LRCUG:** Lower Risk Cannabis Use Guidelines (Dosing/Safety).
-*   **RACGP:** Prescribing medical cannabis in general practice (Anxiety contraindications).
+## 4. Clinical Evidence Basis
+
+The system’s reasoning is strictly anchored in peer-reviewed protocols, ensuring that the "AI Hallucination" risk is mitigated by rigid citation requirements.
+
+*   **ACOEM 2025:** *Guidance for the Medical Use of Cannabis* (Chronic Pain protocols).
+*   **Bell et al. 2024:** *Clinical Practice Guidelines for Cannabis-Based Medicines* (Integration of NRS Pain Scale & GAD-7 Anxiety scores).
+*   **NCSCT 2025:** *Harm Reduction Briefing* (Respiratory risk mitigation).
+*   **LRCUG:** *Lower Risk Cannabis Use Guidelines* (Dosing thresholds and frequency limits).
+*   **RACGP:** *Prescribing Medical Cannabis in General Practice* (Contraindications for anxiety/psychosis).
 
 ---
 *Submitted by Amerigo Di Maria & Team for the Kaggle MedGemma Impact Challenge.*
