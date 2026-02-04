@@ -49,6 +49,7 @@ serve(async (req) => {
     } = await supabaseClient.auth.getUser();
 
     if (userError || !user) {
+      console.warn("[delete-account] Auth verification failed:", userError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         {
@@ -75,7 +76,7 @@ serve(async (req) => {
     // Delete all user data (CASCADE foreign keys should handle this automatically,
     // but we'll be explicit for safety and logging)
     
-    console.log(`Deleting data for user ${userId}`);
+    console.log(`[delete-account] Deleting data for user ${userId}`);
 
     // Delete journal entries
     const { error: entriesError } = await supabaseAdmin
@@ -84,7 +85,7 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     if (entriesError) {
-      console.error("Error deleting journal entries:", entriesError);
+      console.error("[delete-account] Error deleting journal entries:", entriesError);
     }
 
     // Delete reminders
@@ -94,7 +95,7 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     if (remindersError) {
-      console.error("Error deleting reminders:", remindersError);
+      console.error("[delete-account] Error deleting reminders:", remindersError);
     }
 
     // Delete email preferences
@@ -104,7 +105,7 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     if (emailPrefsError) {
-      console.error("Error deleting email preferences:", emailPrefsError);
+      console.error("[delete-account] Error deleting email preferences:", emailPrefsError);
     }
 
     // Delete tool usage
@@ -114,7 +115,7 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     if (toolUsageError) {
-      console.error("Error deleting tool usage:", toolUsageError);
+      console.error("[delete-account] Error deleting tool usage:", toolUsageError);
     }
 
     // Finally, delete the user account from auth.users
@@ -123,9 +124,10 @@ serve(async (req) => {
     );
 
     if (deleteError) {
-      console.error("Error deleting user account:", deleteError);
+      console.error("[delete-account] Error deleting user account:", deleteError);
+      // Return generic error - don't expose internal error details
       return new Response(
-        JSON.stringify({ error: "Failed to delete user account", details: deleteError.message }),
+        JSON.stringify({ error: "Failed to delete account. Please try again or contact support.", code: "ACC_DEL_001" }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -133,7 +135,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Successfully deleted account for user ${userId}`);
+    console.log(`[delete-account] Successfully deleted account for user ${userId}`);
 
     return new Response(
       JSON.stringify({ success: true, message: "Account deleted successfully" }),
@@ -143,10 +145,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error in delete-account function:", error);
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    // Log detailed error server-side only
+    console.error("[delete-account] Error in function:", error);
+    
+    // Return generic error to client - no internal details exposed
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An unexpected error occurred. Please try again.", code: "ACC_DEL_500" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
