@@ -45,7 +45,8 @@ export default function ClinicianDashboard() {
   const [loading, setLoading] = useState(true);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  // Initialize isDemoMode directly from localStorage to avoid race condition
+  const [isDemoMode, setIsDemoMode] = useState(() => localStorage.getItem("demoMode") === "true");
   const [searchQuery, setSearchQuery] = useState("");
   
   // Clinical Data State
