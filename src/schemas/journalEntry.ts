@@ -6,7 +6,8 @@ export const journalEntrySchema = z.object({
   strain_2: z.string().optional(),
   thc_percentage: z.string().optional().transform(val => val ? parseFloat(val) : null),
   cbd_percentage: z.string().optional().transform(val => val ? parseFloat(val) : null),
-  dosageAmount: z.string().min(1, "Dosage amount is required"),
+  thcWeightAmount: z.string().min(1, "THC Weight is required"),
+  cbdWeightAmount: z.string().default("0"),
   dosageUnit: z.string(),
   method: z.string().min(1, "Method is required"),
   consumption_time: z.date(), // Calculated from minutesAgo in the UI, but we might just store minutesAgo in the form state for now? Actually, let's stick to minutesAgo for the UI state.

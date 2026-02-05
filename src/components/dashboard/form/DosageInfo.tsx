@@ -5,32 +5,64 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Wind, Cigarette, Droplet, Beaker, Pipette, Cookie } from "lucide-react";
 import { JournalEntryFormValues } from "@/schemas/journalEntry";
 import { getMethodIcon } from "@/constants/journal";
+import { useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export const DosageInfo = () => {
   const { register, control, watch, formState: { errors } } = useFormContext<JournalEntryFormValues>();
-  const method = watch("method");
+  const thcWeightAmount = watch("thcWeightAmount");
+  const cbdWeightAmount = watch("cbdWeightAmount");
+  const dosageUnit = watch("dosageUnit");
+
+  const totalWeight = useMemo(() => {
+    const thc = parseFloat(thcWeightAmount) || 0;
+    const cbd = parseFloat(cbdWeightAmount) || 0;
+    return (thc + cbd).toFixed(2);
+  }, [thcWeightAmount, cbdWeightAmount]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <Label htmlFor="dosageAmount">Dosage</Label>
-        <div className="flex gap-2 mt-1.5">
-          <div className="flex-1">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="dosage">Dosage Weights</Label>
+          <Badge variant="secondary" className="font-mono">
+            Total: {totalWeight}{dosageUnit}
+          </Badge>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3 mt-1.5">
+          <div className="space-y-1.5">
+            <Label htmlFor="thcWeight" className="text-xs text-muted-foreground">THC Weight</Label>
             <Input
-              id="dosageAmount"
+              id="thcWeight"
               type="number"
-              step="0.1"
-              placeholder="e.g., 0.5"
-              {...register("dosageAmount")}
+              step="0.01"
+              placeholder="THC"
+              {...register("thcWeightAmount")}
             />
           </div>
+          
+          <div className="space-y-1.5">
+            <Label htmlFor="cbdWeight" className="text-xs text-muted-foreground">CBD Weight</Label>
+            <Input
+              id="cbdWeight"
+              type="number"
+              step="0.01"
+              placeholder="CBD"
+              {...register("cbdWeightAmount")}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <Label className="text-xs text-muted-foreground">Unit:</Label>
           <Controller
             name="dosageUnit"
             control={control}
             defaultValue="g"
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -42,8 +74,8 @@ export const DosageInfo = () => {
             )}
           />
         </div>
-        {errors.dosageAmount && (
-          <p className="text-xs text-destructive mt-1">{errors.dosageAmount.message}</p>
+        {errors.thcWeightAmount && (
+          <p className="text-xs text-destructive mt-1">{errors.thcWeightAmount.message}</p>
         )}
       </div>
       

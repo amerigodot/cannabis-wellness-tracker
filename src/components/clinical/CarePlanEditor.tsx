@@ -52,7 +52,7 @@ export function CarePlanEditor({ initialRegimen, onSave }: CarePlanEditorProps) 
 
   const handleUpdateProduct = (index: number, field: keyof Product, value: string | number) => {
     const newProducts = [...regimen.products];
-    // @ts-ignore - dynamic assignment
+    // @ts-expect-error - dynamic assignment
     newProducts[index] = { ...newProducts[index], [field]: value };
     setRegimen(prev => ({ ...prev, products: newProducts }));
     setHasChanges(true);

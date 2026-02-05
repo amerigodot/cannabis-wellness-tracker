@@ -101,6 +101,15 @@ export const JournalEntryForm = ({
   const afterAnxiety = watch("afterAnxiety");
   const afterEnergy = watch("afterEnergy");
   const afterFocus = watch("afterFocus");
+  const thcWeightAmount = watch("thcWeightAmount");
+  const cbdWeightAmount = watch("cbdWeightAmount");
+  const dosageUnit = watch("dosageUnit");
+
+  const totalWeight = useMemo(() => {
+    const thc = parseFloat(thcWeightAmount) || 0;
+    const cbd = parseFloat(cbdWeightAmount) || 0;
+    return (thc + cbd).toFixed(2);
+  }, [thcWeightAmount, cbdWeightAmount]);
   
   const hasLoadedDraft = useRef(false);
 
@@ -175,7 +184,8 @@ export const JournalEntryForm = ({
       
       const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
       if (dosageMatch) {
-        setValue("dosageAmount", dosageMatch[1]);
+        setValue("thcWeightAmount", dosageMatch[1]);
+        setValue("cbdWeightAmount", "0"); // Default to 0 for CBD if not stored separately
         setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
       }
     }
@@ -221,7 +231,8 @@ export const JournalEntryForm = ({
     // Parse dosage
     const dosageMatch = pendingEntryToComplete.dosage.match(/^([\d.]+)(\w+)$/);
     if (dosageMatch) {
-      setValue("dosageAmount", dosageMatch[1]);
+      setValue("thcWeightAmount", dosageMatch[1]);
+      setValue("cbdWeightAmount", "0"); // Default or we could try to split it if we stored it joined
       setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
     }
     
@@ -272,14 +283,15 @@ export const JournalEntryForm = ({
       return;
     }
 
-    if (!data.strain || !data.dosageAmount || !data.method) {
-      toast.error("Please fill in strain, dosage, and method");
+    if (!data.strain || !data.thcWeightAmount || !data.method) {
+      toast.error("Please fill in strain, THC weight, and method");
       return;
     }
 
     setIsSubmitting(true);
     
-    const dosage = `${data.dosageAmount}${data.dosageUnit}`;
+    const totalW = parseFloat(data.thcWeightAmount) + (parseFloat(data.cbdWeightAmount) || 0);
+    const dosage = `${totalW.toFixed(2)}${data.dosageUnit}`;
     
     // If completing a pending entry, we use the original consumption time
     // Otherwise, calculate from minutesAgo
@@ -357,7 +369,8 @@ export const JournalEntryForm = ({
         strain2: data.strain2,
         thcPercentage: data.thcPercentage,
         cbdPercentage: data.cbdPercentage,
-        dosageAmount: data.dosageAmount,
+        thcWeightAmount: data.thcWeightAmount,
+        cbdWeightAmount: data.cbdWeightAmount,
         dosageUnit: data.dosageUnit,
         method: data.method,
       });
@@ -446,22 +459,48 @@ export const JournalEntryForm = ({
 
       {/* Dosage and Method */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="dosage">Dosage</Label>
-          <div className="flex gap-2 mt-1.5">
-            <Controller
-              name="dosageAmount"
-              control={control}
-              render={({ field }) => (
-                <Input {...field} type="number" step="0.1" placeholder="e.g., 0.5" className="flex-1" />
-              )}
-            />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="dosage">Dosage Weights</Label>
+            <Badge variant="secondary" className="font-mono">
+              Total: {totalWeight}{dosageUnit}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-1.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="thcWeight" className="text-xs text-muted-foreground">THC Weight</Label>
+              <div className="flex gap-2">
+                <Controller
+                  name="thcWeightAmount"
+                  control={control}
+                  render={({ field }) => (
+                    <Input {...field} type="number" step="0.01" placeholder="THC" className="flex-1" />
+                  )}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="cbdWeight" className="text-xs text-muted-foreground">CBD Weight</Label>
+              <Controller
+                name="cbdWeightAmount"
+                control={control}
+                render={({ field }) => (
+                  <Input {...field} type="number" step="0.01" placeholder="CBD" className="flex-1" />
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <Label className="text-xs text-muted-foreground">Unit:</Label>
             <Controller
               name="dosageUnit"
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-[100px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
