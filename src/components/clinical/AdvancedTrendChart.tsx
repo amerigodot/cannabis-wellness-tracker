@@ -35,7 +35,7 @@ export function AdvancedTrendChart({ data }: AdvancedTrendChartProps) {
   // Show placeholder if no valid data points
   if (sortedData.length === 0) {
     return (
-      <Card className="h-full flex flex-col">
+      <Card className="flex flex-col">
         <CardHeader>
           <CardTitle>Symptom vs. Dosage Correlations</CardTitle>
           <CardDescription>No data available to display.</CardDescription>
@@ -48,15 +48,15 @@ export function AdvancedTrendChart({ data }: AdvancedTrendChartProps) {
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>Symptom vs. Dosage Correlations</CardTitle>
         <CardDescription>
           Visualize how changing cannabinoid doses impacts reported symptom severity over time.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 min-h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <CardContent className="pt-2">
+        <ResponsiveContainer width="100%" height={420}>
           <ComposedChart data={sortedData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorPain" x1="0" y1="0" x2="0" y2="1">
