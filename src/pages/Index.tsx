@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope, Lock, LayoutDashboard } from "lucide-react";
+import { Leaf, LogOut, Sparkles, Bell, Settings, Brain, ShieldCheck, Stethoscope, Lock, LayoutDashboard, Clock, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { JournalEntry } from "@/types/journal";
@@ -330,6 +330,47 @@ const Index = () => {
             <p className="text-muted-foreground text-lg">Track your wellness journey with ease</p>
           </div>
         </header>
+
+        {/* Pending Entry Shortcut - shows when there's a pending entry to complete */}
+        {(() => {
+          const pendingEntry = entries.find(e => e.entry_status === 'pending_after');
+          if (pendingEntry && !pendingEntryToComplete) {
+            const timeAgo = new Date().getTime() - new Date(pendingEntry.consumption_time || pendingEntry.created_at).getTime();
+            const minutesAgo = Math.floor(timeAgo / 60000);
+            const hoursAgo = Math.floor(minutesAgo / 60);
+            const timeLabel = hoursAgo > 0 ? `${hoursAgo}h ${minutesAgo % 60}m ago` : `${minutesAgo}m ago`;
+            
+            return (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-800 dark:text-amber-300">
+                          Pending Entry: {pendingEntry.strain}
+                        </p>
+                        <p className="text-sm text-amber-700/80 dark:text-amber-400/80">
+                          Started {timeLabel} • Ready to complete "After" state
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => handleCompletePendingEntry(pendingEntry.id)}
+                      className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Complete Now
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* Entry Form */}
         <JournalEntryForm
