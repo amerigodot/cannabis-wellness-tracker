@@ -2,9 +2,25 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+// Allowed origins for CORS - restrict to known domains
+const ALLOWED_ORIGINS = [
+  "https://cannabis-wellness-tracker.lovable.app",
+  "https://id-preview--71a51820-93cb-44f1-8bb9-105d41643cf2.lovable.app",
+];
+
+// Helper to get CORS headers with origin validation
+const getCorsHeaders = (origin: string | null): Record<string, string> => {
+  const isAllowed = origin && (
+    ALLOWED_ORIGINS.includes(origin) ||
+    origin.startsWith("http://localhost:") ||
+    origin.endsWith(".lovable.app")
+  );
+  
+  return {
+    "Access-Control-Allow-Origin": isAllowed && origin ? origin : ALLOWED_ORIGINS[0],
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
 // Input validation schema
@@ -19,6 +35,9 @@ const RATE_LIMIT_MAX_REQUESTS = 10;
 const RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour in milliseconds
 
 serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(origin);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -36,7 +55,7 @@ serve(async (req) => {
       console.error("[triage-assessment] Invalid JSON in request body");
       return new Response(
         JSON.stringify({ error: "Invalid request format" }),
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -49,7 +68,7 @@ serve(async (req) => {
           error: "Invalid input data",
           details: validationResult.error.errors.map(e => e.message)
         }),
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -61,7 +80,7 @@ serve(async (req) => {
       console.warn("[triage-assessment] Missing auth header");
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: corsHeaders }
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     
@@ -72,7 +91,7 @@ serve(async (req) => {
       console.warn("[triage-assessment] Auth failed:", authError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: corsHeaders }
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -97,7 +116,7 @@ serve(async (req) => {
       console.warn(`[triage-assessment] Rate limit exceeded for user ${user.id}`);
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-        { status: 429, headers: corsHeaders }
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -206,7 +225,7 @@ serve(async (req) => {
       JSON.stringify({ error: "An error occurred processing your request. Please try again." }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getCorsHeaders(null) },
       }
     );
   }
