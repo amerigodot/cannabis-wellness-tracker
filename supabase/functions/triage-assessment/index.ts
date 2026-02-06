@@ -14,6 +14,10 @@ const TriageInputSchema = z.object({
   severity: z.number().int().min(1, "Severity must be at least 1").max(10, "Severity cannot exceed 10"),
 });
 
+// Rate limit configuration: 10 requests per hour for triage assessment
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour in milliseconds
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -74,7 +78,49 @@ serve(async (req) => {
 
     console.log(`[triage-assessment] Processing request for user ${user.id}`);
 
-    // 2. Risk Stratification (MedGemma Logic)
+    // 2. Rate Limiting - Check user's request count within the time window
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+    const { data: rateLimitData, error: rateLimitError } = await supabase
+      .from('rate_limits')
+      .select('id, request_count, window_start')
+      .eq('user_id', user.id)
+      .eq('endpoint', 'triage-assessment')
+      .gte('window_start', windowStart)
+      .order('window_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (rateLimitError) {
+      console.error("[triage-assessment] Rate limit check failed:", rateLimitError);
+      // Continue without rate limiting if there's a DB error (fail open for availability)
+    } else if (rateLimitData && rateLimitData.request_count >= RATE_LIMIT_MAX_REQUESTS) {
+      console.warn(`[triage-assessment] Rate limit exceeded for user ${user.id}`);
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
+    // Update or insert rate limit record
+    if (rateLimitData) {
+      // Update existing record
+      await supabase
+        .from('rate_limits')
+        .update({ request_count: rateLimitData.request_count + 1 })
+        .eq('id', rateLimitData.id);
+    } else {
+      // Insert new record
+      await supabase
+        .from('rate_limits')
+        .insert({
+          user_id: user.id,
+          endpoint: 'triage-assessment',
+          request_count: 1,
+          window_start: new Date().toISOString()
+        });
+    }
+
+    // 3. Risk Stratification (MedGemma Logic)
     // We prompt the model to act as a Triage Nurse using ESI (Emergency Severity Index)
     const prompt = `
     Role: Clinical Triage System (ESI Protocol).
@@ -131,7 +177,7 @@ serve(async (req) => {
         };
     }
 
-    // 3. Audit Logging (HIPAA Requirement)
+    // 4. Audit Logging (HIPAA Requirement)
     const { error: auditError } = await supabase.from("triage_audit_logs").insert({
         user_id: user.id,
         symptoms: symptoms,
