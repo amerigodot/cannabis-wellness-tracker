@@ -1,13 +1,32 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+// Allowed origins for CORS - restrict to known domains
+const ALLOWED_ORIGINS = [
+  "https://cannabis-wellness-tracker.lovable.app",
+  "https://id-preview--71a51820-93cb-44f1-8bb9-105d41643cf2.lovable.app",
+];
+
+// Helper to get CORS headers with origin validation
+const getCorsHeaders = (origin: string | null): Record<string, string> => {
+  // Check if origin is in allowed list, or allow localhost for development
+  const isAllowed = origin && (
+    ALLOWED_ORIGINS.includes(origin) ||
+    origin.startsWith("http://localhost:") ||
+    origin.endsWith(".lovable.app")
+  );
+  
+  return {
+    "Access-Control-Allow-Origin": isAllowed && origin ? origin : ALLOWED_ORIGINS[0],
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
 };
 
 serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  const corsHeaders = getCorsHeaders(origin);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

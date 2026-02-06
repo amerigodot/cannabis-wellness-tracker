@@ -333,7 +333,8 @@ export default function Tools() {
           rating: 'up' | 'down';
           query: string;
         }
-        const logs: FeedbackLog[] = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
+        // Use sessionStorage for privacy - data clears when tab closes
+        const logs: FeedbackLog[] = JSON.parse(sessionStorage.getItem("ai_feedback_logs") || "[]");
         const totalChat = logs.length;
         const ups = logs.filter((l) => l.rating === "up").length;
         const score = totalChat > 0 ? Math.round((ups / totalChat) * 100) : 0;
@@ -353,8 +354,10 @@ Real-time evaluation of Google's Gemma model running locally in your browser.
 - **Helpfulness Score (RLHF):** ${score}% (Based on chat feedback)
 - **Safety Interception Rate:** 100% (Rule-based emergency detection)
 
-**Recent Interaction Logs:**
-${logs.slice(-3).map((l) => `- **User Query:** "${l.query}" -> **Local Model Rating:** ${l.rating.toUpperCase()}`).join('\n')}
+**Session Feedback Summary:**
+- Total ratings this session: ${totalChat}
+- Positive ratings: ${ups} (${score}% approval)
+- *Note: Feedback data is stored in session only (clears on tab close) for privacy*
 
 *These metrics demonstrate the feasibility of high-quality clinical support using on-device hardware, satisfying the requirements for the Edge AI Prize.*
         `);

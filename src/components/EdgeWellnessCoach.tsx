@@ -247,14 +247,21 @@ ${item.content.slice(0, 300)}...
 
   const handleRateResponse = (rating: "up" | "down") => {
     if (lastResponseIndex === null) return;
+    
+    // Security: Only store minimal feedback data (no sensitive queries/responses)
+    // Using sessionStorage instead of localStorage for better privacy - clears on tab close
     const log: FeedbackLog = {
-      query: messages[lastResponseIndex - 1].content, // Note: This might grab the prompt-engineered version, usually acceptable for logs
-      response: messages[lastResponseIndex].content,
+      query: "[redacted for privacy]", // Don't store actual health queries
+      response: "[redacted for privacy]", // Don't store actual AI responses
       rating,
       timestamp: new Date().toISOString()
     };
-    const existingLogs = JSON.parse(localStorage.getItem("ai_feedback_logs") || "[]");
-    localStorage.setItem("ai_feedback_logs", JSON.stringify([...existingLogs, log]));
+    
+    // Use sessionStorage instead of localStorage - data clears when tab closes
+    const existingLogs = JSON.parse(sessionStorage.getItem("ai_feedback_logs") || "[]");
+    // Limit stored logs to prevent unbounded growth
+    const trimmedLogs = existingLogs.slice(-49); // Keep last 49 + new one = 50 max
+    sessionStorage.setItem("ai_feedback_logs", JSON.stringify([...trimmedLogs, log]));
     toast({ title: "Feedback Recorded" });
     setLastResponseIndex(null);
   };
