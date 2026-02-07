@@ -107,17 +107,20 @@ export const InsightsChart = ({
     entries.forEach(entry => {
       const date = new Date(entry.created_at);
       let groupKey: string;
+      // We use timestamps or ISO-like strings for sorting keys to avoid "current year" parsing issues
+      // and ensure correct chronological order spanning years.
       
       if (groupBy === 'day') {
-        groupKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        // Use YYYY-MM-DD for sorting
+        groupKey = date.toISOString().split('T')[0];
       } else if (groupBy === 'week') {
         // Get the start of the week
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
-        groupKey = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        groupKey = weekStart.toISOString().split('T')[0];
       } else {
-        // Monthly grouping
-        groupKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        // Monthly grouping YYYY-MM
+        groupKey = date.toISOString().slice(0, 7);
       }
       
       if (!groupedData[groupKey]) {
@@ -137,9 +140,8 @@ export const InsightsChart = ({
         ...badges
       }))
       .sort((a, b) => {
-        const dateA = new Date(a.period);
-        const dateB = new Date(b.period);
-        return dateA.getTime() - dateB.getTime();
+        // Sort chronologically ascending (Oldest -> Newest)
+        return a.period.localeCompare(b.period);
       });
   }, [entries]);
   
@@ -590,6 +592,18 @@ export const InsightsChart = ({
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis 
                   dataKey="period" 
+                  tickFormatter={(val) => {
+                    try {
+                      // Handle YYYY-MM and YYYY-MM-DD
+                      const date = new Date(val);
+                      if (val.length === 7) { // Monthly
+                        return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                      }
+                      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    } catch {
+                      return val;
+                    }
+                  }}
                   tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   height={60}
                   angle={-45}
@@ -607,7 +621,14 @@ export const InsightsChart = ({
                     borderRadius: '6px',
                     color: 'hsl(var(--card-foreground))'
                   }}
-                  content={({ active, payload }) => {
+                  labelFormatter={(label) => {
+                    try {
+                      return new Date(label).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    } catch {
+                      return label;
+                    }
+                  }}
+                  content={({ active, payload, label }) => {
                     if (!active || !payload || payload.length === 0) return null;
                     return (
                       <div className="bg-card border border-border rounded-md p-3 shadow-lg">
