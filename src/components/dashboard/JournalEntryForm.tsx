@@ -59,6 +59,7 @@ export const JournalEntryForm = ({
   // Persist form state and slider history
   const [formDraft, setFormDraft] = useLocalStorage<EntryFormValues | null>("journal_form_draft", null);
   const [sliderHistory, setSliderHistory] = useLocalStorage<{timestamp: number, field: string, value: number}[]>("journal_slider_history", []);
+  const [lastCbdWeight, setLastCbdWeight] = useLocalStorage<string>("journal_last_cbd_weight", "0");
   
   // Collapsible section states
   const [observationsOpen, setObservationsOpen] = useState(() => {
@@ -184,12 +185,18 @@ export const JournalEntryForm = ({
       
       const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
       if (dosageMatch) {
-        setValue("thcWeightAmount", dosageMatch[1]);
-        setValue("cbdWeightAmount", "0"); // Default to 0 for CBD if not stored separately
-        setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
+        const total = parseFloat(dosageMatch[1]);
+        const unit = dosageMatch[2] as "g" | "ml" | "mg";
+        const cbd = parseFloat(lastCbdWeight) || 0;
+        // Calculate THC as remainder, ensuring non-negative
+        const thc = Math.max(0, total - cbd);
+        
+        setValue("thcWeightAmount", thc.toFixed(2).replace(/\.00$/, ''));
+        setValue("cbdWeightAmount", lastCbdWeight);
+        setValue("dosageUnit", unit);
       }
     }
-  }, [lastEntry, setValue, pendingEntryToComplete]);
+  }, [lastEntry, setValue, pendingEntryToComplete, lastCbdWeight]);
 
   // Populate form when completing a pending entry
   useEffect(() => {
@@ -357,6 +364,9 @@ export const JournalEntryForm = ({
 
     if (success) {
       setShowSuccessAnimation(true);
+      
+      // Save CBD weight preference
+      setLastCbdWeight(data.cbdWeightAmount || "0");
       
       // Clear draft and history
       setFormDraft(null);
