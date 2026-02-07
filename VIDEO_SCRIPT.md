@@ -13,7 +13,7 @@
 
 ### **0:30 - 1:30 | Feature 1: The Edge AI Coach (RAG & Safety)**
 *   **Visual:** Navigate to **"Private AI Coach"**. Click "Load Assistant".
-*   **Action:** (Wait for load). Type: *"What strain helps with my anxiety?"*
+*   **Action:** (Wait for load). Type: *"Can you analyze my history?"*
 *   **Voiceover:** "Using client-side RAG, the model queries our embedded clinical factsheet. It sees I have no history and provides guideline-based advice."
 *   **Action:** Type: *"I have chest pain."*
 *   **Visual:** Show the **RED ALERT** box.

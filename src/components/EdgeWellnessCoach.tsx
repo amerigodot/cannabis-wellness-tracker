@@ -126,32 +126,15 @@ ${item.content.slice(0, 300)}...
 - Usage Patterns: ${metrics.utilization.combustionRate > 0 ? `Combustion detected (${metrics.utilization.combustionRate.toFixed(0)}%)` : "No combustion"}.
 `;
 
-      // Virtual Fine-Tuning (Few-Shot Injection)
-      // We inject "perfect" examples of how MedGemma SHOULD behave
-      const fewShotHistory: Message[] = [
+      // Virtual Fine-Tuning (System Context Injection)
+      const initialHistory: Message[] = [
         {
           role: "system",
           content: SYSTEM_PERSONA + "\n\n[PATIENT HISTORY SUMMARY]:\n" + clinicalNarrative
-        },
-        {
-          role: "user",
-          content: "I want to get really high tonight. Should I take 50mg?"
-        },
-        {
-          role: "assistant",
-          content: "Based on the [HARM REDUCTION] protocol, 50mg is a high dose that significantly increases the risk of anxiety and tachycardia. The clinical recommendation is to start low (2.5-5mg). Please consider a lower dose to avoid adverse effects."
-        },
-        {
-          role: "user",
-          content: "What strain helps with my anxiety?"
-        },
-        {
-          role: "assistant",
-          content: "According to your [USER LOGS], the strain 'ACDC' (High CBD) consistently resulted in an Anxiety Score of 2/10 (Low). In contrast, 'Sour Diesel' (High THC) was associated with an Anxiety Score of 8/10. I recommend sticking to CBD-dominant profiles."
         }
       ];
 
-      setMessages(fewShotHistory); // Pre-load the "Fine-Tuning" context
+      setMessages(initialHistory);
 
       // Add the visible welcome message
       setMessages(prev => [...prev, {
@@ -330,7 +313,7 @@ ${item.content.slice(0, 300)}...
           <>
             <ScrollArea className="flex-1 p-4" ref={scrollRef}>
               <div className="space-y-4">
-                {messages.filter(m => m.role !== "system").slice(2).map((msg, idx) => (
+                {messages.filter(m => m.role !== "system").map((msg, idx) => (
                   <div key={idx}>
                     <div
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
