@@ -30,7 +30,7 @@ export const blogPosts: BlogPost[] = [
     category: "Wellness Tips",
     tags: ["tracking", "wellness", "beginners guide", "medical marijuana"],
     readTime: "8 min read",
-    imageUrl: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1517971129774-8a2b38fa128e?w=800&auto=format&fit=crop",
     content: `
 # The Complete Guide to Tracking Medical Marijuana Use
 
@@ -154,7 +154,7 @@ Start tracking today and take control of your medical marijuana experience. Your
     category: "Wellness Tips",
     tags: ["dosage", "optimization", "beginners guide", "tolerance"],
     readTime: "9 min read",
-    imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop",
     content: `
 # Dosage Optimization: Finding Your Perfect Amount
 
@@ -407,7 +407,7 @@ Remember: the goal is the minimum effective dose that provides relief without un
     category: "Strain Guides",
     tags: ["THC", "CBD", "cannabinoids", "strain selection"],
     readTime: "6 min read",
-    imageUrl: "https://images.unsplash.com/photo-1631549499101-e2a48a7b4a9d?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=800&auto=format&fit=crop",
     content: `
 # Understanding THC:CBD Ratios for Optimal Wellness
 
@@ -553,7 +553,7 @@ Remember: there's no universal "best" ratio—only what works best for you. Use 
     category: "Strain Guides",
     tags: ["pain relief", "strains", "chronic pain", "medical marijuana"],
     readTime: "10 min read",
-    imageUrl: "https://images.unsplash.com/photo-1530305408560-82d13781b33a?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=800&auto=format&fit=crop",
     content: `
 # Top 10 Cannabis Strains for Chronic Pain Relief
 
@@ -764,7 +764,7 @@ Remember: always consult with your healthcare provider before starting any medic
     category: "Wellness Tips",
     tags: ["consumption methods", "vaping", "edibles", "beginners guide"],
     readTime: "11 min read",
-    imageUrl: "https://images.unsplash.com/photo-1511694009171-3cdddf2f65d4?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&auto=format&fit=crop",
     content: String.raw`
 # Consumption Methods: Complete Comparison Guide
 
@@ -1069,7 +1069,7 @@ Remember: the best consumption method is the one you'll use consistently to main
     category: "Strain Guides",
     tags: ["terpenes", "effects", "strain selection", "entourage effect"],
     readTime: "12 min read",
-    imageUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&auto=format&fit=crop",
     content: String.raw`
 # Terpenes: The Secret to Cannabis Effects
 
@@ -1361,7 +1361,7 @@ The future of cannabis therapy is personalized, and terpenes are the key to that
     category: "Wellness Tips",
     tags: ["tolerance", "optimization", "long-term use", "microdosing"],
     readTime: "10 min read",
-    imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800&auto=format&fit=crop",
     content: String.raw`
 # Managing Cannabis Tolerance: Effective Strategies
 
@@ -2311,7 +2311,7 @@ Sweet dreams!
     category: "Wellness Tips",
     tags: ["microdosing", "dosage", "optimization", "wellness"],
     readTime: "11 min read",
-    imageUrl: "https://images.unsplash.com/photo-1532634922-8fe0b757fb13?w=800&auto=format&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800&auto=format&fit=crop",
     content: String.raw`
 # Microdosing Cannabis: The Complete Guide
 
@@ -3619,6 +3619,622 @@ The result: **reliable effectiveness data captured naturally** as part of your w
 [Start Your Free Journal →](/auth)
 
 *All entries are private and encrypted. Track with confidence.*
+    `
+  },
+  {
+    id: "14",
+    slug: "clinician-insights-tracking-patterns-patient-outcomes",
+    title: "Clinician Insights: Tracking Patterns for Better Patient Outcomes",
+    excerpt: "Discover how healthcare providers can leverage patient tracking data to identify consumption patterns, improve care plans, and enhance treatment outcomes.",
+    metaDescription: "Guide for clinicians on medical marijuana patient tracking. Learn to identify consumption patterns, optimize dosing, and build collaborative care plans with patient data.",
+    metaKeywords: "clinician cannabis tracking, patient tracking patterns, medical marijuana healthcare provider, cannabis care plans, data-driven cannabis medicine",
+    author: "Medical Marijuana Journal Team",
+    publishedAt: "2024-03-25",
+    updatedAt: "2024-03-25",
+    category: "Clinical Care",
+    tags: ["clinician", "patient tracking", "medical marijuana", "healthcare provider", "data patterns"],
+    readTime: "12 min read",
+    imageUrl: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&auto=format&fit=crop",
+    content: `
+# Clinician Insights: Tracking Patterns for Better Patient Outcomes
+
+As medical marijuana programs expand across the globe, healthcare providers are increasingly called upon to guide patients through cannabis-based therapies. Yet unlike traditional pharmaceuticals with standardized dosing protocols, cannabis medicine requires a personalized, data-driven approach. Patient tracking data has emerged as an essential tool for clinicians seeking to optimize treatment outcomes.
+
+## The Clinical Case for Patient Tracking
+
+### Why Traditional Approaches Fall Short
+
+Medical marijuana presents unique challenges for clinicians:
+
+- **No universal dosing**: Unlike conventional medications, there's no "one size fits all" dosage
+- **Individual variability**: Endocannabinoid system differences create vastly different responses
+- **Product inconsistency**: Even the same strain varies between batches and dispensaries
+- **Subjective outcomes**: Pain, anxiety, and mood are difficult to measure objectively
+- **Limited clinical trials**: Regulatory barriers have restricted randomized controlled trials
+
+**The result**: Clinicians often rely on patient self-reports and anecdotal feedback rather than measurable data.
+
+### How Tracking Data Transforms Care
+
+When patients systematically track their consumption and outcomes, clinicians gain access to:
+
+- **Objective before/after measurements** across wellness metrics
+- **Dose-response curves** showing how different amounts affect specific symptoms
+- **Temporal patterns** revealing optimal timing and duration of effects
+- **Comparative strain data** identifying which products work best for each patient
+- **Side effect profiles** documented in real-time rather than recalled from memory
+
+This data enables evidence-based adjustments rather than trial-and-error guessing.
+
+## Key Patterns to Monitor
+
+### 1. Consumption Frequency and Escalation
+
+**What to track**: How often is the patient consuming, and has frequency increased over time?
+
+**Clinical significance**:
+- **Stable frequency**: Indicates treatment is working at current dose
+- **Increasing frequency**: May signal tolerance development or worsening condition
+- **Decreasing frequency**: Could indicate improved condition or adverse effects
+
+**Red flags to watch**:
+- More than 50% increase in consumption over 30 days
+- Daily consumption evolving to multiple daily sessions
+- Patient reports needing more to achieve same effect
+
+**Intervention options**:
+- Tolerance break recommendations
+- Strain rotation protocols
+- Dosage optimization discussions
+- Re-evaluation of underlying condition
+
+### 2. Symptom Response Patterns
+
+**What to track**: Before/after measurements for pain, anxiety, mood, energy, focus
+
+**Clinical significance**:
+
+**Strong Responders** (60-100% improvement):
+- Continue current protocol
+- Document effective strains for future reference
+- Consider reducing dose to minimum effective level
+
+**Moderate Responders** (30-59% improvement):
+- Experiment with dosage adjustments
+- Try different consumption methods
+- Consider cannabinoid ratio changes (more/less CBD)
+
+**Weak Responders** (0-29% improvement):
+- Re-evaluate if cannabis is appropriate treatment
+- Explore alternative strains or products
+- Consider combination therapy approaches
+- Rule out confounding factors (stress, sleep, other medications)
+
+### 3. Time-of-Day Patterns
+
+**What to track**: When patients consume and how effectiveness varies by time
+
+**Clinical insights**:
+
+**Morning consumers**: May need energizing sativas for daytime function
+**Evening consumers**: May benefit from sedating indicas for sleep
+**Consistent timing**: Suggests symptoms follow predictable patterns
+**Irregular timing**: May indicate breakthrough symptoms or lifestyle constraints
+
+**Optimization opportunities**:
+- Align consumption timing with symptom peaks
+- Recommend different strains for different times
+- Identify if symptoms are circadian-linked
+
+### 4. Method of Consumption Patterns
+
+**What to track**: Which consumption methods the patient prefers and their relative effectiveness
+
+**Clinical considerations**:
+
+**Inhalation preference**: Fast onset, shorter duration, good for breakthrough symptoms
+**Edible preference**: Longer duration, less control, better for sustained relief
+**Tincture preference**: Balance of onset and duration, precise dosing
+**Multiple methods**: Patient may be optimizing for different situations
+
+**Health considerations**:
+- Respiratory patients should avoid smoking
+- Patients with GI issues may struggle with edibles
+- Liver function affects edible metabolism
+
+### 5. THC:CBD Ratio Responses
+
+**What to track**: How different cannabinoid ratios affect outcomes
+
+**Clinical patterns**:
+
+**High THC responders**: May need psychoactive effects for pain relief
+**Balanced ratio responders**: Often ideal for anxiety and chronic conditions
+**CBD-dominant responders**: May have THC sensitivity or anxiety concerns
+
+**Optimization strategies**:
+- Start with balanced ratios and adjust based on response
+- Higher CBD for anxiety-prone patients
+- Consider adding CBD to reduce THC side effects
+
+## Building Collaborative Care Plans
+
+### Patient Data Sharing
+
+Modern tracking tools allow patients to share specific data with their clinicians:
+
+**What patients can share**:
+- Aggregated effectiveness scores by strain
+- Before/after metric averages
+- Consumption frequency trends
+- Side effect reports
+
+**Privacy considerations**:
+- Patients control what data is shared
+- End-to-end encryption protects sensitive information
+- Data can be anonymized for clinical review
+
+### Structured Review Sessions
+
+**Quarterly Data Reviews**:
+1. Review overall effectiveness trends
+2. Identify top-performing strains and dosages
+3. Discuss any tolerance or escalation concerns
+4. Adjust care plan based on data insights
+5. Set goals for next quarter
+
+**Ad-Hoc Reviews** (triggered by):
+- Significant effectiveness decline
+- New side effects
+- Major life changes affecting treatment
+- Patient request for optimization
+
+### Collaborative Goal Setting
+
+Work with patients to establish measurable goals:
+
+**Example Goals**:
+- Reduce average pain score from 7/10 to 4/10 within 60 days
+- Find 2 effective daytime strains that don't impair focus
+- Decrease total consumption by 20% while maintaining effectiveness
+- Identify sleep-specific strain with 70%+ effectiveness
+
+**Tracking Progress**:
+- Review goal metrics at each appointment
+- Adjust strategies based on measured outcomes
+- Celebrate wins to reinforce tracking behavior
+
+## Safety Patterns and Red Flags
+
+### Concerning Patterns to Monitor
+
+**Escalating Tolerance**:
+- Track dose increases over time
+- Note if effectiveness scores drop despite higher doses
+- Recommend tolerance breaks when appropriate
+
+**Psychological Dependence Indicators**:
+- Consuming despite planned breaks
+- Distress when unable to consume
+- Neglecting activities to consume
+- Using more than intended regularly
+
+**Adverse Effect Patterns**:
+- Recurring anxiety or paranoia with certain strains
+- Cognitive impairment affecting daily function
+- Cardiovascular symptoms (racing heart, blood pressure changes)
+- Respiratory symptoms from inhalation
+
+**Drug Interaction Concerns**:
+- Changes in effectiveness of other medications
+- Unusual sedation when combined with other substances
+- GI issues suggesting edible metabolism problems
+
+### Intervention Thresholds
+
+Establish clear thresholds for clinical intervention:
+
+**Yellow Flags** (monitor closely):
+- 25-50% increase in consumption over 30 days
+- Effectiveness scores declining 15-30%
+- Occasional breakthrough of managed symptoms
+
+**Red Flags** (immediate attention):
+- More than 50% consumption increase in 30 days
+- Effectiveness below 30% consistently
+- New psychological symptoms
+- Patient reports feeling dependent
+- Other medication effectiveness changes
+
+## Case Studies: Data-Driven Outcomes
+
+### Case 1: Optimizing Chronic Pain Management
+
+**Patient**: 52-year-old with fibromyalgia, using cannabis for 8 months
+
+**Initial data review**:
+- Average pain reduction: 35% (moderate responder)
+- Using high-THC indica exclusively
+- Consuming 4x daily, escalating dose
+
+**Pattern insights**:
+- Morning consumption showed weakest effectiveness
+- Best results with evening consumption before sleep
+- Tolerance developing (same dose, declining effects)
+
+**Intervention**:
+- Shifted to CBD-dominant tincture for morning/afternoon
+- Maintained indica for evening only
+- Implemented 2-day tolerance break weekly
+
+**Outcome** (60 days later):
+- Average pain reduction: 58% (effective responder)
+- Total consumption decreased 30%
+- No further tolerance escalation
+
+### Case 2: Anxiety Management Refinement
+
+**Patient**: 34-year-old with generalized anxiety disorder
+
+**Initial data review**:
+- Anxiety reduction: 45% average
+- Occasional spikes to worse-than-baseline anxiety
+- Using sativa strains during day
+
+**Pattern insights**:
+- High-THC sativas correlated with anxiety spikes
+- CBD-dominant sessions showed consistent relief
+- Limonene-heavy strains worsened symptoms
+
+**Intervention**:
+- Switched to high-CBD strains (1:2 THC:CBD ratio minimum)
+- Avoided limonene-dominant terpene profiles
+- Added linalool-rich options for acute anxiety
+
+**Outcome** (45 days later):
+- Average anxiety reduction: 67% (effective responder)
+- Zero anxiety-worsening episodes
+- Patient reports best anxiety management in years
+
+## The Future of Data-Driven Cannabis Medicine
+
+### Emerging Opportunities
+
+**Population-Level Insights**: Aggregated, anonymized patient data can reveal which strains work best for specific conditions across large patient groups.
+
+**Predictive Modeling**: Machine learning algorithms may eventually predict optimal strains based on patient characteristics and symptom profiles.
+
+**Standardized Outcomes**: Consistent tracking metrics enable comparison across patients, clinicians, and treatment approaches.
+
+**Research Support**: Patient-generated data can support clinical research and inform treatment guidelines.
+
+### Clinician Recommendations
+
+1. **Encourage consistent tracking**: Patients who track regularly provide better data for clinical decisions
+
+2. **Review data at every visit**: Make tracking data review a standard part of appointments
+
+3. **Set measurable goals**: Use tracking metrics to establish and monitor treatment objectives
+
+4. **Watch for patterns**: Tolerance, escalation, and adverse effects are easier to catch with data
+
+5. **Collaborate with patients**: Tracking creates a shared language for discussing treatment optimization
+
+## Conclusion: From Anecdotes to Evidence
+
+Patient tracking transforms medical marijuana from an anecdote-based therapy into an evidence-based treatment. Clinicians who leverage this data can:
+
+- Make more informed dosing recommendations
+- Identify concerning patterns before they become problems
+- Build truly personalized treatment plans
+- Demonstrate measurable outcomes to patients and colleagues
+- Contribute to the broader understanding of cannabis medicine
+
+The future of cannabis medicine is precision medicine—and that precision requires data. By encouraging and utilizing patient tracking, clinicians can lead the way toward more effective, safer, and more personalized cannabis-based care.
+
+*For patients: Ask your healthcare provider about incorporating tracking data into your care plan. Your data can help optimize your treatment.*
+
+[Learn more about tracking for better outcomes →](/auth)
+    `
+  },
+  {
+    id: "15",
+    slug: "local-ai-privacy-on-device-processing-health-data",
+    title: "Local AI Privacy: Why On-Device Processing Protects Your Health Data",
+    excerpt: "Understand how local AI processing keeps your sensitive health information private by ensuring your data never leaves your device.",
+    metaDescription: "Learn why on-device AI processing is essential for health data privacy. Understand local AI, zero-knowledge architecture, and how to protect sensitive wellness information.",
+    metaKeywords: "local AI privacy, on-device processing, health data protection, zero-knowledge architecture, edge AI, private health tracking",
+    author: "Medical Marijuana Journal Team",
+    publishedAt: "2024-03-30",
+    updatedAt: "2024-03-30",
+    category: "Privacy & Security",
+    tags: ["privacy", "local AI", "on-device", "data protection", "security", "health data"],
+    readTime: "10 min read",
+    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&auto=format&fit=crop",
+    content: `
+# Local AI Privacy: Why On-Device Processing Protects Your Health Data
+
+In an era of AI-powered health applications, a critical question emerges: **where does your sensitive health data actually go?** Most health apps send your information to cloud servers for processing—meaning your most private wellness details exist on computers controlled by others. Local AI offers a radically different approach: your data never leaves your device.
+
+## The Privacy Problem with Cloud-Based Health AI
+
+### How Most Health AI Works
+
+When you use a typical AI-powered health app:
+
+1. You enter sensitive information (symptoms, conditions, habits)
+2. Your data travels across the internet to company servers
+3. AI models on those servers process your information
+4. Results are sent back to your device
+
+**The problem**: Your health data now exists on servers you don't control.
+
+### What This Means for Your Privacy
+
+**Cloud storage risks**:
+- Company employees may access your data
+- Data breaches can expose your health information
+- Government agencies can subpoena your records
+- Companies may sell or share data with third parties
+- Acquisition by other companies transfers your data to new owners
+
+**Real-world examples**:
+- Major health app breaches have exposed millions of records
+- Mental health apps have been caught selling user data
+- Period tracking apps have shared data with advertisers
+- Fitness data has been subpoenaed in legal proceedings
+
+### Why Health Data Is Especially Sensitive
+
+Unlike your music preferences or shopping history, health data reveals:
+
+- Medical conditions and diagnoses
+- Substance use patterns
+- Mental health status
+- Reproductive health information
+- Genetic predispositions
+- Treatment effectiveness
+
+This information can affect:
+- Employment opportunities
+- Insurance rates and coverage
+- Legal proceedings
+- Personal relationships
+- Social stigma and discrimination
+
+**The stakes are higher with health data**—privacy isn't just about preference, it's about protection.
+
+## What Is Local AI?
+
+### Definition
+
+Local AI (also called on-device AI or edge AI) processes data directly on your phone, tablet, or computer—**never sending it to external servers**.
+
+**Key difference**:
+- **Cloud AI**: Your data → Internet → Company servers → Processing → Results
+- **Local AI**: Your data → Your device → Processing → Results (data never leaves)
+
+### How It Works Technically
+
+Modern devices contain powerful processors capable of running AI models:
+
+**On smartphones**:
+- Apple Neural Engine (iPhones)
+- Google Tensor chips (Pixels)
+- Snapdragon AI accelerators (Android phones)
+
+**On computers**:
+- WebGPU for browser-based AI
+- Local GPU acceleration
+- CPU-based inference
+
+These processors can run sophisticated AI models entirely offline, keeping your data on your device.
+
+### What Local AI Can Do
+
+Despite running on-device, local AI can:
+
+- Analyze patterns in your wellness data
+- Generate personalized insights
+- Summarize your health trends
+- Identify correlations between behaviors and outcomes
+- Provide coaching and recommendations
+- Answer questions about your data
+
+**All without your information ever leaving your control.**
+
+## Zero-Knowledge Architecture: The Gold Standard
+
+### What Is Zero-Knowledge?
+
+A zero-knowledge system means **the service provider cannot access your data**—even if they wanted to, even if compelled by authorities.
+
+**Traditional approach**: "We promise not to look at your data"
+**Zero-knowledge approach**: "We literally cannot look at your data"
+
+### How Zero-Knowledge Works
+
+**Client-side encryption**:
+1. Data is encrypted on your device before any storage
+2. Only you hold the encryption keys
+3. Encrypted data is meaningless without your keys
+4. Even database administrators see only encrypted gibberish
+
+**Local AI processing**:
+1. Data is decrypted only on your device
+2. AI processing happens locally
+3. Results never leave your device
+4. No server ever sees your actual health information
+
+### The Difference in Practice
+
+**Scenario**: A legal subpoena demands your health records
+
+**Traditional health app**: Company hands over your data to authorities
+
+**Zero-knowledge app**: Company can only provide encrypted data that's useless without your personal keys—they literally don't have access to your information
+
+## Benefits of Local AI for Health Tracking
+
+### 1. Complete Privacy
+
+Your health data exists only on your devices. No cloud servers store your symptoms, conditions, or consumption patterns. No employees can access your information. No breaches can expose your health history.
+
+### 2. No Internet Required
+
+Local AI works offline. Track your wellness in airplane mode, in areas without service, or simply when you prefer to disconnect. Your health management doesn't depend on connectivity.
+
+### 3. Faster Response
+
+No network latency means instant results. AI insights appear immediately rather than waiting for server round-trips. The experience feels more natural and responsive.
+
+### 4. Reduced Data Footprint
+
+With zero-knowledge architecture:
+- Servers store only encrypted data
+- No analytics can be run on your information
+- Your data can't be aggregated with others
+- Deletion is truly permanent
+
+### 5. Future-Proof Privacy
+
+Privacy policies change. Companies get acquired. Laws evolve. By ensuring your data never leaves your device in usable form, you're protected regardless of future changes.
+
+### 6. Personal Control
+
+You decide:
+- When to generate insights
+- What analysis to run
+- Whether to export data
+- When to delete everything
+
+No one else makes these decisions about your health information.
+
+## Comparing Cloud AI vs. Local AI
+
+| Factor | Cloud AI | Local AI |
+|--------|----------|----------|
+| **Data location** | Company servers | Your device only |
+| **Internet required** | Yes | No |
+| **Privacy risk** | High (data stored externally) | Minimal (data stays local) |
+| **Breach exposure** | Your data at risk | No data to breach |
+| **Employee access** | Possible | Impossible |
+| **Subpoena risk** | Company can provide data | No usable data to provide |
+| **Processing speed** | Network-dependent | Instant |
+| **Model updates** | Automatic | Periodic downloads |
+| **Cost to provider** | High (server costs) | Low (your device does work) |
+
+## How End-to-End Encryption Complements Local AI
+
+### Defense in Depth
+
+Even with local AI, you may want to sync data between devices or back up your journal. End-to-end encryption ensures this data remains protected:
+
+**Encryption flow**:
+1. Data is encrypted with keys derived from your password
+2. Encrypted data syncs to server/backup
+3. Another device downloads encrypted data
+4. Decryption happens locally with your password
+
+**Result**: Data in transit and at rest is always encrypted. Only your devices with your password can read it.
+
+### Password-Derived Keys
+
+Your encryption keys are derived from your password using strong algorithms:
+
+- Keys are never stored on servers
+- Keys exist only in your device memory during active sessions
+- Without your password, encrypted data is unreadable
+- Even the app developer cannot decrypt your information
+
+### The Belt-and-Suspenders Approach
+
+**Local AI alone**: Protects active data but requires local storage
+**Encryption alone**: Protects stored data but requires server processing
+**Local AI + Encryption**: Comprehensive protection for all scenarios
+
+## Practical Benefits You'll Notice
+
+### Using the App Anywhere
+
+- **On flights**: Full functionality without WiFi
+- **In rural areas**: No signal needed for tracking
+- **During travel**: Privacy regardless of network security
+- **At work**: No data traversing employer networks
+
+### Speed and Responsiveness
+
+- Insights appear instantly
+- No loading spinners waiting for server response
+- Real-time analysis as you enter data
+- Smooth, native-feeling experience
+
+### Confidence in Your Privacy
+
+- Know exactly where your data exists (your devices)
+- No wondering about company data practices
+- No anxiety about breaches or policy changes
+- Complete peace of mind about sensitive health information
+
+## Taking Control of Your Health Information
+
+### Questions to Ask Health Apps
+
+Before trusting an app with sensitive health data:
+
+1. **Where is my data processed?** (Look for "on-device" or "local")
+2. **Is my data encrypted?** (Look for "end-to-end" or "client-side")
+3. **Can employees access my data?** (Should be "no")
+4. **What happens if subpoenaed?** (Should be "only encrypted data")
+5. **Can I export/delete everything?** (Should be "yes")
+
+### Red Flags to Watch
+
+- "We take privacy seriously" without technical details
+- No mention of encryption methodology
+- Cloud-based AI as the only option
+- Vague policies about data sharing
+- No clear deletion process
+
+### Green Flags to Trust
+
+- Specific technical descriptions of local processing
+- Open about encryption methods (AES-GCM, etc.)
+- Zero-knowledge architecture clearly explained
+- No cloud AI for sensitive data
+- Verifiable privacy claims
+
+## The Future of Private Health Technology
+
+### Trends Supporting Local AI
+
+**Stronger device processors**: Phones and computers increasingly powerful enough for complex AI
+**WebGPU adoption**: Browser-based AI becoming viable for web applications
+**Privacy regulations**: GDPR, HIPAA, and new laws demanding better data protection
+**Consumer awareness**: Users increasingly understanding and demanding privacy
+
+### What This Means for You
+
+The technology exists today to have:
+- Powerful AI-driven health insights
+- Complete privacy protection
+- No compromise between features and security
+
+You don't have to choose between useful AI and protecting your health information.
+
+## Conclusion: Your Data, Your Device, Your Control
+
+Local AI represents a fundamental shift in health technology: instead of trusting companies with your most sensitive information, you keep it under your own control. Your health data never leaves your device, never sits on external servers, and never risks exposure through breaches or subpoenas.
+
+This isn't about having something to hide—it's about **recognizing that health information is deeply personal** and deserves the highest level of protection. Local AI delivers that protection without sacrificing the powerful insights that make health tracking valuable.
+
+When evaluating health apps, prioritize those that respect your privacy through architecture—not just policy. Look for local AI processing, end-to-end encryption, and zero-knowledge design.
+
+**Your health data is yours. Keep it that way.**
+
+[Experience privacy-first health tracking →](/auth)
+
+*This app uses local AI processing. Your wellness data never leaves your device. All cloud-synced data is end-to-end encrypted with keys only you control.*
     `
   }
 ];
