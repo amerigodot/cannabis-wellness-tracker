@@ -28,4 +28,8 @@ export interface JournalEntry {
   after_energy?: number | null;
   after_focus?: number | null;
   is_deleted?: boolean;
+  // Separate THC/CBD weights
+  thc_weight?: number | null;
+  cbd_weight?: number | null;
+  dosage_unit?: string | null;
 }

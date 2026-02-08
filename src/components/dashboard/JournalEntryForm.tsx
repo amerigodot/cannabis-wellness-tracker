@@ -183,18 +183,25 @@ export const JournalEntryForm = ({
       setValue("cbdPercentage", lastEntry.cbd_percentage?.toString() || "");
       setValue("method", lastEntry.method);
       
-      const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
-      if (dosageMatch) {
-        const total = parseFloat(dosageMatch[1]);
-        const unit = dosageMatch[2] as "g" | "ml" | "mg";
-        const savedCbd = parseFloat(lastCbdWeight) || 0;
-        // Use saved CBD weight, but cap it at total to avoid negative THC
-        const cbd = Math.min(savedCbd, total);
-        const thc = Math.max(0, total - cbd);
-        
-        setValue("thcWeightAmount", thc.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
-        setValue("cbdWeightAmount", cbd.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
-        setValue("dosageUnit", unit);
+      // Use new separate weight columns if available, fallback to parsing dosage
+      if (lastEntry.thc_weight != null || lastEntry.cbd_weight != null) {
+        setValue("thcWeightAmount", lastEntry.thc_weight?.toString() || "0");
+        setValue("cbdWeightAmount", lastEntry.cbd_weight?.toString() || "0");
+        setValue("dosageUnit", (lastEntry.dosage_unit as "g" | "ml" | "mg") || "g");
+      } else {
+        // Legacy fallback: parse from combined dosage string
+        const dosageMatch = lastEntry.dosage.match(/^([\d.]+)(\w+)$/);
+        if (dosageMatch) {
+          const total = parseFloat(dosageMatch[1]);
+          const unit = dosageMatch[2] as "g" | "ml" | "mg";
+          const savedCbd = parseFloat(lastCbdWeight) || 0;
+          const cbd = Math.min(savedCbd, total);
+          const thc = Math.max(0, total - cbd);
+          
+          setValue("thcWeightAmount", thc.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
+          setValue("cbdWeightAmount", cbd.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
+          setValue("dosageUnit", unit);
+        }
       }
     }
   }, [lastEntry, setValue, pendingEntryToComplete, lastCbdWeight]);
@@ -236,12 +243,19 @@ export const JournalEntryForm = ({
     setValue("afterEnergy", beforeEnergy);
     setValue("afterFocus", beforeFocus);
     
-    // Parse dosage
-    const dosageMatch = pendingEntryToComplete.dosage.match(/^([\d.]+)(\w+)$/);
-    if (dosageMatch) {
-      setValue("thcWeightAmount", dosageMatch[1]);
-      setValue("cbdWeightAmount", "0"); // Default or we could try to split it if we stored it joined
-      setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
+    // Load dosage - use new columns if available, fallback to parsing
+    if (pendingEntryToComplete.thc_weight != null || pendingEntryToComplete.cbd_weight != null) {
+      setValue("thcWeightAmount", pendingEntryToComplete.thc_weight?.toString() || "0");
+      setValue("cbdWeightAmount", pendingEntryToComplete.cbd_weight?.toString() || "0");
+      setValue("dosageUnit", (pendingEntryToComplete.dosage_unit as "g" | "ml" | "mg") || "g");
+    } else {
+      // Legacy fallback
+      const dosageMatch = pendingEntryToComplete.dosage.match(/^([\d.]+)(\w+)$/);
+      if (dosageMatch) {
+        setValue("thcWeightAmount", dosageMatch[1]);
+        setValue("cbdWeightAmount", "0");
+        setValue("dosageUnit", dosageMatch[2] as "g" | "ml" | "mg");
+      }
     }
     
     // Switch to Full Tracking mode and go to "after" tab
@@ -331,6 +345,10 @@ export const JournalEntryForm = ({
       icon: data.selectedIcon,
       consumption_time: consumptionTime.toISOString(),
       entry_status: status,
+      // Store separate THC/CBD weights
+      thc_weight: parseFloat(data.thcWeightAmount) || 0,
+      cbd_weight: parseFloat(data.cbdWeightAmount) || 0,
+      dosage_unit: data.dosageUnit,
       // For pending entry completion, preserve the original before values
       before_mood: pendingEntryToComplete ? pendingEntryToComplete.before_mood : (!data.isQuickEntry ? data.beforeMood : null),
       before_pain: pendingEntryToComplete ? pendingEntryToComplete.before_pain : (!data.isQuickEntry ? data.beforePain : null),

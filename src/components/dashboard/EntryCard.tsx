@@ -124,8 +124,20 @@ export const EntryCard = ({
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <Label className="text-xs text-muted-foreground">Dosage</Label>
-            <p className="font-medium">{entry.dosage}</p>
+            <Label className="text-xs text-muted-foreground">THC</Label>
+            <p className="font-medium">
+              {entry.thc_weight != null 
+                ? `${entry.thc_weight}${entry.dosage_unit || 'g'}`
+                : entry.dosage}
+            </p>
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">CBD</Label>
+            <p className="font-medium">
+              {entry.cbd_weight != null 
+                ? `${entry.cbd_weight}${entry.dosage_unit || 'g'}`
+                : '—'}
+            </p>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">Method</Label>
@@ -137,16 +149,14 @@ export const EntryCard = ({
               {entry.method}
             </div>
           </div>
-          {entry.thc_percentage && (
+          {(entry.thc_percentage || entry.cbd_percentage) && (
             <div>
-              <Label className="text-xs text-muted-foreground">THC %</Label>
-              <p className="font-medium">{entry.thc_percentage}%</p>
-            </div>
-          )}
-          {entry.cbd_percentage && (
-            <div>
-              <Label className="text-xs text-muted-foreground">CBD %</Label>
-              <p className="font-medium">{entry.cbd_percentage}%</p>
+              <Label className="text-xs text-muted-foreground">Potency</Label>
+              <p className="font-medium">
+                {entry.thc_percentage && `${entry.thc_percentage}% THC`}
+                {entry.thc_percentage && entry.cbd_percentage && ' / '}
+                {entry.cbd_percentage && `${entry.cbd_percentage}% CBD`}
+              </p>
             </div>
           )}
         </div>

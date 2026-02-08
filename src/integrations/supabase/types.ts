@@ -89,9 +89,11 @@ export type Database = {
           before_notes: string | null
           before_pain: number | null
           cbd_percentage: number | null
+          cbd_weight: number | null
           consumption_time: string | null
           created_at: string
           dosage: string
+          dosage_unit: string | null
           effects_duration_minutes: number | null
           encrypted_data: string | null
           encryption_version: number | null
@@ -106,6 +108,7 @@ export type Database = {
           strain: string
           strain_2: string | null
           thc_percentage: number | null
+          thc_weight: number | null
           user_id: string
         }
         Insert: {
@@ -122,9 +125,11 @@ export type Database = {
           before_notes?: string | null
           before_pain?: number | null
           cbd_percentage?: number | null
+          cbd_weight?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage: string
+          dosage_unit?: string | null
           effects_duration_minutes?: number | null
           encrypted_data?: string | null
           encryption_version?: number | null
@@ -139,6 +144,7 @@ export type Database = {
           strain: string
           strain_2?: string | null
           thc_percentage?: number | null
+          thc_weight?: number | null
           user_id: string
         }
         Update: {
@@ -155,9 +161,11 @@ export type Database = {
           before_notes?: string | null
           before_pain?: number | null
           cbd_percentage?: number | null
+          cbd_weight?: number | null
           consumption_time?: string | null
           created_at?: string
           dosage?: string
+          dosage_unit?: string | null
           effects_duration_minutes?: number | null
           encrypted_data?: string | null
           encryption_version?: number | null
@@ -172,6 +180,7 @@ export type Database = {
           strain?: string
           strain_2?: string | null
           thc_percentage?: number | null
+          thc_weight?: number | null
           user_id?: string
         }
         Relationships: []
