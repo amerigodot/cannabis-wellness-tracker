@@ -187,12 +187,13 @@ export const JournalEntryForm = ({
       if (dosageMatch) {
         const total = parseFloat(dosageMatch[1]);
         const unit = dosageMatch[2] as "g" | "ml" | "mg";
-        const cbd = parseFloat(lastCbdWeight) || 0;
-        // Calculate THC as remainder, ensuring non-negative
+        const savedCbd = parseFloat(lastCbdWeight) || 0;
+        // Use saved CBD weight, but cap it at total to avoid negative THC
+        const cbd = Math.min(savedCbd, total);
         const thc = Math.max(0, total - cbd);
         
-        setValue("thcWeightAmount", thc.toFixed(2).replace(/\.00$/, ''));
-        setValue("cbdWeightAmount", lastCbdWeight);
+        setValue("thcWeightAmount", thc.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
+        setValue("cbdWeightAmount", cbd.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1'));
         setValue("dosageUnit", unit);
       }
     }
