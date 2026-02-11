@@ -124,7 +124,7 @@ export const EntryCard = ({
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
-            <Label className="text-xs text-muted-foreground">THC</Label>
+            <Label className="text-xs text-muted-foreground">THC Weight</Label>
             <p className="font-medium">
               {entry.thc_weight != null 
                 ? `${entry.thc_weight}${entry.dosage_unit || 'g'}`
@@ -132,11 +132,11 @@ export const EntryCard = ({
             </p>
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">CBD</Label>
+            <Label className="text-xs text-muted-foreground">CBD Weight</Label>
             <p className="font-medium">
               {entry.cbd_weight != null 
                 ? `${entry.cbd_weight}${entry.dosage_unit || 'g'}`
-                : '—'}
+                : '0' + (entry.dosage_unit || 'g')}
             </p>
           </div>
           <div>

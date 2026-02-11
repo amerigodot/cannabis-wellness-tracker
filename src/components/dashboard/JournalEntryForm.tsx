@@ -185,8 +185,8 @@ export const JournalEntryForm = ({
       
       // Use new separate weight columns if available, fallback to parsing dosage
       if (lastEntry.thc_weight != null || lastEntry.cbd_weight != null) {
-        setValue("thcWeightAmount", lastEntry.thc_weight?.toString() || "0");
-        setValue("cbdWeightAmount", lastEntry.cbd_weight?.toString() || "0");
+        setValue("thcWeightAmount", lastEntry.thc_weight?.toString() || "0.00");
+        setValue("cbdWeightAmount", lastEntry.cbd_weight?.toString() || "0.00");
         setValue("dosageUnit", (lastEntry.dosage_unit as "g" | "ml" | "mg") || "g");
       } else {
         // Legacy fallback: parse from combined dosage string
@@ -203,6 +203,10 @@ export const JournalEntryForm = ({
           setValue("dosageUnit", unit);
         }
       }
+    } else {
+      // Default values for brand new entries when no lastEntry exists
+      setValue("thcWeightAmount", "0.50");
+      setValue("cbdWeightAmount", "0.00");
     }
   }, [lastEntry, setValue, pendingEntryToComplete, lastCbdWeight]);
 
