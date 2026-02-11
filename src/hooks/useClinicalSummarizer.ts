@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CreateMLCEngine, MLCEngine } from "@mlc-ai/web-llm";
 import { ClinicalMetrics } from "@/utils/clinicalAugmentation";
+import { executeLoadingSequence } from "@/utils/aiWeightManager";
 import { toast } from "sonner";
 
 const SUMMARY_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
@@ -34,18 +35,24 @@ export function useClinicalSummarizer() {
   const initModel = useCallback(async () => {
     if (engine) return engine;
     
-    setState(prev => ({ ...prev, isModelLoading: true, progress: "Initializing Edge AI..." }));
+    setState(prev => ({ ...prev, isModelLoading: true, progress: "Starting Security Handshake..." }));
     
     try {
       // Check for WebGPU support
       const gpu = (navigator as Navigator & { gpu?: unknown }).gpu;
       if (!gpu) {
-        throw new Error("WebGPU not supported");
+        throw new Error("WebGPU not supported. Use Chrome/Edge on compatible hardware.");
       }
 
+      // Step 1: Execute Defended Loading Sequence (Integrity Checks)
+      await executeLoadingSequence(SUMMARY_MODEL, (step) => {
+        setState(prev => ({ ...prev, progress: step }));
+      });
+
+      // Step 2: Create Engine
       const newEngine = await CreateMLCEngine(SUMMARY_MODEL, {
         initProgressCallback: (report) => {
-          setState(prev => ({ ...prev, progress: report.text }));
+          setState(prev => ({ ...prev, progress: `Engine: ${report.text}` }));
         },
         logLevel: "INFO",
       });
@@ -55,8 +62,9 @@ export function useClinicalSummarizer() {
       return newEngine;
     } catch (error) {
       console.error("Model init error:", error);
-      toast.error("Failed to load clinical model");
-      setState(prev => ({ ...prev, isModelLoading: false, progress: "Error loading model" }));
+      const msg = error instanceof Error ? error.message : "Failed to load clinical model";
+      toast.error(msg);
+      setState(prev => ({ ...prev, isModelLoading: false, progress: `Error: ${msg}` }));
       return null;
     }
   }, [engine]);

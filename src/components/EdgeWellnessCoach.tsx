@@ -10,6 +10,7 @@ import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { PATIENT_EDUCATION, CRISIS_TEMPLATES } from "@/data/knowledgeBase";
 import { CLINICAL_PROTOCOLS, SYSTEM_PERSONA } from "@/data/clinicalProtocols";
 import { computeClinicalFeatures } from "@/utils/clinicalAugmentation";
+import { executeLoadingSequence } from "@/utils/aiWeightManager";
 
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -107,8 +108,13 @@ ${item.content.slice(0, 300)}...
     setIsModelLoading(true);
     setLoadProgress("Initializing...");
     try {
+      // Step 1: Execute Defended Loading Sequence (Integrity Checks)
+      await executeLoadingSequence(SELECTED_MODEL, (step) => {
+        setLoadProgress(step);
+      });
+
       const engine = await CreateMLCEngine(SELECTED_MODEL, {
-        initProgressCallback: (report) => setLoadProgress(report.text),
+        initProgressCallback: (report) => setLoadProgress(`Engine: ${report.text}`),
         logLevel: "INFO",
       });
       setEngine(engine);
@@ -181,7 +187,7 @@ ${item.content.slice(0, 300)}...
       })))
       : "NO ENTRIES FOUND. The user is new.";
 
-    let finalPrompt = `
+    const finalPrompt = `
     [USER JOURNAL]:
     ${userDataset}
 

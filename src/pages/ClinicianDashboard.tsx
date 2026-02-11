@@ -111,7 +111,7 @@ export default function ClinicianDashboard() {
     // For now, show empty patient list until Phase 4 backend implementation
     setPatients([]);
     setLoading(false);
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     const demo = localStorage.getItem("demoMode") === "true";

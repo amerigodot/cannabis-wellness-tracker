@@ -95,15 +95,19 @@ export default function Triage() {
   };
 
   // Helper to safely extract JSON from model output
-  const extractJSON = (text: string): any => {
+  const extractJSON = (text: string): TriageResult | null => {
     try {
       // 1. Try direct parse
-      return JSON.parse(text);
+      return JSON.parse(text) as TriageResult;
     } catch (e) {
       // 2. Try Markdown Code Block
       const markdownMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (markdownMatch && markdownMatch[1]) {
-        try { return JSON.parse(markdownMatch[1]); } catch (e2) { }
+        try { 
+          return JSON.parse(markdownMatch[1]) as TriageResult; 
+        } catch (e2) {
+          console.error("Failed to parse JSON from markdown match", e2);
+        }
       }
       
       // 3. Try finding the outermost JSON object
@@ -112,7 +116,11 @@ export default function Triage() {
       
       if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
         const potentialJson = text.substring(firstBrace, lastBrace + 1);
-        try { return JSON.parse(potentialJson); } catch (e3) { }
+        try { 
+          return JSON.parse(potentialJson) as TriageResult; 
+        } catch (e3) {
+          console.error("Failed to parse JSON from outermost braces", e3);
+        }
       }
       
       return null;
