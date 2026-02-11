@@ -453,24 +453,38 @@ export default function ClinicianDashboard() {
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              onClick={() => selectedPatient && generateSummary(selectedPatient.full_name, patientMetrics)}
-                              disabled={isAiLoading || !selectedPatient}
+                              onClick={() => {
+                                if (selectedPatient && !isAiLoading && !isModelLoading && patientMetrics) {
+                                  generateSummary(selectedPatient.full_name, patientMetrics);
+                                }
+                              }}
+                              disabled={isAiLoading || isModelLoading || !selectedPatient}
                             >
-                              {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                              Generate Summary
+                              {(isAiLoading || isModelLoading) ? (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                              ) : (
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                              )}
+                              {isAiLoading ? "Generating..." : isModelLoading ? "Loading Model..." : "Generate Summary"}
                             </Button>
                           </CardHeader>
                           <CardContent className="space-y-4 pt-4">
-                            {isModelLoading && (
+                            {(isModelLoading || (isAiLoading && !summary)) && (
                               <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 bg-muted/50 rounded-md">
                                 <Loader2 className="w-3 h-3 animate-spin" />
-                                {progress}
+                                {isModelLoading ? progress : "Generating clinical insights..."}
                               </div>
                             )}
                             
                             {summary ? (
                               <div className="p-4 rounded-lg bg-primary/5 border border-primary/10 prose prose-sm dark:prose-invert max-w-none">
                                 <div className="whitespace-pre-wrap font-medium text-foreground/90">{summary}</div>
+                                {isAiLoading && (
+                                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground animate-pulse border-t pt-2 border-primary/5">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    AI is still processing clinical metrics...
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <div className="p-8 text-center border-2 border-dashed rounded-lg text-muted-foreground text-sm">

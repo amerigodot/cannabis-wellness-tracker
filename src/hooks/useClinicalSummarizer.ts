@@ -34,6 +34,7 @@ export function useClinicalSummarizer() {
 
   const initModel = useCallback(async () => {
     if (engine) return engine;
+    if (state.isModelLoading) return null;
     
     setState(prev => ({ ...prev, isModelLoading: true, progress: "Starting Security Handshake..." }));
     
@@ -67,9 +68,11 @@ export function useClinicalSummarizer() {
       setState(prev => ({ ...prev, isModelLoading: false, progress: `Error: ${msg}` }));
       return null;
     }
-  }, [engine]);
+  }, [engine, state.isModelLoading]);
 
   const generateSummary = useCallback(async (patientName: string, metrics: ClinicalMetrics) => {
+    if (state.isLoading || state.isModelLoading) return;
+
     let currentEngine = engine;
     if (!currentEngine) {
       currentEngine = await initModel();
@@ -120,7 +123,7 @@ export function useClinicalSummarizer() {
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [engine, initModel]);
+  }, [engine, initModel, state.isLoading, state.isModelLoading]);
 
   const resetSummary = useCallback(() => {
     setState(prev => ({ ...prev, summary: "" }));
