@@ -101,7 +101,7 @@ export const useEncryptedJournal = () => {
     // Return sanitized entry with placeholders
     return {
       encryptedData: JSON.stringify(encrypted),
-      encryptionVersion: 1,
+      encryptionVersion: encrypted.version,
       sanitizedEntry: {
         ...entry,
         strain: "[encrypted]",

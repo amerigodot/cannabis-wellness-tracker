@@ -3,8 +3,8 @@
  * 
  * This module provides zero-knowledge encryption where:
  * - Keys are derived from user password using PBKDF2
- * - Data is encrypted with AES-256-GCM
- * - Server never sees encryption keys
+ * - Data is encrypted with AES-256-GCM (Symmetric) or Hybrid (RSA+AES)
+ * - Server never sees unencrypted private keys
  */
 
 const PBKDF2_ITERATIONS = 100000;
@@ -15,6 +15,7 @@ const IV_LENGTH = 12;
 export interface EncryptedData {
   ciphertext: string; // Base64 encoded
   iv: string; // Base64 encoded
+  encryptedKey?: string; // Base64 encoded (for V2 hybrid encryption)
   version: number;
 }
 
@@ -85,73 +86,211 @@ export async function deriveKey(password: string, saltBase64: string): Promise<C
       name: "AES-GCM",
       length: KEY_LENGTH,
     },
-    false, // Not extractable
+    true, // Extractable (needed for wrapping private keys)
+    ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+  );
+}
+
+/**
+ * Generate RSA-OAEP Key Pair for Asymmetric Encryption
+ */
+export async function generateAsymmetricKeyPair(): Promise<CryptoKeyPair> {
+  return await crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true, // Extractable
     ["encrypt", "decrypt"]
   );
 }
 
 /**
- * Encrypt sensitive journal fields
+ * Export key to JWK format (stringified)
  */
-export async function encryptData(
-  key: CryptoKey,
-  data: SensitiveJournalFields
-): Promise<EncryptedData> {
-  const encoder = new TextEncoder();
-  const ivArray = new Uint8Array(IV_LENGTH);
-  crypto.getRandomValues(ivArray);
+export async function exportKeyJWK(key: CryptoKey): Promise<string> {
+  const jwk = await crypto.subtle.exportKey("jwk", key);
+  return JSON.stringify(jwk);
+}
+
+/**
+ * Import key from JWK format
+ */
+export async function importKeyJWK(jwkString: string, type: "public" | "private"): Promise<CryptoKey> {
+  const jwk = JSON.parse(jwkString);
+  return await crypto.subtle.importKey(
+    "jwk",
+    jwk,
+    {
+      name: "RSA-OAEP",
+      hash: "SHA-256",
+    },
+    true,
+    [type === "public" ? "encrypt" : "decrypt"]
+  );
+}
+
+/**
+ * Wrap (Encrypt) Private Key with Password-Derived Key
+ */
+export async function encryptPrivateKey(privateKey: CryptoKey, wrappingKey: CryptoKey): Promise<{ encryptedKey: string; iv: string }> {
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   
-  // Copy to new ArrayBuffer to avoid SharedArrayBuffer issues
-  const ivBuffer = new ArrayBuffer(ivArray.byteLength);
-  new Uint8Array(ivBuffer).set(ivArray);
-  
-  const plaintext = encoder.encode(JSON.stringify(data));
-  
-  const ciphertext = await crypto.subtle.encrypt(
+  const encrypted = await crypto.subtle.wrapKey(
+    "jwk",
+    privateKey,
+    wrappingKey,
     {
       name: "AES-GCM",
-      iv: ivBuffer,
-    },
-    key,
-    plaintext
+      iv: iv,
+    }
   );
 
   return {
-    ciphertext: arrayBufferToBase64(new Uint8Array(ciphertext)),
-    iv: arrayBufferToBase64(ivArray),
-    version: 1,
+    encryptedKey: arrayBufferToBase64(new Uint8Array(encrypted)),
+    iv: arrayBufferToBase64(iv)
   };
 }
 
 /**
+ * Unwrap (Decrypt) Private Key with Password-Derived Key
+ */
+export async function decryptPrivateKey(encryptedKeyBase64: string, ivBase64: string, wrappingKey: CryptoKey): Promise<CryptoKey> {
+  const encryptedKey = base64ToArrayBuffer(encryptedKeyBase64);
+  const iv = base64ToArrayBuffer(ivBase64);
+
+  return await crypto.subtle.unwrapKey(
+    "jwk",
+    encryptedKey,
+    wrappingKey,
+    {
+      name: "AES-GCM",
+      iv: iv,
+    },
+    {
+      name: "RSA-OAEP",
+      hash: "SHA-256",
+    },
+    true,
+    ["decrypt"]
+  );
+}
+
+/**
+ * Encrypt sensitive journal fields
+ * Supports V1 (Symmetric) and V2 (Hybrid Asymmetric)
+ */
+export async function encryptData(
+  key: CryptoKey, // Can be AES (V1) or RSA Public Key (V2)
+  data: SensitiveJournalFields
+): Promise<EncryptedData> {
+  const encoder = new TextEncoder();
+  const plaintext = encoder.encode(JSON.stringify(data));
+  const ivArray = new Uint8Array(IV_LENGTH);
+  crypto.getRandomValues(ivArray);
+  const ivBuffer = ivArray.buffer;
+
+  // Version 2: Hybrid Encryption (if key is RSA Public Key)
+  if (key.algorithm.name === "RSA-OAEP") {
+    // 1. Generate Ephemeral AES Key
+    const ephemeralKey = await crypto.subtle.generateKey(
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt"]
+    );
+
+    // 2. Encrypt Data with Ephemeral Key
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: ivBuffer },
+      ephemeralKey,
+      plaintext
+    );
+
+    // 3. Encrypt Ephemeral Key with RSA Public Key
+    const rawEphemeralKey = await crypto.subtle.exportKey("raw", ephemeralKey);
+    const encryptedKey = await crypto.subtle.encrypt(
+      { name: "RSA-OAEP" },
+      key,
+      rawEphemeralKey
+    );
+
+    return {
+      ciphertext: arrayBufferToBase64(new Uint8Array(ciphertext)),
+      iv: arrayBufferToBase64(ivArray),
+      encryptedKey: arrayBufferToBase64(new Uint8Array(encryptedKey)),
+      version: 2,
+    };
+  } 
+  
+  // Version 1: Symmetric Encryption (Legacy)
+  else {
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: ivBuffer },
+      key,
+      plaintext
+    );
+
+    return {
+      ciphertext: arrayBufferToBase64(new Uint8Array(ciphertext)),
+      iv: arrayBufferToBase64(ivArray),
+      version: 1,
+    };
+  }
+}
+
+/**
  * Decrypt sensitive journal fields
+ * Supports V1 (Symmetric) and V2 (Hybrid Asymmetric)
  */
 export async function decryptData(
-  key: CryptoKey,
+  key: CryptoKey, // AES Key (V1) or RSA Private Key (V2)
   encrypted: EncryptedData
 ): Promise<SensitiveJournalFields> {
   const decoder = new TextDecoder();
-  
   const ciphertextArray = base64ToArrayBuffer(encrypted.ciphertext);
   const ivArray = base64ToArrayBuffer(encrypted.iv);
   
-  // Copy to new ArrayBuffers to avoid SharedArrayBuffer issues
-  const ivBuffer = new ArrayBuffer(ivArray.byteLength);
-  new Uint8Array(ivBuffer).set(ivArray);
-  
-  const ciphertextBuffer = new ArrayBuffer(ciphertextArray.byteLength);
-  new Uint8Array(ciphertextBuffer).set(ciphertextArray);
-  
-  const plaintext = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: ivBuffer,
-    },
-    key,
-    ciphertextBuffer
-  );
+  let decryptedBuffer: ArrayBuffer;
 
-  return JSON.parse(decoder.decode(plaintext));
+  // Version 2: Hybrid Decryption
+  if (encrypted.version === 2 && encrypted.encryptedKey && key.algorithm.name === "RSA-OAEP") {
+    // 1. Decrypt Ephemeral Key with RSA Private Key
+    const encryptedKeyBuffer = base64ToArrayBuffer(encrypted.encryptedKey);
+    const ephemeralKeyRaw = await crypto.subtle.decrypt(
+      { name: "RSA-OAEP" },
+      key,
+      encryptedKeyBuffer
+    );
+
+    // 2. Import Ephemeral Key
+    const ephemeralKey = await crypto.subtle.importKey(
+      "raw",
+      ephemeralKeyRaw,
+      { name: "AES-GCM" },
+      false,
+      ["decrypt"]
+    );
+
+    // 3. Decrypt Data with Ephemeral Key
+    decryptedBuffer = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: ivArray },
+      ephemeralKey,
+      ciphertextArray
+    );
+  } 
+  
+  // Version 1: Symmetric Decryption
+  else {
+    decryptedBuffer = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: ivArray },
+      key,
+      ciphertextArray
+    );
+  }
+
+  return JSON.parse(decoder.decode(decryptedBuffer));
 }
 
 /**
