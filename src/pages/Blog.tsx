@@ -59,9 +59,15 @@ export default function Blog() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search articles..."
+                placeholder="Search articles by title, excerpt, or tags..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value !== "") {
+                    setSelectedCategory(null);
+                    setSelectedTag(null);
+                  }
+                }}
                 className="pl-10"
               />
             </div>
@@ -73,8 +79,11 @@ export default function Blog() {
                   <Badge
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                    className="cursor-pointer transition-all hover:bg-primary/10"
+                    onClick={() => {
+                      setSelectedCategory(selectedCategory === category ? null : category);
+                      setSearchQuery(""); // Clear search when selecting a category for better UX
+                    }}
                   >
                     {category}
                   </Badge>
@@ -82,26 +91,12 @@ export default function Blog() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm font-medium text-muted-foreground self-center">Tags:</span>
-              {tags.map(tag => (
-                <Badge
-                  key={tag}
-                  variant={selectedTag === tag ? "default" : "secondary"}
-                  className="cursor-pointer"
-                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                >
-                  <Tag className="w-3 h-3 mr-1" />
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-
             {(searchQuery || selectedCategory || selectedTag) && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClearFilters}
+                className="text-muted-foreground hover:text-foreground"
               >
                 Clear All Filters
               </Button>

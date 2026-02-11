@@ -541,7 +541,7 @@ Remember: there's no universal "best" ratio—only what works best for you. Use 
     `
   },
   {
-    id: "3",
+    id: "4",
     slug: "top-strains-chronic-pain-relief",
     title: "Top 10 Cannabis Strains for Chronic Pain Relief",
     excerpt: "Discover the most effective cannabis strains for managing chronic pain, including detailed profiles of their effects and cannabinoid content.",
