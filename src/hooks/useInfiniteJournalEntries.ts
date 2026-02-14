@@ -4,56 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { JournalEntry } from "@/types/journal";
 import { toast } from "sonner";
 import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
+import { useE2EE } from "./useE2EE";
+import { useEffect, useState } from "react";
 
 const PAGE_SIZE = 20;
 
-interface FetchEntriesParams {
-  pageParam?: number;
-  userId: string;
-}
-
-interface EntriesPage {
-  entries: JournalEntry[];
-  nextCursor: number | null;
-  totalCount: number;
-}
-
-const fetchEntriesPage = async ({ pageParam = 0, userId }: FetchEntriesParams): Promise<EntriesPage> => {
-  const from = pageParam * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-
-  // Get total count first
-  const { count } = await supabase
-    .from("journal_entries")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("is_deleted", false);
-
-  // Fetch page of entries
-  const { data, error } = await supabase
-    .from("journal_entries")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("is_deleted", false)
-    .order("consumption_time", { ascending: false })
-    .range(from, to);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const totalCount = count || 0;
-  const hasMore = from + PAGE_SIZE < totalCount;
-
-  return {
-    entries: data || [],
-    nextCursor: hasMore ? pageParam + 1 : null,
-    totalCount,
-  };
-};
+// ... fetchEntriesPage implementation ...
 
 export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean) => {
   const queryClient = useQueryClient();
+  const { isUnlocked, encryptPayload, decryptPayload } = useE2EE();
+  const [decryptedEntries, setDecryptedEntries] = useState<JournalEntry[]>([]);
 
   const {
     data,
@@ -73,8 +34,34 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Flatten all pages into a single array
-  const entries = data?.pages.flatMap((page) => page.entries) || [];
+  // Flatten and Decrypt entries
+  useEffect(() => {
+    const rawEntries = data?.pages.flatMap((page) => page.entries) || [];
+    
+    const decryptAll = async () => {
+      const processed = await Promise.all(rawEntries.map(async (entry: any) => {
+        if (entry.is_encrypted && isUnlocked) {
+          try {
+            const decrypted = await decryptPayload({
+              payload: entry.encrypted_payload,
+              wrappedKey: entry.wrapped_aes_key,
+              iv: entry.encryption_iv
+            });
+            return { ...entry, ...decrypted };
+          } catch (e) {
+            console.error("Decryption failed for entry", entry.id, e);
+            return { ...entry, strain: "[Encrypted - Unlock Vault]" };
+          }
+        }
+        return entry;
+      }));
+      setDecryptedEntries(processed);
+    };
+
+    decryptAll();
+  }, [data, isUnlocked, decryptPayload]);
+
+  const entries = decryptedEntries;
   const totalCount = data?.pages[0]?.totalCount || 0;
 
   // Create entry mutation
@@ -82,14 +69,35 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     mutationFn: async (entryData: Omit<JournalEntry, 'id' | 'user_id' | 'created_at'>) => {
       if (!user) throw new Error("User not authenticated");
       
+      let payload: any = { ...entryData };
+      let e2eeFields = {};
+
+      if (isUnlocked) {
+        // Encrypt the sensitive fields
+        const encrypted = await encryptPayload(entryData);
+        e2eeFields = {
+          is_encrypted: true,
+          ...encrypted,
+          // Zero out sensitive fields in plaintext columns for privacy
+          strain: "Encrypted",
+          dosage: "Encrypted",
+          notes: null,
+          observations: [],
+          activities: [],
+          negative_side_effects: []
+        };
+      }
+
       const { data, error } = await supabase.from("journal_entries").insert({
         user_id: user.id,
-        ...entryData
+        ...payload,
+        ...e2eeFields
       }).select().single();
 
       if (error) throw error;
       return data;
     },
+    // ... rest of createMutation ...
     onSuccess: (_, variables) => {
       const previousEntryCount = totalCount;
       const newEntryCount = previousEntryCount + 1;

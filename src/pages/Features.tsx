@@ -85,15 +85,15 @@ const Features = () => {
               Complete Feature Overview — Track your journey, discover patterns, and optimize your wellness experience
             </p>
             <div className="flex items-center justify-center gap-4 mt-6 flex-wrap">
-              <Badge variant="secondary" className="text-sm py-1.5 px-4">
+              <Badge variant="secondary" className="text-sm py-1.5 px-4 print:bg-slate-100 print:text-slate-800 print:border-slate-200">
                 <Lock className="h-3.5 w-3.5 mr-1.5" />
                 Encrypted & Private
               </Badge>
-              <Badge variant="secondary" className="text-sm py-1.5 px-4">
+              <Badge variant="secondary" className="text-sm py-1.5 px-4 print:bg-slate-100 print:text-slate-800 print:border-slate-200">
                 <Eye className="h-3.5 w-3.5 mr-1.5" />
                 You Own Your Data
               </Badge>
-              <Badge variant="secondary" className="text-sm py-1.5 px-4">
+              <Badge variant="secondary" className="text-sm py-1.5 px-4 print:bg-slate-100 print:text-slate-800 print:border-slate-200">
                 <Shield className="h-3.5 w-3.5 mr-1.5" />
                 No Ads
               </Badge>
@@ -101,7 +101,7 @@ const Features = () => {
           </div>
 
           {/* Core Features Section */}
-          <section className="mb-12 print:mb-8">
+          <section className="mb-12 print:mb-8 print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Calendar className="h-6 w-6 text-primary" />
               Core Features
@@ -155,7 +155,7 @@ const Features = () => {
           </section>
 
           {/* Journal Entry Features */}
-          <section className="mb-12 print:mb-8 print:break-before-page">
+          <section className="mb-12 print:mb-8 print:break-before-page print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <FileText className="h-6 w-6 text-primary" />
               Journal Entry System
@@ -209,7 +209,7 @@ const Features = () => {
           </section>
 
           {/* MedGemma AI Features */}
-          <section className="mb-12 print:mb-8 print:break-before-page">
+          <section className="mb-12 print:mb-8 print:break-before-page print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Brain className="h-6 w-6 text-primary" />
               Edge AI Innovation (MedGemma Challenge)
@@ -263,7 +263,7 @@ const Features = () => {
           </section>
 
           {/* Clinician Portal & Care Management */}
-          <section className="mb-12 print:mb-8">
+          <section className="mb-12 print:mb-8 print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Stethoscope className="h-6 w-6 text-primary" />
               Clinician Portal & Care Management
@@ -317,7 +317,7 @@ const Features = () => {
           </section>
 
           {/* Analytics Features */}
-          <section className="mb-12 print:mb-8">
+          <section className="mb-12 print:mb-8 print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <BarChart3 className="h-6 w-6 text-primary" />
               Analytics & Insights
@@ -348,7 +348,7 @@ const Features = () => {
             </div>
 
             {/* Effectiveness Scoring Card */}
-            <Card className="mt-4">
+            <Card className="mt-4 print:break-inside-avoid print:shadow-none print:border-slate-300">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Award className="h-5 w-5 text-primary" />
@@ -364,7 +364,7 @@ const Features = () => {
                     { label: "Mild", range: "20-39%", color: "bg-orange-500/20 text-orange-700 dark:text-orange-400" },
                     { label: "Limited", range: "0-19%", color: "bg-red-500/20 text-red-700 dark:text-red-400" }
                   ].map((score) => (
-                    <div key={score.label} className={`rounded-lg p-3 ${score.color}`}>
+                    <div key={score.label} className={`rounded-lg p-3 ${score.color} print:bg-slate-50 print:border print:border-slate-200`}>
                       <div className="font-semibold text-sm">{score.label}</div>
                       <div className="text-xs opacity-80">{score.range}</div>
                     </div>
@@ -375,12 +375,12 @@ const Features = () => {
           </section>
 
           {/* Additional Features */}
-          <section className="mb-12 print:mb-8">
+          <section className="mb-12 print:mb-8 print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Settings className="h-6 w-6 text-primary" />
               Additional Features
             </h2>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 print:grid-cols-2 gap-4">
               <MiniFeatureCard
                 icon={<Trash2 className="h-4 w-4" />}
                 title="Trash & Recovery"
@@ -415,28 +415,28 @@ const Features = () => {
           </section>
 
           {/* Privacy Section */}
-          <section className="mb-12 print:mb-8">
+          <section className="mb-12 print:mb-8 print:break-inside-avoid">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <Shield className="h-6 w-6 text-primary" />
               Privacy & Security
             </h2>
-            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 print:bg-white print:border-slate-300 print:break-inside-avoid print:shadow-none">
               <CardContent className="pt-6">
                 <div className="grid md:grid-cols-3 gap-6 text-center">
                   <div>
                     <Lock className="h-8 w-8 mx-auto mb-3 text-primary" />
-                    <h3 className="font-semibold mb-1">End-to-End Encrypted</h3>
-                    <p className="text-sm text-muted-foreground">Your data is encrypted and secure</p>
+                    <h3 className="font-semibold mb-1 print:text-slate-900">End-to-End Encrypted</h3>
+                    <p className="text-sm text-muted-foreground print:text-slate-600">Your data is encrypted and secure</p>
                   </div>
                   <div>
                     <Eye className="h-8 w-8 mx-auto mb-3 text-primary" />
-                    <h3 className="font-semibold mb-1">You Own Your Data</h3>
-                    <p className="text-sm text-muted-foreground">Complete data ownership and control</p>
+                    <h3 className="font-semibold mb-1 print:text-slate-900">You Own Your Data</h3>
+                    <p className="text-sm text-muted-foreground print:text-slate-600">Complete data ownership and control</p>
                   </div>
                   <div>
                     <Shield className="h-8 w-8 mx-auto mb-3 text-primary" />
-                    <h3 className="font-semibold mb-1">No Ads, No Selling</h3>
-                    <p className="text-sm text-muted-foreground">We never sell your information</p>
+                    <h3 className="font-semibold mb-1 print:text-slate-900">No Ads, No Selling</h3>
+                    <p className="text-sm text-muted-foreground print:text-slate-600">We never sell your information</p>
                   </div>
                 </div>
               </CardContent>
@@ -462,11 +462,34 @@ const Features = () => {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+          * {
+            background-image: none !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+          }
+          .min-h-screen {
+            min-height: auto !important;
+          }
           .print\\:hidden { display: none !important; }
           .print\\:bg-white { background: white !important; }
           .print\\:mb-8 { margin-bottom: 2rem !important; }
           .print\\:break-before-page { break-before: page; }
           .print\\:text-primary { color: hsl(var(--primary)) !important; }
+          .print\\:break-inside-avoid { 
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            display: block !important; /* Ensure block display for break-inside to work reliably */
+          }
+          /* Ensure Card components don't split and render correctly */
+          .rounded-xl, .rounded-lg, .border, .Card {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          /* Fix for halves colored cards - ensure solid background and no complex layout interaction */
+          .rounded-lg.p-3.print\\:bg-slate-50 {
+            background-color: #f8fafc !important;
+            opacity: 1 !important;
+          }
         }
       `}</style>
     </>
@@ -485,18 +508,18 @@ const FeatureCard = ({
   description: string;
   features: string[];
 }) => (
-  <Card className="h-full">
+  <Card className="h-full print:break-inside-avoid print:shadow-none print:border-slate-300 print:bg-white">
     <CardHeader className="pb-3">
-      <CardTitle className="text-lg flex items-center gap-2">
+      <CardTitle className="text-lg flex items-center gap-2 print:text-black">
         <span className="text-primary">{icon}</span>
         {title}
       </CardTitle>
-      <p className="text-sm text-muted-foreground">{description}</p>
+      <p className="text-sm text-muted-foreground print:text-black">{description}</p>
     </CardHeader>
     <CardContent>
       <ul className="space-y-1.5">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-2 text-sm">
+          <li key={index} className="flex items-start gap-2 text-sm print:text-black">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <span>{feature}</span>
           </li>
@@ -516,12 +539,12 @@ const MiniFeatureCard = ({
   title: string;
   description: string;
 }) => (
-  <Card className="p-4">
+  <Card className="p-4 print:break-inside-avoid print:shadow-none print:border-slate-300 print:bg-white">
     <div className="flex items-start gap-3">
       <span className="text-primary mt-0.5">{icon}</span>
       <div>
-        <h3 className="font-medium text-sm">{title}</h3>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <h3 className="font-medium text-sm print:text-black">{title}</h3>
+        <p className="text-xs text-muted-foreground print:text-black">{description}</p>
       </div>
     </div>
   </Card>

@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { SecurityVault } from "@/components/clinical/SecurityVault";
+
 interface NotificationPreferences {
   browserNotifications: boolean;
   emailNotifications: boolean;
@@ -416,6 +418,11 @@ export default function Settings() {
           </CardContent>
         </Card>
 
+        {/* Security Vault (E2EE) */}
+        <div className="mb-6">
+          <SecurityVault />
+        </div>
+
         {/* Notification Preferences */}
         <Card className="mb-6">
           <CardHeader>
@@ -502,98 +509,6 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Privacy & Encryption Settings */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-primary" />
-              Privacy & Encryption
-            </CardTitle>
-            <CardDescription>
-              Control how your journal data is protected
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Encryption Status */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-3 flex-1">
-                <Lock className="w-5 h-5 text-primary mt-0.5" />
-                <div className="space-y-1 flex-1">
-                  <Label className="text-base font-medium">
-                    End-to-End Encryption
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {encryptionEnabled 
-                      ? "Your journal data is encrypted with your password. Only you can read it."
-                      : "Encrypt your journal entries so only you can access them."
-                    }
-                  </p>
-                </div>
-              </div>
-              {encryptionEnabled ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-primary font-medium">Enabled</span>
-                  {isUnlocked && (
-                    <Button variant="outline" size="sm" onClick={lock}>
-                      Lock Now
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={() => setShowMigrationWizard(true)}
-                >
-                  Enable
-                </Button>
-              )}
-            </div>
-
-            {encryptionEnabled && (
-              <>
-                <Separator />
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <div className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-sm">Zero-Knowledge Privacy</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Your data is encrypted before it leaves your browser. We cannot read your journal entries—only you have the key.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {!encryptionEnabled && needsMigration && (
-              <>
-                <Separator />
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    You have unencrypted journal entries. Enable encryption to protect your health data.
-                  </p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Migration Wizard Dialog */}
-        {showMigrationWizard && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <MigrationWizard 
-              onComplete={() => {
-                setShowMigrationWizard(false);
-                setNeedsMigration(false);
-                toast.success("Encryption enabled successfully!");
-              }}
-              onSkip={() => setShowMigrationWizard(false)}
-            />
-          </div>
-        )}
 
         {/* Browser Permission Info */}
         {Notification.permission === "denied" && (
