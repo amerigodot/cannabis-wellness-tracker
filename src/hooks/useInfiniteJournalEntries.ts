@@ -5,7 +5,7 @@ import { JournalEntry } from "@/types/journal";
 import { toast } from "sonner";
 import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
 import { useE2EE } from "./useE2EE";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 const PAGE_SIZE = 20;
 
