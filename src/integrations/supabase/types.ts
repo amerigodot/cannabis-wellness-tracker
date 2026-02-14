@@ -313,6 +313,44 @@ export type Database = {
         }
         Relationships: []
       }
+      e2ee_vault: {
+        Row: {
+          created_at: string
+          password_salt: string
+          public_key: string
+          updated_at: string
+          user_id: string
+          vault_version: number
+          wrapped_private_key: string
+        }
+        Insert: {
+          created_at?: string
+          password_salt: string
+          public_key: string
+          updated_at?: string
+          user_id: string
+          vault_version?: number
+          wrapped_private_key: string
+        }
+        Update: {
+          created_at?: string
+          password_salt?: string
+          public_key?: string
+          updated_at?: string
+          user_id?: string
+          vault_version?: number
+          wrapped_private_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e2ee_vault_user_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_encryption_salts: {
         Row: {
           created_at: string

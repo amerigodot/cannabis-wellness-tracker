@@ -25,8 +25,8 @@ export function useE2EE() {
     }
 
     const { data, error } = await supabase
-      .from("user_encryption_salts")
-      .select("id")
+      .from("e2ee_vault")
+      .select("user_id")
       .eq("user_id", user.id)
       .single();
 
@@ -62,13 +62,13 @@ export function useE2EE() {
       // 4. Export public key
       const publicKeyJWK = await crypto.exportKeyJWK(keyPair.publicKey);
 
-      // 5. Save to Supabase (using existing user_encryption_salts table)
-      const { error } = await supabase.from("user_encryption_salts").upsert({
+      // 5. Save to Supabase (using fresh e2ee_vault table)
+      const { error } = await supabase.from("e2ee_vault").upsert({
         user_id: user.id,
         password_salt: salt,
         public_key: publicKeyJWK,
-        encrypted_private_key: JSON.stringify({ encryptedKey, iv }),
-        key_version: 2
+        wrapped_private_key: JSON.stringify({ encryptedKey, iv }),
+        vault_version: 2
       });
 
       if (error) throw error;
@@ -92,7 +92,7 @@ export function useE2EE() {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from("user_encryption_salts")
+        .from("e2ee_vault")
         .select("*")
         .eq("user_id", user.id)
         .single();
@@ -104,7 +104,7 @@ export function useE2EE() {
 
       // 2. Unwrap private key
       const wrappingKey = await crypto.deriveKey(passphrase, data.password_salt);
-      const { encryptedKey, iv } = JSON.parse(data.encrypted_private_key);
+      const { encryptedKey, iv } = JSON.parse(data.wrapped_private_key);
       const privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
 
       setKeys({ publicKey, privateKey });
