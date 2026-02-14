@@ -120,21 +120,21 @@ export function useE2EE() {
   /**
    * Helper to encrypt a journal entry payload
    */
-  const encryptPayload = async (data: any) => {
+  const encryptPayload = useCallback(async (data: object) => {
     if (!keys?.publicKey) throw new Error("Vault locked");
-    const encrypted = await crypto.encryptData(keys.publicKey, data);
+    const encrypted = await crypto.encryptData(keys.publicKey, data as any);
     
     return {
       encrypted_payload: encrypted.ciphertext,
       wrapped_aes_key: encrypted.encryptedKey,
       encryption_iv: encrypted.iv,
     };
-  };
+  }, [keys]);
 
   /**
    * Helper to decrypt a journal entry payload
    */
-  const decryptPayload = async (encrypted: { payload: string; wrappedKey: string; iv: string }) => {
+  const decryptPayload = useCallback(async (encrypted: { payload: string; wrappedKey: string; iv: string }) => {
     if (!keys?.privateKey) throw new Error("Vault locked");
     
     const decrypted = await crypto.decryptData(
@@ -148,7 +148,7 @@ export function useE2EE() {
     );
 
     return decrypted;
-  };
+  }, [keys]);
 
   return {
     ...status,

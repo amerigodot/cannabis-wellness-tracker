@@ -34,18 +34,25 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  const rawEntries = useMemo(() => data?.pages.flatMap((page) => page.entries) || [], [data?.pages]);
+
   // Flatten and Decrypt entries
   useEffect(() => {
-    const rawEntries = data?.pages.flatMap((page) => page.entries) || [];
-    
+    let isMounted = true;
+
     const decryptAll = async () => {
-      const processed = await Promise.all(rawEntries.map(async (entry: any) => {
-        if (entry.is_encrypted && isUnlocked) {
+      if (!rawEntries.length) {
+        setDecryptedEntries([]);
+        return;
+      }
+
+      const processed = await Promise.all(rawEntries.map(async (entry) => {
+        if ((entry as any).is_encrypted && isUnlocked) {
           try {
             const decrypted = await decryptPayload({
-              payload: entry.encrypted_payload,
-              wrappedKey: entry.wrapped_aes_key,
-              iv: entry.encryption_iv
+              payload: (entry as any).encrypted_payload,
+              wrappedKey: (entry as any).wrapped_aes_key,
+              iv: (entry as any).encryption_iv
             });
             return { ...entry, ...decrypted };
           } catch (e) {
@@ -55,11 +62,18 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
         }
         return entry;
       }));
-      setDecryptedEntries(processed);
+
+      if (isMounted) {
+        setDecryptedEntries(processed);
+      }
     };
 
     decryptAll();
-  }, [data, isUnlocked, decryptPayload]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [rawEntries, isUnlocked, decryptPayload]);
 
   const entries = decryptedEntries;
   const totalCount = data?.pages[0]?.totalCount || 0;
@@ -69,7 +83,7 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     mutationFn: async (entryData: Omit<JournalEntry, 'id' | 'user_id' | 'created_at'>) => {
       if (!user) throw new Error("User not authenticated");
       
-      let payload: any = { ...entryData };
+      const payload: Partial<JournalEntry> = { ...entryData };
       let e2eeFields = {};
 
       if (isUnlocked) {
