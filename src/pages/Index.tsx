@@ -110,7 +110,8 @@ const Index = () => {
     setTimeRangeFilter,
   } = useJournalEntries(user);
 
-  // Prompt for migration if user has unencrypted entries
+  // Disable conflicting migration wizard for now to focus on new E2EE Vault
+  /*
   useEffect(() => {
     if (!isDemoMode && user && needsMigration && !encryptionEnabled) {
       // Delay showing to not overwhelm on first load
@@ -120,6 +121,7 @@ const Index = () => {
       return () => clearTimeout(timer);
     }
   }, [isDemoMode, user, needsMigration, encryptionEnabled]);
+  */
 
   const handleDelete = (entryId: string) => {
     setDeleteEntryId(entryId);
