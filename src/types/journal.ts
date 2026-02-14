@@ -32,4 +32,9 @@ export interface JournalEntry {
   thc_weight?: number | null;
   cbd_weight?: number | null;
   dosage_unit?: string | null;
+  // E2EE fields
+  is_encrypted?: boolean;
+  encrypted_payload?: string | null;
+  encryption_iv?: string | null;
+  wrapped_aes_key?: string | null;
 }

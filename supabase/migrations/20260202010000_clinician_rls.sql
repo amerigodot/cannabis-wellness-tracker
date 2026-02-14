@@ -5,7 +5,7 @@ CREATE POLICY "Clinicians can view linked patient entries" ON public.journal_ent
     EXISTS (
       SELECT 1 FROM public.clinician_patient_links cpl
       WHERE cpl.clinician_id = auth.uid()
-      AND cpl.patient_id = public.journal_entries.user_id
+      AND cpl.patient_id = journal_entries.user_id
       AND cpl.status = 'active'
       AND (cpl.consent_scope->>'share_symptom_scores')::boolean = true
     )

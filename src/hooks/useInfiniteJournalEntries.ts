@@ -9,7 +9,50 @@ import { useEffect, useState, useMemo } from "react";
 
 const PAGE_SIZE = 20;
 
-// ... fetchEntriesPage implementation ...
+interface FetchEntriesParams {
+  pageParam?: number;
+  userId: string;
+}
+
+interface EntriesPage {
+  entries: JournalEntry[];
+  nextCursor: number | null;
+  totalCount: number;
+}
+
+const fetchEntriesPage = async ({ pageParam = 0, userId }: FetchEntriesParams): Promise<EntriesPage> => {
+  const from = pageParam * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  // Get total count first
+  const { count } = await supabase
+    .from("journal_entries")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_deleted", false);
+
+  // Fetch page of entries
+  const { data, error } = await supabase
+    .from("journal_entries")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_deleted", false)
+    .order("consumption_time", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const totalCount = count || 0;
+  const hasMore = from + PAGE_SIZE < totalCount;
+
+  return {
+    entries: data as unknown as JournalEntry[] || [],
+    nextCursor: hasMore ? pageParam + 1 : null,
+    totalCount,
+  };
+};
 
 export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean) => {
   const queryClient = useQueryClient();
@@ -47,12 +90,12 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
       }
 
       const processed = await Promise.all(rawEntries.map(async (entry) => {
-        if ((entry as any).is_encrypted && isUnlocked) {
+        if (entry.is_encrypted && isUnlocked) {
           try {
             const decrypted = await decryptPayload({
-              payload: (entry as any).encrypted_payload,
-              wrappedKey: (entry as any).wrapped_aes_key,
-              iv: (entry as any).encryption_iv
+              payload: entry.encrypted_payload || "",
+              wrappedKey: entry.wrapped_aes_key || "",
+              iv: entry.encryption_iv || ""
             });
             return { ...entry, ...decrypted };
           } catch (e) {
@@ -111,7 +154,6 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
       if (error) throw error;
       return data;
     },
-    // ... rest of createMutation ...
     onSuccess: (_, variables) => {
       const previousEntryCount = totalCount;
       const newEntryCount = previousEntryCount + 1;
