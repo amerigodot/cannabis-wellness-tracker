@@ -12,7 +12,7 @@
 
 ---
 
-## 🚨 JUDGES START HERE: [Review MedGemma Challenge Implementation](#-medgemma-impact-challenge-submission-edge-ai-track)
+## 🚨 JUDGES START HERE: [Read Full Submission Documentation (SUBMISSION.md)](./SUBMISSION.md)
 **Video Demo Script:** [View Script](./VIDEO_SCRIPT.md)
 
 ---
@@ -24,17 +24,17 @@ This submission is specialized for the **Edge AI Prize ($5,000)** and the **Main
 ### 🧠 The Case for Edge AI in Medical Cannabis
 Medical cannabis patients handle extremely sensitive health and substance-use data. Privacy is not just a feature; it is a clinical requirement for honest journaling and effective shared decision-making. Our platform demonstrates that complex medical reasoning can be decentralized, preserving patient dignity while enabling professional oversight.
 
-### 🛡️ Data Architecture & Privacy (Zero-Knowledge)
-Patient journal entries are stored in an **end‑to‑end encrypted** Supabase database using asymmetric key pairs (**RSA-4096**), with the patient’s private key encrypted under their passphrase and **never leaving their device**. 
-
-Medical guideline knowledge bases and the **Gemma‑2B** model run entirely client‑side via WebLLM/WebGPU, so day‑to‑day clinical decision support (CDS) queries **never expose raw health data** to a central server. When patients choose to share with clinicians, only aggregated summaries (e.g., trends in dose, symptom response, adherence, and adverse events) are generated on‑device and encrypted before transmission, preserving privacy while still enabling evidence‑based conversations and potential future interoperability via **FHIR exports**.
+### 🛡️ Privacy-First Architecture (Zero-Knowledge)
+Our solution implements **Local-Only Inference** using **WebLLM** and **Google's Gemma-2-2B** model.
+-   **Zero Data Leakage:** All medical reasoning, journal analysis, and clinician summarization occur entirely within the user's browser (WASM/WebGPU). Raw PHI never leaves the device.
+-   **Local RAG (Retrieval Augmented Generation):** The AI grounds its advice in medical literature (Bell et al. 2024, ACOEM) stored locally on the client, ensuring clinical accuracy without cloud calls.
+-   **Secure Clinician Linking:** A privacy-preserving protocol using 6-digit one-time codes and granular consent scopes allows clinicians to view trends and summaries without centralizing raw data.
 
 ### 🏗️ Technical Implementation
-1.  **Inference Engine:** Powered by `@mlc-ai/web-llm` utilizing the `gemma-2-2b-it-q4f16_1-MLC` quantized model.
-2.  **Cryptography:** Native **Web Crypto API** orchestration for zero-knowledge RSA-4096 key management and AES-256-GCM data encryption.
-3.  **Instruction Tuning (Simulated):** We implement **In-Context Learning (ICL)** via a rigorous System Persona and Clinical Metric injection. This forces the general-purpose Gemma model to adopt a strict "Clinical Decision Support" role.
-4.  **Deterministic Feature Engineering:** Raw user logs are pre-processed into high-signal clinical metrics (e.g., "Dose Drift", "Adherence Velocity") *before* LLM inference, significantly improving reasoning reliability.
-5.  **Hardware Feasibility:** Optimized for consumer-grade hardware (M1/M2/M3 Macs, NVIDIA RTX, Intel Iris Xe) utilizing WebGPU for near-zero latency.
+1.  **Engine:** Powered by `@mlc-ai/web-llm` utilizing the `gemma-2-2b-it-q4f16_1-MLC` quantized model.
+2.  **Instruction Tuning (Simulated):** We implement **In-Context Learning (ICL)** via a rigorous System Persona and Clinical Metric injection. This forces the general-purpose Gemma model to adopt a strict "Clinical Decision Support" role.
+3.  **Deterministic Feature Engineering:** Raw user logs are pre-processed into high-signal clinical metrics (e.g., "Dose Drift", "Adherence Velocity") *before* LLM inference, significantly improving reasoning reliability.
+4.  **Hardware Feasibility:** Optimized for consumer-grade hardware (M1/M2/M3 Macs, NVIDIA RTX, Intel Iris Xe) utilizing WebGPU for near-zero latency.
 
 ### 🎯 Task Goals & Success Metrics
 1.  **Harm Reduction:** 100% interception of emergency keywords via rule-based layers before the LLM.
@@ -75,21 +75,20 @@ To facilitate testing without any backend setup:
 ## ✨ Key Features
 
 ### 🤖 Edge AI Clinical Tools
-1.  **Private AI Coach:** Multi-modal analysis of effectiveness patterns grounded in clinical guidelines, running 100% on-device.
-2.  **Clinician Portal:** Secure dashboard featuring multi-axis trend visualization and automated Edge AI clinical summaries.
-3.  **Security Vault:** Zero-knowledge key management system for initializing and unlocking RSA-4096 encryption.
-4.  **Clinical Triage System:** protocol-driven risk stratification for respiratory and inflammatory symptoms.
+1.  **Private AI Coach:** Multi-modal analysis of effectiveness patterns grounded in Bell et al. 2024 guidelines.
+2.  **Clinician Portal:** Secure dashboard featuring multi-axis trend visualization and AI-generated clinical summaries.
+3.  **Clinical Triage System:** protocol-driven risk stratification for respiratory and inflammation symptoms.
+4.  **Performance Dashboard:** Real-time monitoring of inference latency and helpfulness metrics.
 
 ### 📓 Advanced Journaling
-*   **Encrypted Health Logs:** Native integration of E2EE for all sensitive fields (strain, dosage, notes).
-*   **Validated Scales:** Clinical-grade tracking using NRS (Pain) and GAD-7 (Anxiety) metrics.
-*   **Timeline Analytics:** Adaptive visualizations showing symptom trajectory and dose-response correlation.
+*   **Split-Weight Tracking:** Dedicated inputs for THC and CBD weight with dynamic total calculation.
+*   **Validated Scales:** Integration of NRS (Pain) and GAD-7 (Anxiety) for clinical-grade outcomes.
+*   **Timeline Analytics:** Unified calendar with effectiveness scoring and dose-response correlation.
 
-## 🔒 Security & Privacy
--   **Zero-Knowledge:** PHI is encrypted before it leaves the browser. We have no access to your data or keys.
--   **Asymmetric E2EE:** Industry-standard **RSA-4096** bit key pairs protected by your secret passphrase.
--   **Local-Only Inference:** Medical reasoning occurs via WebGPU/WASM in a sandboxed browser environment.
--   **Audit Compliance:** HIPAA-ready logging for clinical decision support events.
+## 🔒 Security
+-   **Encrypted:** Sensitive data is encrypted at rest and in transit.
+-   **Local-First:** All AI inference is client-side.
+-   **Audit Logs:** HIPAA-compliant logging for all clinical decision support events.
 
 ## 🛡️ Disclaimer
 This application is for informational purposes only. It does not provide medical advice.
