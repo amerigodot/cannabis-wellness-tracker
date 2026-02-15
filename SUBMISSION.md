@@ -64,4 +64,27 @@ The system’s reasoning is strictly anchored in peer-reviewed protocols, ensuri
 *   **RACGP:** *Prescribing Medical Cannabis in General Practice* (Contraindications for anxiety/psychosis).
 
 ---
+
+
+
+## 5. Regulatory Maturity & AI Act Alignment
+
+
+
+This project is engineered with a proactive focus on evolving global AI regulations, specifically aligning with the **EU AI Act** frameworks for **High-Risk AI Systems** in healthcare (Annex III). 
+
+
+
+*   **Transparency & Explainability:** Our local RAG architecture ensures that every clinical recommendation is traceable back to peer-reviewed source material, mitigating "black box" risks.
+
+*   **Technical Robustness & Safety:** By implementing a deterministic safety interceptor and local-only inference, we eliminate cloud-based vulnerabilities and ensure consistent performance in safety-critical environments.
+
+*   **Data Sovereignty:** Our RSA-4096 E2EE architecture exceeds standard GDPR/HIPAA requirements, ensuring that the patient retains absolute control over their sensitive medical data.
+
+*   **Human Oversight:** The system is designed as a **Clinical Decision Support (CDS)** tool, emphasizing clinician verification and shared decision-making rather than autonomous medical diagnosis.
+
+
+
+---
+
 *Submitted by Amerigo Di Maria & Team for the Kaggle MedGemma Impact Challenge.*

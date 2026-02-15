@@ -85,10 +85,11 @@ To facilitate testing without any backend setup:
 *   **Validated Scales:** Integration of NRS (Pain) and GAD-7 (Anxiety) for clinical-grade outcomes.
 *   **Timeline Analytics:** Unified calendar with effectiveness scoring and dose-response correlation.
 
-## 🔒 Security
--   **Encrypted:** Sensitive data is encrypted at rest and in transit.
--   **Local-First:** All AI inference is client-side.
--   **Audit Logs:** HIPAA-compliant logging for all clinical decision support events.
+## 🔒 Security & Regulatory Maturity
+-   **Zero-Knowledge:** Sensitive data is encrypted at rest and in transit using RSA-4096 E2EE.
+-   **Local-First:** All AI inference is client-side, eliminating cloud-based PHI leaks.
+-   **AI Act Alignment:** Engineered to align with **EU AI Act** requirements for **High-Risk AI Systems** in healthcare, prioritizing transparency, robustness, and human-in-the-loop oversight.
+-   **Audit Logs:** HIPAA-ready logging for all clinical decision support events.
 
 ## 🛡️ Disclaimer
 This application is for informational purposes only. It does not provide medical advice.
