@@ -96,14 +96,11 @@ export type Database = {
           dosage_unit: string | null
           effects_duration_minutes: number | null
           encrypted_data: string | null
-          encrypted_payload: string | null
-          encryption_iv: string | null
           encryption_version: number | null
           entry_status: string | null
           icon: string | null
           id: string
           is_deleted: boolean
-          is_encrypted: boolean | null
           method: string
           negative_side_effects: string[]
           notes: string | null
@@ -113,7 +110,6 @@ export type Database = {
           thc_percentage: number | null
           thc_weight: number | null
           user_id: string
-          wrapped_aes_key: string | null
         }
         Insert: {
           activities?: string[]
@@ -136,14 +132,11 @@ export type Database = {
           dosage_unit?: string | null
           effects_duration_minutes?: number | null
           encrypted_data?: string | null
-          encrypted_payload?: string | null
-          encryption_iv?: string | null
           encryption_version?: number | null
           entry_status?: string | null
           icon?: string | null
           id?: string
           is_deleted?: boolean
-          is_encrypted?: boolean | null
           method: string
           negative_side_effects?: string[]
           notes?: string | null
@@ -153,7 +146,6 @@ export type Database = {
           thc_percentage?: number | null
           thc_weight?: number | null
           user_id: string
-          wrapped_aes_key?: string | null
         }
         Update: {
           activities?: string[]
@@ -176,14 +168,11 @@ export type Database = {
           dosage_unit?: string | null
           effects_duration_minutes?: number | null
           encrypted_data?: string | null
-          encrypted_payload?: string | null
-          encryption_iv?: string | null
           encryption_version?: number | null
           entry_status?: string | null
           icon?: string | null
           id?: string
           is_deleted?: boolean
-          is_encrypted?: boolean | null
           method?: string
           negative_side_effects?: string[]
           notes?: string | null
@@ -193,44 +182,8 @@ export type Database = {
           thc_percentage?: number | null
           thc_weight?: number | null
           user_id?: string
-          wrapped_aes_key?: string | null
         }
         Relationships: []
-      }
-      profiles: {
-        Row: {
-          clinician_verified: boolean | null
-          created_at: string
-          full_name: string | null
-          id: string
-          role: string
-          updated_at: string
-        }
-        Insert: {
-          clinician_verified?: boolean | null
-          created_at?: string
-          full_name?: string | null
-          id: string
-          role?: string
-          updated_at?: string
-        }
-        Update: {
-          clinician_verified?: boolean | null
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          role?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       rate_limits: {
         Row: {
@@ -313,72 +266,25 @@ export type Database = {
         }
         Relationships: []
       }
-      e2ee_vault: {
-        Row: {
-          created_at: string
-          password_salt: string
-          public_key: string
-          updated_at: string
-          user_id: string
-          vault_version: number
-          wrapped_private_key: string
-        }
-        Insert: {
-          created_at?: string
-          password_salt: string
-          public_key: string
-          updated_at?: string
-          user_id: string
-          vault_version?: number
-          wrapped_private_key: string
-        }
-        Update: {
-          created_at?: string
-          password_salt?: string
-          public_key?: string
-          updated_at?: string
-          user_id?: string
-          vault_version?: number
-          wrapped_private_key?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "e2ee_vault_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_encryption_salts: {
         Row: {
           created_at: string
-          encrypted_private_key: string | null
           key_version: number
           password_salt: string
-          private_key_version: number | null
-          public_key: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          encrypted_private_key?: string | null
           key_version?: number
           password_salt: string
-          private_key_version?: number | null
-          public_key?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          encrypted_private_key?: string | null
           key_version?: number
           password_salt?: string
-          private_key_version?: number | null
-          public_key?: string | null
           updated_at?: string
           user_id?: string
         }

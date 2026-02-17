@@ -163,11 +163,11 @@ export async function decryptPrivateKey(encryptedKeyBase64: string, ivBase64: st
 
   return await crypto.subtle.unwrapKey(
     "jwk",
-    encryptedKey,
+    encryptedKey.buffer as ArrayBuffer,
     wrappingKey,
     {
       name: "AES-GCM",
-      iv: iv,
+      iv: iv.buffer as ArrayBuffer,
     },
     {
       name: "RSA-OAEP",
@@ -261,7 +261,7 @@ export async function decryptData(
     const ephemeralKeyRaw = await crypto.subtle.decrypt(
       { name: "RSA-OAEP" },
       key,
-      encryptedKeyBuffer
+      encryptedKeyBuffer.buffer as ArrayBuffer
     );
 
     // 2. Import Ephemeral Key
@@ -275,18 +275,18 @@ export async function decryptData(
 
     // 3. Decrypt Data with Ephemeral Key
     decryptedBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: ivArray },
+      { name: "AES-GCM", iv: ivArray.buffer as ArrayBuffer },
       ephemeralKey,
-      ciphertextArray
+      ciphertextArray.buffer as ArrayBuffer
     );
   } 
   
   // Version 1: Symmetric Decryption
   else {
     decryptedBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: ivArray },
+      { name: "AES-GCM", iv: ivArray.buffer as ArrayBuffer },
       key,
-      ciphertextArray
+      ciphertextArray.buffer as ArrayBuffer
     );
   }
 

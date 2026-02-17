@@ -149,7 +149,7 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
         user_id: user.id,
         ...payload,
         ...e2eeFields
-      }).select().single();
+      } as any).select().single();
 
       if (error) throw error;
       return data;
