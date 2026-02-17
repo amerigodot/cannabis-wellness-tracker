@@ -25,7 +25,7 @@ export function useE2EE() {
     }
 
     // Try e2ee_vault first, fallback to user_encryption_salts
-    let { data, error } = await supabase
+    let { data, error } = await (supabase as any)
       .from("e2ee_vault")
       .select("user_id")
       .eq("user_id", user.id)
@@ -88,7 +88,7 @@ export function useE2EE() {
       };
 
       // 5. Try saving to fresh e2ee_vault table
-      const { error: vaultError } = await supabase.from("e2ee_vault").upsert({
+      const { error: vaultError } = await (supabase as any).from("e2ee_vault").upsert({
         user_id: user.id,
         ...vaultData
       });
@@ -127,7 +127,7 @@ export function useE2EE() {
       let vault: any = null;
 
       // 1. Try e2ee_vault
-      const { data: vData, error: vError } = await supabase
+      const { data: vData, error: vError } = await (supabase as any)
         .from("e2ee_vault")
         .select("*")
         .eq("user_id", user.id)

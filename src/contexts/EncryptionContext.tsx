@@ -75,9 +75,9 @@ export const EncryptionProvider: React.FC<EncryptionProviderProps> = ({ children
         // Check if user has encryption salt (meaning encryption is set up)
         const { data: saltData } = await supabase
           .from("user_encryption_salts")
-          .select("password_salt, key_version, public_key")
+          .select("password_salt, key_version")
           .eq("user_id", session.user.id)
-          .single();
+          .single() as { data: any };
 
         if (saltData) {
           setEncryptionEnabled(true);
@@ -159,10 +159,8 @@ export const EncryptionProvider: React.FC<EncryptionProviderProps> = ({ children
         .upsert({
           user_id: session.user.id,
           password_salt: salt,
-          key_version: 2, // Version 2 for Asymmetric
-          public_key: publicKeyJWK,
-          encrypted_private_key: encryptedPrivateKeyBlob
-        });
+          key_version: 2,
+        } as any);
 
       if (error) {
         console.error("Error storing encryption keys:", error);
@@ -202,9 +200,9 @@ export const EncryptionProvider: React.FC<EncryptionProviderProps> = ({ children
       // 1. Fetch encrypted private key
       const { data: keyData } = await supabase
         .from("user_encryption_salts")
-        .select("encrypted_private_key, public_key, key_version")
+        .select("password_salt, key_version")
         .eq("user_id", session.user.id)
-        .single();
+        .single() as { data: any };
 
       // 2. Derive Wrapping Key
       const wrapperKey = await deriveKeyFromPassword(password, userSalt);
