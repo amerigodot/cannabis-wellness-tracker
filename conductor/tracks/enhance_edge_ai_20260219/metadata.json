@@ -1,0 +1,8 @@
+{
+  "track_id": "enhance_edge_ai_20260219",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-19T10:00:00Z",
+  "updated_at": "2026-02-19T10:00:00Z",
+  "description": "Enhance Edge AI Reasoning: Refine the useClinicalSummarizer hook and prompt engineering to improve the accuracy of AI-generated clinical insights using the Gemma-2B model."
+}
