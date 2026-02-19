@@ -359,12 +359,18 @@ function arrayBufferToBase64(buffer: Uint8Array): string {
 }
 
 function base64ToArrayBuffer(base64: string): Uint8Array {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+  try {
+    const trimmed = base64.trim();
+    const binary = atob(trimmed);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  } catch (error) {
+    console.error("Failed to decode base64 string. The string might contain invalid characters or be improperly formatted.", error);
+    throw error;
   }
-  return bytes;
 }
 
 /**
