@@ -145,8 +145,13 @@ export function useE2EE() {
           .single();
 
         if (sData?.password_salt?.startsWith("VAULT_V3:")) {
-          const raw = sData.password_salt.substring(9);
-          vault = JSON.parse(atob(raw));
+          const raw = sData.password_salt.substring(9).trim(); // Added .trim()
+          try {
+            vault = JSON.parse(atob(raw));
+          } catch (decodeError) {
+            console.error("Failed to decode resilient vault JSON:", decodeError);
+            throw new Error("Vault corruption detected.");
+          }
         }
       }
 
@@ -156,9 +161,14 @@ export function useE2EE() {
       const publicKey = await crypto.importKeyJWK(vault.public_key, "public");
 
       // 2. Unwrap private key
-      const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
-      const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
-      privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
+      try {
+        const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
+        const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
+        privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
+      } catch (cryptoError) {
+        console.error("Cryptographic unwrap failed:", cryptoError);
+        throw new Error("Incorrect passphrase or corrupted key material.");
+      }
 
       setKeys({ publicKey, privateKey });
       toast.success("Vault unlocked. Journal decrypted.");
