@@ -9,8 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Bell, Mail, Volume2, Trash2, AlertTriangle, Loader2, Download, ChevronDown, Shield, Lock, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useEncryption } from "@/contexts/EncryptionContext";
-import { MigrationWizard } from "@/components/MigrationWizard";
+
 import { ClinicianLinking } from "@/components/clinical/ClinicianLinking";
 import { ClinicianAccess } from "@/components/clinical/ClinicianAccess";
 import {
@@ -52,9 +51,7 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showMigrationWizard, setShowMigrationWizard] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const { encryptionEnabled, isUnlocked, lock, needsMigration, setNeedsMigration } = useEncryption();
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     browserNotifications: true,
     emailNotifications: true,

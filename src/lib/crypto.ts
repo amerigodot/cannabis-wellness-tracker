@@ -59,6 +59,7 @@ export function generateSalt(): string {
  */
 export async function deriveKey(password: string, saltBase64: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
+
   const saltArray = base64ToArrayBuffer(saltBase64);
   
   // Import password as key material
@@ -361,6 +362,7 @@ function arrayBufferToBase64(buffer: Uint8Array): string {
 function base64ToArrayBuffer(base64: string): Uint8Array {
   try {
     const trimmed = base64.trim();
+    // console.log("Attempting to decode base64 string:", trimmed); // Debug line
     const binary = atob(trimmed);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
