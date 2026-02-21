@@ -43,7 +43,7 @@ export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, classNam
   };
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/auth");
   };
 
   if (!encryptionEnabled) {
