@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useEncryption } from "@/contexts/EncryptionContext";
+import { useE2EE } from "@/hooks/useE2EE";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Shield, AlertTriangle, ArrowLeft, LogOut } from "lucide-react";
+import { Lock, Shield, AlertTriangle, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client"; // Import supabase
@@ -15,7 +15,7 @@ interface UnlockPromptProps {
 }
 
 export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, className }) => {
-  const { unlockWithPassword, encryptionEnabled } = useEncryption();
+  const { unlockVault, hasVault, isUnlocked: e2eeIsUnlocked } = useE2EE();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, classNam
     setError(null);
 
     try {
-      const success = await unlockWithPassword(password);
+      const success = await unlockVault(password);
       if (success) {
         toast.success("Journal unlocked successfully!");
         setPassword("");
@@ -50,25 +50,25 @@ export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, classNam
     setLoading(false);
   };
 
-  if (!encryptionEnabled) {
+  if (!hasVault || e2eeIsUnlocked) {
     return null;
   }
 
   return (
     <div className="relative w-full max-w-md mx-auto">
       <div className="absolute -top-12 left-0 animate-in fade-in slide-in-from-left-4 duration-500">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleSignOut} // Changed to Sign Out
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut} // Connect to handleSignOut
           className="gap-2 text-muted-foreground hover:text-foreground transition-colors"
           disabled={loading}
         >
-          <LogOut className="w-4 h-4" /> {/* Changed icon */}
-          Sign Out
+          <LogOut className="w-4 h-4" /> {/* LogOut icon */}
+          Sign Out {/* Button text */}
         </Button>
       </div>
-      
+
       <Card className={`shadow-lg border-2 ${className}`}>
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 p-4 rounded-full bg-primary/10">
