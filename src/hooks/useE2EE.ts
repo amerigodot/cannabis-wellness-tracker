@@ -155,8 +155,10 @@ export function useE2EE() {
       const publicKey = await crypto.importKeyJWK(vault.public_key, "public");
 
       // 2. Unwrap private key
+      console.log("Attempting to derive wrapping key with salt:", vault.password_salt);
       const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
       const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
+      console.log("Attempting to decrypt private key with encryptedKey (first 20 chars):", encryptedKey.substring(0,20), "and IV:", iv);
       const privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
 
       setKeys({ publicKey, privateKey });
