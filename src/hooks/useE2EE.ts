@@ -39,7 +39,7 @@ export function useE2EE() {
           .select("password_salt")
           .eq("user_id", user.id)
           .single();
-        
+
         if (saltData?.password_salt?.startsWith("VAULT_V3:")) {
           data = { user_id: user.id } as any;
         }
@@ -69,14 +69,14 @@ export function useE2EE() {
 
       // 1. Generate new 4096-bit key pair
       const keyPair = await crypto.generateAsymmetricKeyPair();
-      
+
       // 2. Derive Wrapping Key from passphrase
       const salt = crypto.generateSalt();
       const wrappingKey = await crypto.deriveKey(passphrase, salt);
 
       // 3. Wrap private key
       const { encryptedKey, iv } = await crypto.encryptPrivateKey(keyPair.privateKey, wrappingKey);
-      
+
       // 4. Export public key
       const publicKeyJWK = await crypto.exportKeyJWK(keyPair.publicKey);
 
@@ -125,6 +125,7 @@ export function useE2EE() {
       if (!user) throw new Error("Not authenticated");
 
       let vault: any = null;
+      let privateKey: CryptoKey; // Declare privateKey here
 
       // 1. Try e2ee_vault
       const { data: vData, error: vError } = await (supabase as any)
@@ -132,7 +133,7 @@ export function useE2EE() {
         .select("*")
         .eq("user_id", user.id)
         .single();
-      
+
       if (!vError && vData) {
         vault = vData;
       } else {
@@ -142,7 +143,7 @@ export function useE2EE() {
           .select("password_salt")
           .eq("user_id", user.id)
           .single();
-        
+
         if (sData?.password_salt?.startsWith("VAULT_V3:")) {
           const raw = sData.password_salt.substring(9);
           vault = JSON.parse(atob(raw));
@@ -155,11 +156,9 @@ export function useE2EE() {
       const publicKey = await crypto.importKeyJWK(vault.public_key, "public");
 
       // 2. Unwrap private key
-      console.log("Attempting to derive wrapping key with salt:", vault.password_salt);
       const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
       const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
-      console.log("Attempting to decrypt private key with encryptedKey (first 20 chars):", encryptedKey.substring(0,20), "and IV:", iv);
-      const privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
+      privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
 
       setKeys({ publicKey, privateKey });
       toast.success("Vault unlocked. Journal decrypted.");
@@ -177,7 +176,7 @@ export function useE2EE() {
   const encryptPayload = useCallback(async (data: object) => {
     if (!keys?.publicKey) throw new Error("Vault locked");
     const encrypted = await crypto.encryptData(keys.publicKey, data as any);
-    
+
     return {
       encrypted_payload: encrypted.ciphertext,
       wrapped_aes_key: encrypted.encryptedKey,
@@ -190,7 +189,7 @@ export function useE2EE() {
    */
   const decryptPayload = useCallback(async (encrypted: { payload: string; wrappedKey: string; iv: string }) => {
     if (!keys?.privateKey) throw new Error("Vault locked");
-    
+
     const decrypted = await crypto.decryptData(
       keys.privateKey,
       {
