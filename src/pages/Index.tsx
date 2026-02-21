@@ -12,7 +12,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { EntryList } from "@/components/dashboard/EntryList";
 import { JournalEntryForm } from "@/components/dashboard/JournalEntryForm";
 import { UnlockPrompt } from "@/components/UnlockPrompt";
-import { useE2EE } from "@/hooks/useE2EE";
+import { useE2EEContext } from "@/contexts/E2EEContext";
 
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -54,7 +54,7 @@ const Index = () => {
     hasVault,
     isUnlocked,
     loading: encryptionLoading,
-  } = useE2EE();
+  } = useE2EEContext();
   useEffect(() => {
     const demoMode = localStorage.getItem("demoMode") === "true";
 

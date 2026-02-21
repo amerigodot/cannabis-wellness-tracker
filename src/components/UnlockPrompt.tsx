@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useE2EE } from "@/hooks/useE2EE";
+import { useE2EEContext } from "@/contexts/E2EEContext"; // Use the context instead of the raw hook
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ interface UnlockPromptProps {
 }
 
 export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, className }) => {
-  const { unlockVault, hasVault, isUnlocked: e2eeIsUnlocked } = useE2EE();
+  const { unlockVault, hasVault, isUnlocked: e2eeIsUnlocked } = useE2EEContext(); // Use the context hook
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

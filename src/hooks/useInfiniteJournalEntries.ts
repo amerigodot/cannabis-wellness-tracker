@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { JournalEntry } from "@/types/journal";
 import { toast } from "sonner";
 import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
-import { useE2EE } from "./useE2EE";
+import { useE2EEContext } from "@/contexts/E2EEContext";
 import { useEffect, useState, useMemo } from "react";
 
 const PAGE_SIZE = 20;
@@ -56,7 +56,7 @@ const fetchEntriesPage = async ({ pageParam = 0, userId }: FetchEntriesParams): 
 
 export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean) => {
   const queryClient = useQueryClient();
-  const { isUnlocked, encryptPayload, decryptPayload } = useE2EE();
+  const { isUnlocked, encryptPayload, decryptPayload } = useE2EEContext(); // Use the context hook
   const [decryptedEntries, setDecryptedEntries] = useState<JournalEntry[]>([]);
 
   const {

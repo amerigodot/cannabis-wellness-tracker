@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useE2EE } from "@/hooks/useE2EE";
+import { useE2EEContext } from "@/contexts/E2EEContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Shield, Lock, Unlock, AlertTriangle, Key, CheckCircle2 } from "lucide-r
 import { toast } from "sonner";
 
 export const SecurityVault: React.FC = () => {
-  const { hasVault, isUnlocked, setupVault, unlockVault, loading } = useE2EE();
+  const { hasVault, isUnlocked, setupVault, unlockVault, loading } = useE2EEContext(); // Use context hook
   const [passphrase, setPassphrase] = useState("");
   const [confirmPassphrase, setConfirmPassphrase] = useState("");
   const [isSettingUp, setIsSettingUp] = useState(false);
