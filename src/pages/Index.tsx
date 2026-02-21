@@ -12,8 +12,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { EntryList } from "@/components/dashboard/EntryList";
 import { JournalEntryForm } from "@/components/dashboard/JournalEntryForm";
 import { UnlockPrompt } from "@/components/UnlockPrompt";
-import { MigrationWizard } from "@/components/MigrationWizard";
-import { useEncryption } from "@/contexts/EncryptionContext";
+import { useE2EE } from "@/hooks/useE2EE";
 
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -52,13 +51,10 @@ const Index = () => {
 
   // Encryption/Privacy state
   const {
-    encryptionEnabled,
+    hasVault,
     isUnlocked,
-    isLoading: encryptionLoading,
-    needsMigration,
-    setNeedsMigration
-  } = useEncryption();
-  const [showMigrationWizard, setShowMigrationWizard] = useState(false);
+    loading: encryptionLoading,
+  } = useE2EE();
   useEffect(() => {
     const demoMode = localStorage.getItem("demoMode") === "true";
 
@@ -217,8 +213,8 @@ const Index = () => {
     return <LandingPage />;
   }
 
-  // Show unlock prompt if encryption is enabled but not unlocked
-  if (!isDemoMode && encryptionEnabled && !isUnlocked) {
+  // Show unlock prompt if a vault exists but is not unlocked
+  if (!isDemoMode && hasVault && !isUnlocked) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <UnlockPrompt />
@@ -226,20 +222,7 @@ const Index = () => {
     );
   }
 
-  // Show migration wizard if prompted
-  if (showMigrationWizard && !encryptionEnabled) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <MigrationWizard
-          onComplete={() => {
-            setShowMigrationWizard(false);
-            setNeedsMigration(false);
-          }}
-          onSkip={() => setShowMigrationWizard(false)}
-        />
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-background">
