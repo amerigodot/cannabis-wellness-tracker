@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Shield, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Lock, Shield, AlertTriangle, ArrowLeft, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client"; // Import supabase
 
 interface UnlockPromptProps {
   onUnlocked?: () => void;
@@ -42,8 +43,11 @@ export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, classNam
     setLoading(false);
   };
 
-  const handleBack = () => {
+  const handleSignOut = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
     navigate("/auth");
+    setLoading(false);
   };
 
   if (!encryptionEnabled) {
@@ -56,11 +60,12 @@ export const UnlockPrompt: React.FC<UnlockPromptProps> = ({ onUnlocked, classNam
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={handleBack} 
+          onClick={handleSignOut} // Changed to Sign Out
           className="gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          disabled={loading}
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
+          <LogOut className="w-4 h-4" /> {/* Changed icon */}
+          Sign Out
         </Button>
       </div>
       
