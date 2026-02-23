@@ -1,92 +1,61 @@
-# 🏆 MedGemma Impact Challenge: Edge AI Architecture
+# 🏆 MedGemma Impact Challenge: Edge AI Architecture & QMS
 
 **Project Name:** Cannabis Wellness Tracker (MedGemma-Edge Edition)  
 **Track:** Main Track + Edge AI Prize  
-**Model:** Gemma-2B (Quantized via WebLLM)  
+**Model:** Gemma-2-2B (Quantized `q4f16_1` via WebLLM)  
 **Live Demo:** [cannabis-wellness-tracker.lovable.app](https://cannabis-wellness-tracker.lovable.app)
 
 ---
 
-## 1. Clinical Narrative & Architectural Philosophy
+## 1. Problem Importance & Real-World Impact
 
-The **Cannabis Wellness Tracker** reimagines the patient-provider relationship through the lens of **Zero-Knowledge (ZK) AI**. In the delicate domain of cannabinoid medicine, where patient privacy is paramount and data sovereignty is a clinical necessity, traditional cloud-based AI architectures introduce unacceptable risk.
+Medical cannabis now sits on an evidence base of tens of thousands of PubMed‑indexed studies, yet clinical workflows and tooling have not kept pace, leaving many clinicians without practical ways to apply that evidence at the point of care. Surveys consistently show that most clinicians receive little or no formal training in cannabinoid medicine, report low confidence in dosing and product selection, and identify stigma and legal uncertainty as major barriers to discussing cannabis with patients. 
 
-Our solution moves the entire clinical decision support pipeline—from symptom tracking to triage and physician summarization—directly to the **Edge**. By running Google’s **Gemma-2B** model entirely within the browser via WebGPU, we achieve a breakthrough in privacy-preserving healthcare: a system that can reason about sensitive substance use patterns, detect adverse events, and generate SOAP notes without a single byte of Protected Health Information (PHI) ever leaving the patient’s device.
+In that vacuum, patients using cannabis for anxiety, chronic pain, and sleep often self‑experiment with high‑THC products guided by peers rather than evidence‑based protocols—increasing risks for panic, tachycardia, and cannabis use disorder.
 
-This is not merely a tracking app; it is a **dual-interface clinical platform**. Patients maintain a granular, private journal of their regimen, while clinicians access a synthesized, AI-generated dashboard that highlights "Dose Drift," adherence to safety protocols, and symptom trajectories. The bridge between these two worlds is built on a "Verify, Don't Trust" model, where connection is established via ephemeral, offline-first linking codes, ensuring that the patient remains the sole custodian of their medical narrative.
-
-**Regulatory Alignment:** To meet the rigorous demands of the **EU AI Act** and **EHDS** for high-risk health systems, we have implemented a comprehensive **[AI Quality Management System (AI QMS)](./AI_QMS.md)** that governs risk management, transparency, traceability, and human oversight.
+The **Cannabis Wellness Tracker (MedGemma‑Edge Edition)** addresses this gap by reframing cannabis care as a longitudinal, **shared decision‑support problem**. The system turns detailed patient logs into trend visualizations and effectiveness scores, supporting gradual dose reductions and guideline-concordant use. By providing immediate feedback on dose drift and adverse-effect patterns, the system reduces avoidable emergency presentations and empowers both patient and provider with evidence-based insights.
 
 ---
 
-## 2. Technical & Clinical Stack
+## 2. Technical Stack & AI QMS Governance
 
-We have engineered a high-performance, local-first stack optimized for consumer hardware, demonstrating the viability of Edge AI for complex medical reasoning.
+We have engineered a high-performance, local-first stack governed by an **AI Quality Management System (AI QMS)**. This ensures that the high-risk nature of clinical decision support is mitigated through structured processes and technical controls.
 
-| Layer | Component | Implementation Detail | Role |
-| :--- | :--- | :--- | :--- |
-| **Inference** | **WebLLM (MLC)** | `Gemma-2b-it-q4f32_1` (WASM/WebGPU) | Runs the LLM locally on the client GPU. |
-| **Orchestration** | **Virtual Fine-Tuning** | In-Context Learning (ICL) | Injects rigorous "System Persona" & "Few-Shot" clinical examples into the context window at runtime, forcing the model to adhere to medical protocols without weight modification. |
-| **Retrieval (RAG)** | **Local Vector Store** | Client-Side JSON Knowledge Base | Embeds 2025 Clinical Guidelines (ACOEM, NCSCT, Bell et al.) for real-time citation and grounding. |
-| **Data Eng.** | **Feature Engine** | `computeClinicalFeatures.ts` | Deterministic pre-processing of raw logs into high-signal metrics (e.g., "Adverse Event Rate," "Combustion %") *before* LLM ingestion. |
-| **Safety** | **State Machine** | `SafetyInterceptor.ts` | Regex/Rule-based pre-filter that catches emergency keywords (e.g., "chest pain") with 100% deterministic reliability, bypassing the LLM for immediate crisis triage. |
-| **Persistence** | **Local Storage** | `IndexedDB` / `localStorage` | Encrypted at rest. No cloud database required for the core AI loop. |
-
----
-
-## 3. The Edge AI Pipeline: From Raw Data to Clinical Insight
-
-Our pipeline transforms noisy, subjective patient logs into structured, actionable clinical intelligence using a multi-stage process that leverages the strengths of both deterministic code and probabilistic AI.
-
-### Stage 1: Deterministic Feature Engineering
-Before the LLM is invoked, raw journal entries are processed by our local feature engine. This transforms unstructured data into rigorous clinical metrics:
-*   **Dose Drift:** Calculates the percentage deviation from the prescribed THC target.
-*   **Adherence Rate:** Measures compliance with the dosing schedule (e.g., BID vs. PRN).
-*   **Risk Flagging:** Applies the **Lower Risk Cannabis Use Guidelines (LRCUG)** rules to detect patterns like "Early Morning Use" or "High THC Velocity."
-
-### Stage 2: Virtual Fine-Tuning & RAG Injection
-We overcome the limitation of unable to fine-tune weights in the browser by constructing a dynamic system prompt for every inference call. This prompt injects:
-1.  **The System Persona:** "You are an expert Clinical Assistant specializing in Harm Reduction..."
-2.  **The Patient Context:** The pre-calculated metrics from Stage 1.
-3.  **The Evidence Basis:** Relevant chunks of clinical guidelines (e.g., *Bell et al. 2024* for dosing, *NCSCT* for respiratory risks) retrieved via local keyword matching.
-
-### Stage 3: Zero-Knowledge Inference
-The constructed prompt is sent to the local Gemma-2B instance. The model generates a response—whether a patient chat reply or a clinician SOAP note—completely offline. This architecture ensures that the "reasoning" happens on data that the server never sees.
+| Layer | Component | QMS / Regulatory Role (EU AI Act) |
+| :--- | :--- | :--- |
+| **Inference** | **WebLLM (MLC)** | `Gemma-2-2b-it-q4f16_1` runs locally via WebGPU, ensuring **Zero-Knowledge** privacy and Art. 15 Cybersecurity compliance. |
+| **Governance** | **AI QMS Scaffold** | `AI_QMS.md` defines the design, validation, and monitoring processes for high-risk AI (Art. 9). |
+| **Safety** | **Deterministic Interceptor** | regex/keyword filter that bypasses the LLM for immediate crisis triage (e.g., chest pain, suicide), ensuring Art. 9 safety reliability. |
+| **Retrieval** | **Local RAG** | Grounds AI reasoning in a JSON knowledge base (Bell et al., RACGP), satisfying Art. 13 Transparency. |
+| **Data Eng.** | **Local Feature Engine** | Keeps math and risk scoring outside the model; abstraction of PHI into clinical metrics before LLM ingestion (Art. 10 Data Governance). |
+| **Audit** | **Traceability Log** | Immutable local logging of inference events and safety overrides (Art. 12 Traceability). |
+| **Human Loop** | **Clinician Portal** | Mandates human review and "Save & Sync" approval for all AI-generated care plan changes (Art. 14 Human Oversight). |
 
 ---
 
-## 4. Clinical Evidence Basis
+## 3. The Edge AI Pipeline: Lifecycle Management
 
-The system’s reasoning is strictly anchored in peer-reviewed protocols, ensuring that the "AI Hallucination" risk is mitigated by rigid citation requirements.
+Our pipeline transforms noisy, subjective patient logs into structured clinical intelligence while strictly adhering to MedGemma’s **HAI‑DEF** philosophy: models should live inside controlled pipelines and never hold the last word on life‑critical choices.
 
-*   **ACOEM 2025:** *Guidance for the Medical Use of Cannabis* (Chronic Pain protocols).
-*   **Bell et al. 2024:** *Clinical Practice Guidelines for Cannabis-Based Medicines* (Integration of NRS Pain Scale & GAD-7 Anxiety scores).
-*   **NCSCT 2025:** *Harm Reduction Briefing* (Respiratory risk mitigation).
-*   **LRCUG:** *Lower Risk Cannabis Use Guidelines* (Dosing thresholds and frequency limits).
-*   **RACGP:** *Prescribing Medical Cannabis in General Practice* (Contraindications for anxiety/psychosis).
+### Stage 1: Deterministic Abstraction (Data Governance)
+A central design choice is to keep math and risk scoring outside the model. Before any LLM call, a local feature engine converts journal data into clinically meaningful metrics—dose drift, adherence rate, and symptom slopes. The model then reasons over an **abstracted "patient card"** rather than raw PHI, minimizing data exposure and improving reasoning reliability for a small 2B model.
 
----
+### Stage 2: System Persona & RAG (Transparency)
+Rather than a generic chatbot, we lock the model into a clinical decision support persona. The system prompt defines it as a CDS Agent governed by specific guidelines (Bell et al., LRCUG). Retrieval-augmented generation is performed entirely client-side, injecting `[SOURCE: ...]` blocks that the model *must* quote, ensuring every recommendation is traceable to medical literature.
 
-
-
-## 5. Regulatory Maturity & AI Act Alignment
-
-
-
-This project is engineered with a proactive focus on evolving global AI regulations, specifically aligning with the **EU AI Act** frameworks for **High-Risk AI Systems** in healthcare (Annex III). 
-
-
-
-*   **Transparency & Explainability:** Our local RAG architecture ensures that every clinical recommendation is traceable back to peer-reviewed source material, mitigating "black box" risks.
-
-*   **Technical Robustness & Safety:** By implementing a deterministic safety interceptor and local-only inference, we eliminate cloud-based vulnerabilities and ensure consistent performance in safety-critical environments.
-
-*   **Data Sovereignty:** Our RSA-4096 E2EE architecture exceeds standard GDPR/HIPAA requirements, ensuring that the patient retains absolute control over their sensitive medical data.
-
-*   **Human Oversight:** The system is designed as a **Clinical Decision Support (CDS)** tool, emphasizing clinician verification and shared decision-making rather than autonomous medical diagnosis.
-
-
+### Stage 3: Zero-Knowledge Privacy (Security)
+Patient journal entries are stored as ciphertext in Supabase using **RSA-4096 asymmetric E2EE**. The private key is wrapped under the patient’s passphrase and never leaves their device. Clinical reasoning over this sensitive information runs entirely on the client via WebLLM/WebGPU. When sharing with clinicians, only aggregated summaries are encrypted for transmission, preserving the privacy of the underlying narrative.
 
 ---
 
+## 4. Regulatory Maturity & AI Act Alignment
+
+This project is engineered as a model of **"maximal privacy within high‑risk AI constraints."** 
+
+1.  **AI QMS Integration:** Our formally documented **[AI Quality Management System](./AI_QMS.md)** governs the entire lifecycle, from pre-deployment bias detection to continuous RLHF monitoring.
+2.  **Traceability (Art. 12):** The system maintains an immutable local audit log, exportable by the user, providing a complete trail of AI decision pathways.
+3.  **Transparency (Art. 13):** The `AiTransparencyBadge` provides clear disclosures on model limitations and local execution.
+4.  **Human Oversight (Art. 14):** Clinicians retain ultimate control via the Care Plan Editor, with the AI functioning as a multi-choice operator assistant.
+
+---
 *Submitted by Amerigo Di Maria & Team for the Kaggle MedGemma Impact Challenge.*
