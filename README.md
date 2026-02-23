@@ -13,6 +13,7 @@
 ---
 
 ## 🚨 JUDGES START HERE: [Read Full Submission Documentation (SUBMISSION.md)](./SUBMISSION.md)
+**EU AI Act Compliance Scaffold:** [View AI QMS](./AI_QMS.md)
 **Video Demo Script:** [View Script](./VIDEO_SCRIPT.md)
 
 ---

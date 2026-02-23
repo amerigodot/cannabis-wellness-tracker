@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { JournalEntry } from "@/types/journal";
 import { toast } from "sonner";
 import { triggerMilestoneCelebration, MILESTONES, MILESTONE_DETAILS } from "@/utils/milestones";
-import { useE2EEContext } from "@/contexts/E2EEContext";
-import { useEffect, useState, useMemo } from "react";
+import { useE2EE } from "./useE2EE";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 const PAGE_SIZE = 20;
 
@@ -54,10 +54,13 @@ const fetchEntriesPage = async ({ pageParam = 0, userId }: FetchEntriesParams): 
   };
 };
 
+const EMPTY_ARRAY: JournalEntry[] = [];
+
 export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean) => {
   const queryClient = useQueryClient();
-  const { isUnlocked, encryptPayload, decryptPayload } = useE2EEContext(); // Use the context hook
+  const { isUnlocked, encryptPayload, decryptPayload } = useE2EE();
   const [decryptedEntries, setDecryptedEntries] = useState<JournalEntry[]>([]);
+  const lastRawEntriesRef = useRef<string>("");
 
   const {
     data,
@@ -77,15 +80,20 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const rawEntries = useMemo(() => data?.pages.flatMap((page) => page.entries) || [], [data?.pages]);
+  const rawEntries = useMemo(() => data?.pages.flatMap((page) => page.entries) || EMPTY_ARRAY, [data?.pages]);
 
   // Flatten and Decrypt entries
   useEffect(() => {
     let isMounted = true;
 
     const decryptAll = async () => {
+      // Stringify check to avoid deep comparison loops
+      const rawString = JSON.stringify(rawEntries.map(e => e.id));
+      if (rawString === lastRawEntriesRef.current && decryptedEntries.length > 0) return;
+      lastRawEntriesRef.current = rawString;
+
       if (!rawEntries.length) {
-        setDecryptedEntries([]);
+        setDecryptedEntries(prev => prev.length === 0 ? prev : EMPTY_ARRAY);
         return;
       }
 
@@ -116,7 +124,7 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
     return () => {
       isMounted = false;
     };
-  }, [rawEntries, isUnlocked, decryptPayload]);
+  }, [rawEntries, isUnlocked, decryptPayload, decryptedEntries.length]);
 
   const entries = decryptedEntries;
   const totalCount = data?.pages[0]?.totalCount || 0;
@@ -149,7 +157,7 @@ export const useInfiniteJournalEntries = (user: User | null, isDemoMode: boolean
         user_id: user.id,
         ...payload,
         ...e2eeFields
-      } as any).select().single();
+      }).select().single();
 
       if (error) throw error;
       return data;

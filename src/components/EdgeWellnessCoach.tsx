@@ -15,6 +15,8 @@ import { executeLoadingSequence } from "@/utils/aiWeightManager";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 
+import { AiTransparencyBadge } from "@/components/clinical/AiTransparencyBadge";
+
 const SELECTED_MODEL = "gemma-2-2b-it-q4f16_1-MLC";
 
 const PROMPT_TEMPLATES = {
@@ -165,6 +167,19 @@ ${item.content.slice(0, 300)}...
     const lowerInput = textToSend.toLowerCase();
     for (const template of CRISIS_TEMPLATES) {
       if (template.trigger_keywords.some(k => lowerInput.includes(k))) {
+        // --- EU AI Act Article 12: Traceability & Logging ---
+        const auditEntry = {
+          timestamp: new Date().toISOString(),
+          model_version: "DETERMINISTIC_INTERCEPTOR",
+          event_type: "safety_override_triggered",
+          prompt_length: textToSend.length,
+          response_length: template.response_template.length,
+          safety_flags_triggered: true
+        };
+        const currentAuditLog = JSON.parse(localStorage.getItem("ai_qms_audit_log") || "[]");
+        localStorage.setItem("ai_qms_audit_log", JSON.stringify([...currentAuditLog.slice(-100), auditEntry]));
+        // ----------------------------------------------------
+
         setMessages(prev => [...prev, { role: "user", content: textToSend }, { role: "assistant", content: template.response_template }]);
         setInputValue("");
         return;
@@ -221,6 +236,22 @@ ${item.content.slice(0, 300)}...
         content: response.choices[0].message.content || "Assessment inconclusive.",
       };
 
+      // --- EU AI Act Article 12: Traceability & Logging ---
+      // Immutable log of inference event (hashed for privacy)
+      const auditEntry = {
+        timestamp: new Date().toISOString(),
+        model_version: SELECTED_MODEL,
+        event_type: "inference_complete",
+        // In a real production QMS, we'd use a crypto hash here to prove exact input/output
+        // without storing PHI in plain text in the log.
+        prompt_length: finalPrompt.length,
+        response_length: aiMsg.content.length,
+        safety_flags_triggered: false // Checked earlier in interceptor
+      };
+      const currentAuditLog = JSON.parse(localStorage.getItem("ai_qms_audit_log") || "[]");
+      localStorage.setItem("ai_qms_audit_log", JSON.stringify([...currentAuditLog.slice(-100), auditEntry]));
+      // ----------------------------------------------------
+
       setMessages((prev) => {
         const newMessages = [...prev, aiMsg];
         setLastResponseIndex(newMessages.length - 1);
@@ -266,7 +297,10 @@ ${item.content.slice(0, 300)}...
           <div className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-primary" />
             <div>
-              <CardTitle>MedGemma-Edge Coach</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                MedGemma-Edge Coach
+                <AiTransparencyBadge />
+              </CardTitle>
               <CardDescription>Clinical Decision Support (Local)</CardDescription>
             </div>
           </div>

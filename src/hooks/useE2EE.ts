@@ -20,39 +20,40 @@ export function useE2EE() {
   const checkVault = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      setVaultStatus({ hasVault: false, isUnlocked: false, loading: false });
+      setVaultStatus(prev => prev.loading ? { hasVault: false, isUnlocked: false, loading: false } : prev);
       return;
     }
 
     // Try e2ee_vault first, fallback to user_encryption_salts
-    let { data, error } = await (supabase as any)
-      .from("e2ee_vault")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .single();
+    try {
+      let { data, error } = await supabase
+        .from("e2ee_vault")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .single();
 
-    if (error && (error.code === 'PGRST205' || error.code === 'PGRST204')) {
-      // Table missing or schema cache error, check user_encryption_salts for JSON-blob vault
-      try {
+      if (error && (error.code === 'PGRST205' || error.code === 'PGRST204')) {
+        // Table missing or schema cache error, check user_encryption_salts for JSON-blob vault
         const { data: saltData } = await supabase
           .from("user_encryption_salts")
           .select("password_salt")
           .eq("user_id", user.id)
           .single();
-
+        
         if (saltData?.password_salt?.startsWith("VAULT_V3:")) {
           data = { user_id: user.id } as any;
         }
-      } catch (e) {
-        console.error("Resilient check failed:", e);
       }
-    }
 
-    setVaultStatus({
-      hasVault: !!data,
-      isUnlocked: !!keys,
-      loading: false,
-    });
+      setVaultStatus({
+        hasVault: !!data,
+        isUnlocked: !!keys,
+        loading: false,
+      });
+    } catch (e) {
+      console.error("Vault check failed:", e);
+      setVaultStatus(prev => ({ ...prev, loading: false }));
+    }
   }, [keys]);
 
   useEffect(() => {
@@ -69,14 +70,14 @@ export function useE2EE() {
 
       // 1. Generate new 4096-bit key pair
       const keyPair = await crypto.generateAsymmetricKeyPair();
-
+      
       // 2. Derive Wrapping Key from passphrase
       const salt = crypto.generateSalt();
       const wrappingKey = await crypto.deriveKey(passphrase, salt);
 
       // 3. Wrap private key
       const { encryptedKey, iv } = await crypto.encryptPrivateKey(keyPair.privateKey, wrappingKey);
-
+      
       // 4. Export public key
       const publicKeyJWK = await crypto.exportKeyJWK(keyPair.publicKey);
 
@@ -88,7 +89,7 @@ export function useE2EE() {
       };
 
       // 5. Try saving to fresh e2ee_vault table
-      const { error: vaultError } = await (supabase as any).from("e2ee_vault").upsert({
+      const { error: vaultError } = await supabase.from("e2ee_vault").upsert({
         user_id: user.id,
         ...vaultData
       });
@@ -125,15 +126,14 @@ export function useE2EE() {
       if (!user) throw new Error("Not authenticated");
 
       let vault: any = null;
-      let privateKey: CryptoKey; // Declare privateKey here
 
       // 1. Try e2ee_vault
-      const { data: vData, error: vError } = await (supabase as any)
+      const { data: vData, error: vError } = await supabase
         .from("e2ee_vault")
         .select("*")
         .eq("user_id", user.id)
         .single();
-
+      
       if (!vError && vData) {
         vault = vData;
       } else {
@@ -143,15 +143,10 @@ export function useE2EE() {
           .select("password_salt")
           .eq("user_id", user.id)
           .single();
-
+        
         if (sData?.password_salt?.startsWith("VAULT_V3:")) {
-          const raw = sData.password_salt.substring(9).trim(); // Added .trim()
-          try {
-            vault = JSON.parse(atob(raw));
-          } catch (decodeError) {
-            console.error("Failed to decode resilient vault JSON:", decodeError);
-            throw new Error("Vault corruption detected.");
-          }
+          const raw = sData.password_salt.substring(9);
+          vault = JSON.parse(atob(raw));
         }
       }
 
@@ -161,14 +156,9 @@ export function useE2EE() {
       const publicKey = await crypto.importKeyJWK(vault.public_key, "public");
 
       // 2. Unwrap private key
-      try {
-        const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
-        const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
-        privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
-      } catch (cryptoError) {
-        console.error("Cryptographic unwrap failed:", cryptoError);
-        throw new Error("Incorrect passphrase or corrupted key material.");
-      }
+      const wrappingKey = await crypto.deriveKey(passphrase, vault.password_salt);
+      const { encryptedKey, iv } = JSON.parse(vault.wrapped_private_key);
+      const privateKey = await crypto.decryptPrivateKey(encryptedKey, iv, wrappingKey);
 
       setKeys({ publicKey, privateKey });
       toast.success("Vault unlocked. Journal decrypted.");
@@ -186,7 +176,7 @@ export function useE2EE() {
   const encryptPayload = useCallback(async (data: object) => {
     if (!keys?.publicKey) throw new Error("Vault locked");
     const encrypted = await crypto.encryptData(keys.publicKey, data as any);
-
+    
     return {
       encrypted_payload: encrypted.ciphertext,
       wrapped_aes_key: encrypted.encryptedKey,
@@ -199,7 +189,7 @@ export function useE2EE() {
    */
   const decryptPayload = useCallback(async (encrypted: { payload: string; wrappedKey: string; iv: string }) => {
     if (!keys?.privateKey) throw new Error("Vault locked");
-
+    
     const decrypted = await crypto.decryptData(
       keys.privateKey,
       {

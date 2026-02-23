@@ -15,6 +15,8 @@ Our solution moves the entire clinical decision support pipeline—from symptom 
 
 This is not merely a tracking app; it is a **dual-interface clinical platform**. Patients maintain a granular, private journal of their regimen, while clinicians access a synthesized, AI-generated dashboard that highlights "Dose Drift," adherence to safety protocols, and symptom trajectories. The bridge between these two worlds is built on a "Verify, Don't Trust" model, where connection is established via ephemeral, offline-first linking codes, ensuring that the patient remains the sole custodian of their medical narrative.
 
+**Regulatory Alignment:** To meet the rigorous demands of the **EU AI Act** and **EHDS** for high-risk health systems, we have implemented a comprehensive **[AI Quality Management System (AI QMS)](./AI_QMS.md)** that governs risk management, transparency, traceability, and human oversight.
+
 ---
 
 ## 2. Technical & Clinical Stack

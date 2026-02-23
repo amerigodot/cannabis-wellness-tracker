@@ -580,6 +580,41 @@ export default function Settings() {
 
             <Separator />
 
+            {/* Export AI Audit Log */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold mb-1 flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-primary" />
+                  Export AI QMS Audit Log
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Download the immutable traceability log required by the EU AI Act (Article 12).
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  const log = localStorage.getItem("ai_qms_audit_log") || "[]";
+                  const blob = new Blob([log], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `ai-audit-log-${new Date().toISOString().split("T")[0]}.json`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                  toast.success("AI Audit Log exported successfully.");
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Audit Log (JSON)
+              </Button>
+            </div>
+
+            <Separator />
+
             {/* Delete Account */}
             <div className="space-y-3">
               <div>

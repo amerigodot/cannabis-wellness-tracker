@@ -29,6 +29,7 @@ import { JournalEntry } from "@/types/journal";
 import { Loader2, RefreshCw } from "lucide-react";
 import { CarePlanEditor } from "@/components/clinical/CarePlanEditor";
 import { AdvancedTrendChart } from "@/components/clinical/AdvancedTrendChart";
+import { AiTransparencyBadge } from "@/components/clinical/AiTransparencyBadge";
 import { toast } from "sonner";
 import { SAMPLE_ENTRIES } from "@/data/sampleEntries";
 
@@ -445,7 +446,10 @@ export default function ClinicianDashboard() {
                         <Card>
                           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                             <div className="space-y-1">
-                              <CardTitle className="text-lg">Edge AI Clinical Summary</CardTitle>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                Edge AI Clinical Summary
+                                <AiTransparencyBadge />
+                              </CardTitle>
                               <CardDescription>
                                 Automated SOAP note generation using local Gemma-2B (WebGPU).
                               </CardDescription>
