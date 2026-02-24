@@ -23,7 +23,7 @@ We have engineered a high-performance, local-first stack governed by an **AI Qua
 
 | Layer | Component | QMS / Regulatory Role (EU AI Act) |
 | :--- | :--- | :--- |
-| **Inference** | **WebLLM (MLC)** | `Gemma-2-2b-it-q4f16_1` runs locally via WebGPU, ensuring **Zero-Knowledge** privacy and Art. 15 Cybersecurity compliance. |
+| **Inference** | **WebLLM (MLC)** | `Gemma-2-2b-it-q4f16_1` runs locally via WebGPU, ensuring a **zero-knowledge pipeline** for clinical reasoning and Art. 15 Cybersecurity compliance. |
 | **Governance** | **AI QMS Scaffold** | `AI_QMS.md` defines the design, validation, and monitoring processes for high-risk AI (Art. 9). |
 | **Safety** | **Deterministic Interceptor** | regex/keyword filter that bypasses the LLM for immediate crisis triage (e.g., chest pain, suicide), ensuring Art. 9 safety reliability. |
 | **Retrieval** | **Local RAG** | Grounds AI reasoning in a JSON knowledge base (Bell et al., RACGP), satisfying Art. 13 Transparency. |
@@ -43,8 +43,10 @@ A central design choice is to keep math and risk scoring outside the model. Befo
 ### Stage 2: System Persona & RAG (Transparency)
 Rather than a generic chatbot, we lock the model into a clinical decision support persona. The system prompt defines it as a CDS Agent governed by specific guidelines (Bell et al., LRCUG). Retrieval-augmented generation is performed entirely client-side, injecting `[SOURCE: ...]` blocks that the model *must* quote, ensuring every recommendation is traceable to medical literature.
 
-### Stage 3: Zero-Knowledge Privacy (Security)
-Patient journal entries are stored as ciphertext in Supabase using **RSA-4096 asymmetric E2EE**. The private key is wrapped under the patient’s passphrase and never leaves their device. Clinical reasoning over this sensitive information runs entirely on the client via WebLLM/WebGPU. When sharing with clinicians, only aggregated summaries are encrypted for transmission, preserving the privacy of the underlying narrative.
+### Stage 3: Secure E2EE Pipeline (Security)
+Cannabis Wellness Tracker uses **end‑to‑end encryption** for your journal data, with client‑side key management, so entries are encrypted before they reach the database and remain unreadable without your keys. The backend stores only ciphertext and metadata needed to operate the service; it never sees your passphrase or derived encryption keys.
+
+For AI triage and decision support, we follow a **zero‑knowledge pipeline**: all model inference and guideline retrieval run locally in your browser, using only data that has already been decrypted on your device, and no raw journal content is sent to any third‑party model provider.
 
 ---
 
@@ -56,6 +58,17 @@ This project is engineered as a model of **"maximal privacy within high‑risk A
 2.  **Traceability (Art. 12):** The system maintains an immutable local audit log, exportable by the user, providing a complete trail of AI decision pathways.
 3.  **Transparency (Art. 13):** The `AiTransparencyBadge` provides clear disclosures on model limitations and local execution.
 4.  **Human Oversight (Art. 14):** Clinicians retain ultimate control via the Care Plan Editor, with the AI functioning as a multi-choice operator assistant.
+
+---
+
+## 🚀 Follow Through for Judges
+
+*   **Live Application:** [cannabis-wellness-tracker.lovable.app](https://cannabis-wellness-tracker.lovable.app)
+*   **Feature Overview:** [Detailed Feature Page](https://cannabis-wellness-tracker.lovable.app/features)
+*   **Compliance Scaffold:** [AI Quality Management System (AI_QMS.md)](./AI_QMS.md)
+*   **Judging Rubric Reference:** [Impact, Innovation, Feasibility, Privacy](#4-regulatory-maturity--ai-act-alignment)
+*   **Reviewer Guide:** [Reviewer Verification Guide](#4-reviewer-verification-guide)
+*   **Technical Proof:** [Database Schema](./supabase/migrations/) | [Edge AI Engine](./src/components/EdgeWellnessCoach.tsx)
 
 ---
 *Submitted by Amerigo Di Maria & Team for the Kaggle MedGemma Impact Challenge.*

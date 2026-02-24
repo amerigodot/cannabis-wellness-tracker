@@ -8,7 +8,7 @@
 ## 1. Executive Summary
 This AI Quality Management System (QMS) outlines the structured processes, controls, and technical scaffolds implemented to ensure the MedGemma-Edge AI system remains safe, effective, transparent, and compliant with the **EU AI Act**, **EHDS (European Health Data Space)**, and **GDPR** over its entire lifecycle. 
 
-By leveraging an on-device, Zero-Knowledge (RSA-4096 E2EE) architecture, this system exemplifies **"maximal privacy within high-risk AI constraints,"** making it an attractive model for regulators, clinicians, and health-tech grant committees.
+By leveraging an on-device, Asymmetric E2EE (RSA-4096) architecture with a zero-knowledge AI pipeline, this system exemplifies **"maximal privacy within high-risk AI constraints,"** making it an attractive model for regulators, clinicians, and health-tech grant committees.
 
 ---
 
@@ -22,7 +22,7 @@ By leveraging an on-device, Zero-Knowledge (RSA-4096 E2EE) architecture, this sy
 *   **Documentation:** Routine hazard analysis reports stored in `/docs/risk_assessments/`.
 
 ### 2.2 Data Governance & Provenance (Article 10)
-*   **GDPR/EHDS Alignment:** Strict data minimization and zero-knowledge storage. Raw Protected Health Information (PHI) never leaves the user's browser.
+*   **GDPR/EHDS Alignment:** Strict data minimization and encrypted cloud storage with client-side keys. Raw Protected Health Information (PHI) never leaves the user's browser in an unencrypted state.
 *   **Consent Management:** Granular, user-controlled consent scopes (e.g., sharing symptom scores vs. private notes) managed via the `clinician_patient_links` E2EE protocol.
 *   **Data Lineage:** The system explicitly tags the source of all clinical insights. Training data for the base Gemma model is documented by Google; fine-tuning is handled purely via runtime **In-Context Learning (ICL)** to prevent model drift and contamination.
 
