@@ -141,6 +141,9 @@ Multi-axis symptom and activity trend visualization highlighting correlation bet
 -   **AI Act Alignment:** Engineered to align with **EU AI Act** requirements for **High-Risk AI Systems** in healthcare, prioritizing transparency, robustness, and human-in-the-loop oversight.
 -   **Audit Logs:** HIPAA-ready logging for all clinical decision support events.
 
+## 📄 License
+This project is licensed under the [Apache License 2.0](./LICENSE).
+
 ## 🛡️ Disclaimer
 This application is for informational purposes only. It does not provide medical advice.
 

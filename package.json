@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -96,8 +97,7 @@
     "url": "git+https://github.com/amerigodot/cannabis-wellness-tracker.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Amerigo Di Maria",
   "bugs": {
     "url": "https://github.com/amerigodot/cannabis-wellness-tracker/issues"
   },
