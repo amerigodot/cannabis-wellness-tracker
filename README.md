@@ -87,7 +87,7 @@ A complete walkthrough showing zero-backend reviewer mode, client-side WebGPU Ge
 
 [![Watch Application Demo Walkthrough](./Media/demo.gif)](./Media/Demo.mp4)
 
-*Click the animated preview above to watch the full HD video ([`Media/Demo.mp4`](./Media/Demo.mp4)).*
+*Click the animated preview above to view the full demo ([`Demo.mp4` (1.0 MB)](./Media/Demo.mp4) | [`Demo.webm` (798 KB)](./Media/Demo.webm)).*
 
 ---
 
