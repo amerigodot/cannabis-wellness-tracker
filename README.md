@@ -11,8 +11,19 @@
 
 ---
 
-## 🚨 JUDGES START HERE: [Read Full Submission Documentation (SUBMISSION.md)](./SUBMISSION.md)
-**EU AI Act Compliance Scaffold:** [View AI QMS](./AI_QMS.md)
+<details>
+<summary>📁 <b>Archived: MedGemma Impact Challenge / Judges Information</b></summary>
+
+<br>
+
+> **Note:** This project was developed as a specialized submission for the **MedGemma Impact Challenge** (Edge AI Track & Main Track).
+
+* **Full Submission Documentation:** [SUBMISSION.md](./SUBMISSION.md)
+* **EU AI Act Compliance Scaffold:** [AI_QMS.md](./AI_QMS.md)
+* **Offline Reviewer Guide:** [See Instructions Below](#-medgemma-reviewer-mode-edge-ai-demo)
+* **Local Media Directory:** [`Media/`](./Media)
+
+</details>
 
 ---
 
@@ -69,6 +80,56 @@ To facilitate testing without any backend setup:
 2.  On the Authentication page, click the green **"Enter Submission Mode (Offline)"** button.
 3.  Navigate to **"Private AI Coach"** to initialize the Gemma-2-2B engine.
 4.  Navigate to **"Settings"** -> **"Clinical Portal"** to test the Clinician-Patient linking flow (use code `000000` in demo).
+
+---
+
+## 🎥 Visual Walkthrough & Demo
+
+### 🎬 Application Demo Video
+A complete walkthrough showing zero-backend reviewer mode, client-side WebGPU Gemma-2B initialization, interactive clinical triage, and encrypted journaling.
+
+<video src="./Media/Demo.mp4" controls width="100%" style="max-height: 520px; border-radius: 8px;">
+  <p>Your browser does not support HTML5 video. <a href="./Media/Demo.mp4">View or download Demo.mp4 directly</a>.</p>
+</video>
+
+---
+
+### 📸 Application Interface & Workflows
+
+#### 1. Offline Reviewer & Submission Mode
+Zero-backend evaluation entry point bypassing remote databases for instant offline evaluation.
+
+<p align="center">
+  <img src="./Media/4930093c25c48f3fc49922f4b3ee1eab.png" alt="Offline Submission Mode" width="100%" />
+</p>
+
+#### 2. Private AI Coach (MedGemma-Edge)
+In-browser WebLLM and WebGPU initialization running Gemma-2B locally for confidential clinical decision support.
+
+<p align="center">
+  <img src="./Media/26a510a7bbe9d1c49a4629c8578d09b0.png" alt="MedGemma-Edge Coach Initialization" width="100%" />
+</p>
+
+#### 3. Clinical Triage & Decision Support
+Protocol-driven patient intake and automated risk assessment using Emergency Severity Index (ESI) guidelines with tiered conservative dosing.
+
+<p align="center">
+  <img src="./Media/d8046e367990780bd0cfa7607f993231.png" alt="Clinical Triage Decision Support" width="100%" />
+</p>
+
+#### 4. Edge AI Wellness Tools
+Suite of on-device analytical tools including Comprehensive Wellness Reports, Correlation & Timing Analysis, and Edge AI Benchmarks.
+
+<p align="center">
+  <img src="./Media/2022b4918f3eda644825e75cba6f9d76.png" alt="Edge AI Wellness Tools" width="100%" />
+</p>
+
+#### 5. Longitudinal Timeline Analytics
+Multi-axis symptom and activity trend visualization highlighting correlation between dosage, activities, and therapeutic outcomes.
+
+<p align="center">
+  <img src="./Media/d8ee801a3ac448a0b5977950c1437688.png" alt="Timeline Analytics and Trends" width="100%" />
+</p>
 
 ---
 
