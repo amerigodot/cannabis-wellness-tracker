@@ -85,9 +85,11 @@ For clinical decision support, the Gemma‑2B model and the cannabinoid guidelin
 ### 🎬 Application Demo Video
 A complete walkthrough showing zero-backend reviewer mode, client-side WebGPU Gemma-2B initialization, interactive clinical triage, and encrypted journaling.
 
-[![Watch Application Demo Walkthrough](./Media/demo.gif)](./Media/Demo.mp4)
+[![Watch Application Demo on YouTube](https://img.youtube.com/vi/wdQbmOr5jiQ/maxresdefault.jpg)](https://youtu.be/wdQbmOr5jiQ?t=68)
 
-*Click the animated preview above to view the full demo ([`Demo.mp4` (1.0 MB)](./Media/Demo.mp4) | [`Demo.webm` (798 KB)](./Media/Demo.webm)).*
+<p align="center">
+  <a href="https://youtu.be/wdQbmOr5jiQ?t=68">▶️ <b>Watch Application Demo on YouTube</b></a>
+</p>
 
 ---
 
