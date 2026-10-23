@@ -20,8 +20,14 @@
 
 * **Full Submission Documentation:** [SUBMISSION.md](./SUBMISSION.md)
 * **EU AI Act Compliance Scaffold:** [AI_QMS.md](./AI_QMS.md)
-* **Offline Reviewer Guide:** [See Instructions Below](#-medgemma-reviewer-mode-edge-ai-demo)
 * **Local Media Directory:** [`Media/`](./Media)
+
+#### 📝 Offline Reviewer Mode (Evaluation Guide)
+To facilitate testing without any backend setup:
+1. Launch the app (`http://localhost:8080`).
+2. On the Authentication page, click the green **"Enter Submission Mode (Offline)"** button.
+3. Navigate to **"Private AI Coach"** to initialize the Gemma-2-2B engine.
+4. Navigate to **"Settings"** -> **"Clinical Portal"** to test the Clinician-Patient linking flow (use code `000000` in demo).
 
 </details>
 
@@ -29,11 +35,9 @@
 
 Technically, Cannabis Wellness Tracker is an encrypted cloud app with a local AI brain: Supabase holds only encrypted journals, while all MedGemma‑style reasoning and triage happen in your browser.
 
-## 🏆 MedGemma Impact Challenge Submission: EDGE AI TRACK
+## 🧠 Edge AI Architecture
 
-This submission is specialized for the **Edge AI Prize ($5,000)** and the **Main Track ($75,000)**. 
-
-### 🧠 The Case for Edge AI in Medical Cannabis
+### The Case for Edge AI in Medical Cannabis
 Medical cannabis patients handle extremely sensitive health and substance-use data. Privacy is not just a feature; it is a clinical requirement for honest journaling and effective shared decision-making. Our platform demonstrates that complex medical reasoning can be decentralized, preserving patient dignity while enabling professional oversight.
 
 ### 🛡️ Privacy and architecture
@@ -73,13 +77,6 @@ For clinical decision support, the Gemma‑2B model and the cannabinoid guidelin
     npm run dev
     ```
     The app will be available at `http://localhost:8080`.
-
-### 📝 MedGemma Reviewer Mode (Edge AI Demo)
-To facilitate testing without any backend setup:
-1.  Launch the app.
-2.  On the Authentication page, click the green **"Enter Submission Mode (Offline)"** button.
-3.  Navigate to **"Private AI Coach"** to initialize the Gemma-2-2B engine.
-4.  Navigate to **"Settings"** -> **"Clinical Portal"** to test the Clinician-Patient linking flow (use code `000000` in demo).
 
 ---
 
@@ -156,4 +153,4 @@ Multi-axis symptom and activity trend visualization highlighting correlation bet
 This application is for informational purposes only. It does not provide medical advice.
 
 ---
-*MedGemma Impact Challenge - Edge AI Track Specialist Submission*
+*Cannabis Wellness Tracker — Local-First Encrypted Healthcare Platform*
