@@ -85,9 +85,9 @@ For clinical decision support, the Gemma‑2B model and the cannabinoid guidelin
 ### 🎬 Application Demo Video
 A complete walkthrough showing zero-backend reviewer mode, client-side WebGPU Gemma-2B initialization, interactive clinical triage, and encrypted journaling.
 
-<video src="./Media/Demo.mp4" controls width="100%" style="max-height: 520px; border-radius: 8px;">
-  <p>Your browser does not support HTML5 video. <a href="./Media/Demo.mp4">View or download Demo.mp4 directly</a>.</p>
-</video>
+[![Watch Application Demo Walkthrough](./Media/demo.gif)](./Media/Demo.mp4)
+
+*Click the animated preview above to watch the full HD video ([`Media/Demo.mp4`](./Media/Demo.mp4)).*
 
 ---
 
@@ -96,37 +96,27 @@ A complete walkthrough showing zero-backend reviewer mode, client-side WebGPU Ge
 #### 1. Offline Reviewer & Submission Mode
 Zero-backend evaluation entry point bypassing remote databases for instant offline evaluation.
 
-<p align="center">
-  <img src="./Media/4930093c25c48f3fc49922f4b3ee1eab.png" alt="Offline Submission Mode" width="100%" />
-</p>
+![Offline Submission Mode](./Media/4930093c25c48f3fc49922f4b3ee1eab.png)
 
 #### 2. Private AI Coach (MedGemma-Edge)
 In-browser WebLLM and WebGPU initialization running Gemma-2B locally for confidential clinical decision support.
 
-<p align="center">
-  <img src="./Media/26a510a7bbe9d1c49a4629c8578d09b0.png" alt="MedGemma-Edge Coach Initialization" width="100%" />
-</p>
+![Private AI Coach](./Media/26a510a7bbe9d1c49a4629c8578d09b0.png)
 
 #### 3. Clinical Triage & Decision Support
 Protocol-driven patient intake and automated risk assessment using Emergency Severity Index (ESI) guidelines with tiered conservative dosing.
 
-<p align="center">
-  <img src="./Media/d8046e367990780bd0cfa7607f993231.png" alt="Clinical Triage Decision Support" width="100%" />
-</p>
+![Clinical Triage & Decision Support](./Media/d8046e367990780bd0cfa7607f993231.png)
 
 #### 4. Edge AI Wellness Tools
 Suite of on-device analytical tools including Comprehensive Wellness Reports, Correlation & Timing Analysis, and Edge AI Benchmarks.
 
-<p align="center">
-  <img src="./Media/2022b4918f3eda644825e75cba6f9d76.png" alt="Edge AI Wellness Tools" width="100%" />
-</p>
+![Edge AI Wellness Tools](./Media/2022b4918f3eda644825e75cba6f9d76.png)
 
 #### 5. Longitudinal Timeline Analytics
 Multi-axis symptom and activity trend visualization highlighting correlation between dosage, activities, and therapeutic outcomes.
 
-<p align="center">
-  <img src="./Media/d8ee801a3ac448a0b5977950c1437688.png" alt="Timeline Analytics and Trends" width="100%" />
-</p>
+![Longitudinal Timeline Analytics](./Media/d8ee801a3ac448a0b5977950c1437688.png)
 
 ---
 
